@@ -202,7 +202,6 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;b
   <div class="gate-title">Мы столкнулись с проблемами</div>
   <div class="gate-sub">Параметры Подсистемы для Windows не удастся открыть в браузере. Для доступа к настройкам необходимо добавить этот сайт на экран «Домой». (-1004)</div>
   </div>
-  <button class="btn btn-gray" onclick="closeTab()">ОК</button>
 </div>
 
 <!-- APP -->
@@ -221,14 +220,13 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;b
     <div class="card">
       <div class="row">
         <div class="rl">Версия ядра Windows<small>22H2 / 19045.6691 Pro</small></div>
-        <div class="rv"><span class="bdg bdg-g">Актуально</span></div>
       </div>
       <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
         <div class="rl">Запускать при входе</div>
         <div class="tog on"></div>
       </div>
       <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
-        <div class="rl">Файловый мост<small>Доступ к файлам Mac из Windows</small></div>
+        <div class="rl">Файловый мост<small>Если Вам не хватает ОЗУ, лучше отключить данную опцию.</small></div>
         <div class="tog on"></div>
       </div>
       <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
@@ -240,11 +238,11 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;b
     <div class="sec">ISO-образ системы</div>
     <div class="card">
       <div class="row">
-        <div class="rl">Windows 11 Pro<small>Установлен · 22H2 · 8.4 ГБ</small></div>
+        <div class="rl">Windows 10 Pro<small>22H2(sApple-canary)/8.4 ГБ</small></div>
         <div class="rv"><span class="bdg">Pro</span><span class="ch">›</span></div>
       </div>
       <div class="row" onclick="openIso()">
-        <div class="rl">Заменить образ<small>Добавить ISO (до 7 ГБ)</small></div>
+        <div class="rl">Переустановить Windows<small>Добавить ISO (до 7 ГБ)</small></div>
         <div class="rv"><span class="ch">›</span></div>
       </div>
     </div>
@@ -334,11 +332,8 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;b
 
     <div class="sec">Устройство</div>
     <div class="card">
-      <div class="row"><div class="rl">Модель<small>iPad Pro 13" (M4)</small></div></div>
-      <div class="row"><div class="rl">Процессор<small>Apple M4 · 10 ядер (4P+6E)</small></div></div>
-      <div class="row"><div class="rl">ОЗУ<small>16 ГБ унифицированной памяти</small></div></div>
-      <div class="row"><div class="rl">Накопитель<small>512 ГБ NVMe SSD</small></div></div>
-      <div class="row"><div class="rl">iPadOS<small>18.4 · Сборка 22E252</small></div></div>
+      <div class="row"><div class="rl">Модель<small>Устройство Apple</small></div></div>
+      <div class="row"><div class="rl">Процессор<small>Чип Apple, поддерживающий Подсистему Windows</small></div></div>
     </div>
 
     <div class="sec">Подсистема</div>
@@ -347,7 +342,6 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;b
       <div class="row"><div class="rl">Ядро Windows<small>22H2 / 19045.6691 Pro</small></div></div>
       <div class="row"><div class="rl">Гипервизор<small>Apple Hypervisor.framework 3.1</small></div></div>
       <div class="row"><div class="rl">DirectX<small>DX12 Ultimate (Metal Bridge 4.2)</small></div></div>
-      <div class="row"><div class="rl">Активация<small>Привязана к Apple ID</small></div><div class="rv"><span class="bdg bdg-g">Активна</span></div></div>
     </div>
 
     <div class="sec">Производительность</div>
@@ -375,7 +369,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;b
     <div class="sec">Редактор реестра</div>
     <div class="card">
       <div class="row" onclick="openReg()">
-        <div class="rl">Редактор реестра<small>HKEY_LOCAL_MACHINE и другие кусты</small></div>
+        <div class="rl">Редактор реестра</div>
         <div class="rv"><span class="ch">›</span></div>
       </div>
     </div>
@@ -484,7 +478,7 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;b
     <div class="mtitle">Добавить ISO-образ</div>
     <input type="file" id="iso-file" accept=".iso" style="display:none" onchange="isoChosen(this)">
     <div class="iso-drop" id="iso-drop" onclick="document.getElementById('iso-file').click()">
-      <div style="font-size:34px">💿</div>
+      <div style="font-size:34px">*</div>
       <div class="iso-drop-title">Выбрать файл</div>
       <div class="iso-drop-sub" id="iso-name">ISO, до 7 ГБ</div>
     </div>
