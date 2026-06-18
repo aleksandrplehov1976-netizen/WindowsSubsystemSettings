@@ -1,915 +1,732 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Подсистема Windows">
-<title>Подсистема Windows для Apple</title>
-<style>
-:root {
-  --blue:#007AFF; --blue-l:rgba(0,122,255,.12);
-  --red:#FF3B30; --green:#34C759; --orange:#FF9500;
-  --g1:#8E8E93; --g2:#AEAEB2; --g3:#C7C7CC; --g4:#D1D1D6; --g5:#E5E5EA; --g6:#F2F2F7;
-  --lbl:rgba(0,0,0,1); --lbl2:rgba(60,60,67,.6); --lbl3:rgba(60,60,67,.3);
-  --sep:rgba(60,60,67,.12);
-  --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif;
-  --r:16px; --pill:50px;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{font-family:var(--font);background:#F2F2F7;color:var(--lbl);height:100%;overflow:hidden;-webkit-font-smoothing:antialiased}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Новости</title>
+    <style>
+        /* ===== ГЛОБАЛЬНЫЙ СБРОС (НИКАКИХ ТЕНЕЙ, СМАЙЛИКОВ, СКРУГЛЕНИЙ) ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-/* GATE */
-#gate{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:48px 36px;z-index:999;transition:opacity .3s}
-#gate.out{opacity:0;pointer-events:none}
-.gate-logo{width:80px;height:80px;background:linear-gradient(150deg,#0058c8,#007AFF);border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,122,255,.3)}
-.gate-logo svg{width:44px;height:44px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
-.gate-title{font-size:22px;font-weight:700;text-align:center;line-height:1.25;max-width:320px}
-.gate-sub{font-size:16px;color:var(--lbl2);text-align:center;line-height:1.5;max-width:300px}
-.gate-steps{background:#F2F2F7;border-radius:14px;padding:16px 18px;width:100%;max-width:340px}
-.g-step{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--sep)}
-.g-step:last-child{border-bottom:none}
-.g-num{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.g-txt{font-size:15px;line-height:1.4}
-.g-txt b{font-weight:600}
-.btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 28px;border-radius:var(--pill);font-size:17px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s,transform .12s;width:100%;max-width:340px;font-family:var(--font)}
-.btn:active{opacity:.75;transform:scale(.98)}
-.btn-blue{background:var(--blue);color:#fff}
-.btn-gray{background:#E5E5EA;color:var(--lbl)}
-.btn-red{background:var(--red);color:#fff}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding: 0;
+            margin: 0;
+        }
 
-/* APP */
-#app{display:none;flex-direction:column;height:100vh;overflow:hidden}
-#app.on{display:flex}
-.page{display:none;flex:1;overflow-y:auto;padding:0 16px 130px;-webkit-overflow-scrolling:touch}
-.page.on{display:block}
+        /* ===== ОБЩИЕ КНОПКИ ===== */
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+        }
 
-/* HEADER */
-.ph{padding:12px 4px 4px}
-.ph h1{font-size:34px;font-weight:700;letter-spacing:-.5px}
-.ph p{font-size:15px;color:var(--lbl2);margin-top:5px}
-.status-line{display:flex;align-items:center;gap:7px;padding:14px 4px 2px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 5px rgba(52,199,89,.6)}
-.status-line span{font-size:14px;color:var(--lbl2)}
-.status-line em{margin-left:auto;font-style:normal;font-size:12px;color:var(--lbl3)}
+        button:active {
+            opacity: 0.6;
+        }
 
-/* SECTION */
-.sec{font-size:13px;font-weight:600;color:var(--lbl2);text-transform:uppercase;letter-spacing:.04em;padding:0 4px 7px;margin-top:26px}
+        /* ===== ШАПКА ГЛАВНОГО ЭКРАНА ===== */
+        .main-header {
+            background: #ffffff;
+            border-bottom: 1px solid #d0d0d0;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-/* CARD */
-.card{background:#fff;border-radius:var(--r);overflow:hidden;margin-bottom:2px}
-.row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--sep);gap:10px;min-height:50px;cursor:pointer;transition:background .1s}
-.row:active{background:#F2F2F7}
-.row:last-child{border-bottom:none}
-.rl{flex:1;font-size:17px}
-.rl small{display:block;font-size:13px;color:var(--lbl2);margin-top:2px}
-.rv{font-size:17px;color:var(--lbl2);display:flex;align-items:center;gap:5px}
-.ch{color:var(--g3);font-size:15px;line-height:1}
+        .main-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: #1a1a1a;
+        }
 
-/* TOGGLE */
-.tog{width:51px;height:31px;background:var(--g4);border-radius:16px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
-.tog.on{background:var(--green)}
-.tog::after{content:'';position:absolute;width:27px;height:27px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .18s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 5px rgba(0,0,0,.2)}
-.tog.on::after{left:22px}
+        /* ===== ГЛАВНЫЙ ЭКРАН: 3 ПЛИТКИ ===== */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: #d0d0d0;
+            margin: 0;
+            padding: 0;
+        }
 
-/* BADGE */
-.bdg{padding:3px 10px;border-radius:20px;font-size:13px;font-weight:600;background:var(--blue-l);color:var(--blue)}
-.bdg-g{background:rgba(52,199,89,.12);color:var(--green)}
-.bdg-o{background:rgba(255,149,0,.12);color:var(--orange)}
-.bdg-r{background:rgba(255,59,48,.12);color:var(--red)}
+        .grid-3 .tile {
+            background: #ffffff;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: none;
+        }
 
-/* SLIDER */
-.slrow{padding:13px 16px 17px;border-bottom:1px solid var(--sep)}
-.slrow:last-child{border-bottom:none}
-.slhd{display:flex;justify-content:space-between;margin-bottom:10px;font-size:17px}
-.slhd b{color:var(--blue);font-weight:600}
-input[type=range]{width:100%;height:4px;appearance:none;background:var(--g5);border-radius:2px;outline:none}
-input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.22);cursor:pointer}
+        .grid-3 .tile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
 
-/* SEG */
-.seg{display:flex;background:var(--g5);border-radius:10px;padding:2px;margin-bottom:2px}
-.si{flex:1;text-align:center;padding:7px 4px;font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;color:var(--lbl2);transition:all .15s}
-.si.on{background:#fff;color:var(--lbl);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+        .grid-3 .tile .tile-title {
+            background: rgba(0, 0, 0, 0.7);
+            color: #ffffff;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.3;
+            position: relative;
+            z-index: 2;
+            text-align: left;
+            letter-spacing: 0.2px;
+            border: none;
+        }
 
-/* PARTITION MAP */
-.pmap{display:flex;height:44px;border-radius:10px;overflow:hidden;gap:2px;margin:12px 16px 0}
-.ps{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer}
-.ps-c{background:var(--blue);flex:4}
-.ps-d{background:var(--orange);flex:2}
-.ps-f{background:var(--g4);flex:1;color:var(--g2)}
+        /* ===== ОСТАЛЬНЫЕ НОВОСТИ (СПИСОК) ===== */
+        .news-list {
+            padding: 0;
+            margin: 0;
+        }
 
-/* PERF RING */
-.pring{width:80px;height:80px;position:relative;margin:0 auto 14px}
-.pring svg{transform:rotate(-90deg)}
-.rb{fill:none;stroke:var(--g5);stroke-width:6}
-.rf{fill:none;stroke:var(--blue);stroke-width:6;stroke-linecap:round;stroke-dasharray:220;stroke-dashoffset:66;transition:stroke-dashoffset .5s}
-.plbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.plbl strong{font-size:18px;font-weight:700}
-.plbl span{font-size:10px;color:var(--lbl2)}
+        .news-list .list-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e5e5;
+            cursor: pointer;
+            background: #ffffff;
+        }
 
-/* USE CASE */
-.ucg{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px 16px}
-.ucc{border-radius:12px;padding:14px;background:#F2F2F7;cursor:pointer;border:2px solid transparent;transition:all .15s}
-.ucc.on{background:var(--blue-l);border-color:var(--blue)}
-.ucc .un{font-size:14px;font-weight:600;margin-top:4px}
-.ucc .ud{font-size:12px;color:var(--lbl2)}
+        .news-list .list-item:active {
+            background: #f0f0f0;
+        }
 
-/* FLOATING NAV */
-.fnav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,.84);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border-radius:28px;padding:8px 6px;box-shadow:0 4px 28px rgba(0,0,0,.11),0 1px 2px rgba(0,0,0,.06),inset 0 0 0 .5px rgba(255,255,255,.9);gap:2px;z-index:100}
-.ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 18px;border-radius:20px;cursor:pointer;transition:background .12s;min-width:68px}
-.ni.on{background:var(--blue-l)}
-.ni svg{width:22px;height:22px;stroke:var(--g1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.ni.on svg{stroke:var(--blue)}
-.nl{font-size:10px;font-weight:600;color:var(--g1);letter-spacing:.02em}
-.ni.on .nl{color:var(--blue)}
+        .news-list .list-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #e5e5e5;
+        }
 
-/* TOAST */
-.toast{position:fixed;bottom:118px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(0,0,0,.76);color:#fff;padding:9px 18px;border-radius:20px;font-size:15px;font-weight:500;opacity:0;transition:all .2s;pointer-events:none;white-space:nowrap;z-index:400}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+        .news-list .list-item .list-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.3;
+            color: #1a1a1a;
+        }
 
-/* === REGISTRY FULLSCREEN === */
-#reg-screen{position:fixed;inset:0;background:#F2F2F7;z-index:500;display:none;flex-direction:column}
-#reg-screen.on{display:flex}
-.reg-topbar{display:flex;align-items:center;padding:14px 16px 8px;background:#fff;border-bottom:1px solid var(--sep);gap:12px;position:sticky;top:0;z-index:10}
-.reg-topbar h2{font-size:17px;font-weight:600;flex:1;text-align:center}
-.reg-close-btn{font-size:17px;font-weight:400;color:var(--blue);cursor:pointer;padding:4px 0;min-width:44px}
-.reg-add-btn{font-size:17px;font-weight:600;color:var(--blue);cursor:pointer;padding:4px 0;min-width:44px;text-align:right}
-.reg-hive-seg{padding:10px 16px 6px;background:#fff;border-bottom:1px solid var(--sep)}
-.reg-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 40px}
-.reg-tree{font-family:'SF Mono','Menlo',monospace;font-size:13px}
-.rk{color:var(--blue);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 0}
-.tri{font-size:10px;transition:transform .13s;display:inline-block}
-.rk.open .tri{transform:rotate(90deg)}
-.rch{padding-left:18px;border-left:1px solid var(--sep);margin-left:5px}
-.rch.h{display:none}
-.vrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--sep);cursor:pointer}
-.vrow:last-child{border-bottom:none}
-.vn{color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vt{color:var(--lbl2);font-size:11px;background:var(--g5);padding:1px 6px;border-radius:4px;flex-shrink:0}
-.vd{color:var(--orange);font-size:12px;flex:2;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.reg-path{font-size:12px;color:var(--lbl2);padding:8px 16px 0;font-family:'SF Mono','Menlo',monospace;word-break:break-all}
+        .news-list .list-item .list-date {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+        }
 
-/* MODALS */
-.mover{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);z-index:600;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s}
-.mover.on{opacity:1;pointer-events:all}
-.msheet{background:#fff;border-radius:20px 20px 0 0;padding:18px 20px 40px;width:100%;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
-.mover.on .msheet{transform:translateY(0)}
-.mhandle{width:36px;height:4px;background:var(--g4);border-radius:2px;margin:0 auto 16px}
-.mtitle{font-size:17px;font-weight:600;margin-bottom:14px}
-.minput{width:100%;padding:12px 14px;border:1.5px solid var(--g4);border-radius:10px;font-size:16px;font-family:'SF Mono','Menlo',monospace;outline:none;margin-bottom:10px;background:var(--g6);color:var(--lbl)}
-.minput:focus{border-color:var(--blue);background:#fff}
-.mactions{display:flex;gap:10px}
-.mbtn{flex:1;height:46px;border-radius:var(--pill);font-size:17px;font-weight:600;border:none;cursor:pointer;font-family:var(--font)}
+        /* ===== ДЕТАЛЬНЫЙ ЭКРАН (НОВОСТЬ) ===== */
+        .detail-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 0;
+            margin: 0;
+        }
 
-/* ISO FLOW */
-.iso-drop{border:2px dashed var(--g4);border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;background:var(--g6);transition:border-color .15s}
-.iso-drop:active{border-color:var(--blue)}
-.iso-drop-title{font-size:17px;font-weight:600;margin-top:6px}
-.iso-drop-sub{font-size:13px;color:var(--lbl2);margin-top:4px}
-.ibar{height:5px;border-radius:3px;background:var(--g5);margin:12px 0 6px;overflow:hidden}
-.ifill{height:100%;background:var(--blue);border-radius:3px;width:0;transition:width .4s}
-.istat{font-size:13px;color:var(--lbl2)}
+        .detail-screen.active {
+            display: block;
+        }
 
-/* LICENSE */
-#lic-screen{position:fixed;inset:0;background:#F2F2F7;z-index:700;display:none;flex-direction:column}
-#lic-screen.on{display:flex}
-.lic-top{display:flex;align-items:center;padding:14px 16px 12px;background:#fff;border-bottom:1px solid var(--sep)}
-.lic-top h2{font-size:17px;font-weight:600;flex:1;text-align:center}
-.lic-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;font-size:14px;line-height:1.6;color:var(--lbl2)}
-.lic-body strong{color:var(--lbl);font-weight:600}
-.lic-bottom{padding:12px 16px;background:#fff;border-top:1px solid var(--sep);display:flex;gap:10px}
+        /* Шапка детального экрана */
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid #d0d0d0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-/* INSTALL FLOW */
-#install-screen{position:fixed;inset:0;background:#fff;z-index:800;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 36px;gap:20px}
-#install-screen.on{display:flex}
-.inst-logo{width:72px;height:72px;background:linear-gradient(150deg,#0058c8,#007AFF);border-radius:18px;display:flex;align-items:center;justify-content:center}
-.inst-logo svg{width:40px;height:40px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
-.inst-title{font-size:22px;font-weight:700;text-align:center}
-.inst-sub{font-size:15px;color:var(--lbl2);text-align:center;line-height:1.5}
-.inst-bar{width:100%;max-width:340px;height:5px;background:var(--g5);border-radius:3px;overflow:hidden}
-.inst-fill{height:100%;background:var(--blue);border-radius:3px;width:0;transition:width .6s linear}
-.inst-step{font-size:14px;color:var(--lbl2);text-align:center;min-height:20px}
+        .detail-header .back-btn {
+            font-size: 28px;
+            font-weight: 300;
+            line-height: 1;
+            color: #1a1a1a;
+            padding: 0 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
 
-/* DANGER CARD */
-.dcard{border:1.5px solid rgba(255,59,48,.18)}
-</style>
+        .detail-header .detail-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1a1a1a;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Контент детального экрана */
+        .detail-content {
+            padding: 16px 20px 40px;
+        }
+
+        .detail-content .detail-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            margin-bottom: 16px;
+            background: #e5e5e5;
+        }
+
+        .detail-content .detail-headline {
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .detail-content .detail-body {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #222;
+            margin-bottom: 20px;
+        }
+
+        /* Кнопка лайка */
+        .like-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 20px;
+        }
+
+        .like-btn {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a1a;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 12px;
+            border: 1px solid #1a1a1a;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .like-btn.liked {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .like-count {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* ===== КОММЕНТАРИИ (Google News стиль) ===== */
+        .comments-section {
+            margin-top: 12px;
+        }
+
+        .comments-section .comments-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .comment-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .comment-item .comment-author {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .comment-item .comment-author span {
+            font-weight: 400;
+            color: #777;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .comment-item .comment-text {
+            font-size: 15px;
+            color: #222;
+            line-height: 1.4;
+            margin-top: 4px;
+        }
+
+        .comment-item .comment-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 6px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .comment-item .comment-actions button {
+            background: none;
+            border: none;
+            color: #555;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .comment-item .comment-actions button:active {
+            color: #1a1a1a;
+        }
+
+        /* Форма добавления комментария */
+        .add-comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .add-comment-form input {
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            font-size: 15px;
+            font-family: inherit;
+            background: #ffffff;
+            color: #1a1a1a;
+            width: 100%;
+        }
+
+        .add-comment-form .comment-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-comment-form .comment-row input:first-child {
+            flex: 0 0 120px;
+        }
+
+        .add-comment-form .comment-row input:last-child {
+            flex: 1;
+        }
+
+        .add-comment-form .submit-comment {
+            align-self: flex-end;
+            padding: 8px 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .add-comment-form .submit-comment:active {
+            opacity: 0.7;
+        }
+
+        /* ===== ЗАГРУЗКА ===== */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #777;
+            font-size: 15px;
+        }
+
+        /* ===== ОШИБКА ===== */
+        .error {
+            text-align: center;
+            padding: 40px 20px;
+            color: #b00020;
+        }
+
+        .error button {
+            margin-top: 12px;
+            padding: 8px 24px;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            font-size: 14px;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 480px) {
+            .grid-3 .tile .tile-title {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+            .news-list .list-item img {
+                width: 60px;
+                height: 60px;
+            }
+            .detail-content .detail-headline {
+                font-size: 19px;
+            }
+            .detail-header .detail-title {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- GATE -->
-<div id="gate">
-  <div class="gate-title">Мы столкнулись с проблемами</div>
-  <div class="gate-sub">Параметры Подсистемы для Windows не удастся открыть в браузере. Для доступа к настройкам необходимо добавить этот сайт на экран «Домой». (-1004)</div>
-  </div>
-</div>
+    <!-- ============================================================ -->
+    <!--  ГЛАВНЫЙ ЭКРАН                                              -->
+    <!-- ============================================================ -->
+    <div id="mainScreen">
+        <div class="main-header">
+            <h1>Новости</h1>
+        </div>
 
-<!-- APP -->
-<div id="app">
+        <!-- 3 плитки (заполняются скриптом) -->
+        <div class="grid-3" id="tilesContainer"></div>
 
-  <!-- PAGE: SYSTEM -->
-  <div class="page on" id="pg-system">
-    <div class="status-line">
-      <div class="dot"></div>
-      <span>Подсистема активна</span>
-      <em>WSA 2.4.1 · 22H2/19045.6691</em>
-    </div>
-    <div class="ph"><h1>Параметры</h1><p>Подсистема Windows для Apple</p></div>
-
-    <div class="sec">Состояние системы</div>
-    <div class="card">
-      <div class="row">
-        <div class="rl">Версия ядра Windows<small>22H2 / 19045.6691 Pro</small></div>
-      </div>
-      <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
-        <div class="rl">Запускать при входе</div>
-        <div class="tog on"></div>
-      </div>
-      <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
-        <div class="rl">Файловый мост<small>Если Вам не хватает ОЗУ, лучше отключить данную опцию.</small></div>
-        <div class="tog on"></div>
-      </div>
-      <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
-        <div class="rl">Общий буфер обмена</div>
-        <div class="tog on"></div>
-      </div>
+        <!-- Список остальных новостей -->
+        <div class="news-list" id="listContainer"></div>
     </div>
 
-    <div class="sec">ISO-образ системы</div>
-    <div class="card">
-      <div class="row">
-        <div class="rl">Windows 10 Pro<small>22H2(sApple-canary)/8.4 ГБ</small></div>
-        <div class="rv"><span class="bdg">Pro</span><span class="ch">›</span></div>
-      </div>
-      <div class="row" onclick="openIso()">
-        <div class="rl">Переустановить Windows<small>Добавить ISO (до 7 ГБ)</small></div>
-        <div class="rv"><span class="ch">›</span></div>
-      </div>
+    <!-- ============================================================ -->
+    <!--  ДЕТАЛЬНЫЙ ЭКРАН                                            -->
+    <!-- ============================================================ -->
+    <div class="detail-screen" id="detailScreen">
+        <div class="detail-header">
+            <button class="back-btn" id="backBtn">←</button>
+            <span class="detail-title" id="detailTitle">Новость</span>
+        </div>
+
+        <div class="detail-content" id="detailContent">
+            <!-- Заполняется скриптом -->
+        </div>
     </div>
 
-    <div class="sec">Память</div>
-    <div class="card">
-      <div class="pmap">
-        <div class="ps ps-c" onclick="toast('Диск C: — системный раздел Windows')">C:</div>
-        <div class="ps ps-d" onclick="toast('Диск D: — данные и приложения')">D:</div>
-        <div class="ps ps-f" onclick="toast('Нераспределено')">···</div>
-      </div>
-      <div class="slrow">
-        <div class="slhd"><span>Объём подсистемы</span><b id="mv">15 ГБ</b></div>
-        <input type="range" min="8" max="64" value="15" oninput="document.getElementById('mv').textContent=this.value+' ГБ'">
-      </div>
-      <div class="row" onclick="nav('partitions')">
-        <div class="rl">Управление разделами</div>
-        <div class="rv"><span class="ch">›</span></div>
-      </div>
-    </div>
+    <!-- ============================================================ -->
+    <!--  СКРИПТ                                                      -->
+    <!-- ============================================================ -->
+    <script>
+        // ============================================================
+        //  КОНФИГУРАЦИЯ
+        // ============================================================
+        const API_BASE = 'https://script.google.com/macros/s/AKfycbzoUIyPjK6So3sVlM3QCvabCExZLjuqI4Jn_cNlpx_eOjRWbNu-qZYFOw902OjzWKMKFg/exec';
 
-    <div class="sec">Ядро и виртуализация</div>
-    <div class="card">
-      <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
-        <div class="rl">Аппаратная виртуализация<small>Apple Hypervisor</small></div>
-        <div class="tog on"></div>
-      </div>
-      <div class="row" onclick="this.querySelector('.tog').classList.toggle('on')">
-        <div class="rl">GPU Passthrough<small>Metal → DirectX 12 мост</small></div>
-        <div class="tog on"></div>
-      </div>
-      <div class="row">
-        <div class="rl">Сетевой адаптер<small>vmxnet3 · 192.168.64.2</small></div>
-        <div class="rv"><span class="bdg">NAT</span><span class="ch">›</span></div>
-      </div>
-    </div>
-  </div>
+        // ============================================================
+        //  СОСТОЯНИЕ
+        // ============================================================
+        let allNews = [];
+        let currentNews = null;
 
-  <!-- PAGE: PARTITIONS -->
-  <div class="page" id="pg-partitions">
-    <div class="ph" style="padding-top:48px"><h1>Разделы</h1><p>Управление дисковым пространством</p></div>
+        // ============================================================
+        //  ЗАГРУЗКА НОВОСТЕЙ
+        // ============================================================
+        async function loadNews() {
+            try {
+                const url = `${API_BASE}?action=getNews`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
 
-    <div class="sec">Карта разделов</div>
-    <div class="card" style="padding:16px">
-      <div class="pmap" style="margin:0 0 12px">
-        <div class="ps ps-c">C:</div>
-        <div class="ps ps-d">D:</div>
-        <div class="ps ps-f">···</div>
-      </div>
-      <div style="display:flex;gap:12px;justify-content:center;font-size:13px;color:var(--lbl2)">
-        <span style="display:flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:2px;background:var(--blue);display:inline-block"></i>C: 12.4 ГБ</span>
-        <span style="display:flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:2px;background:var(--orange);display:inline-block"></i>D: 6.2 ГБ</span>
-        <span style="display:flex;align-items:center;gap:4px"><i style="width:9px;height:9px;border-radius:2px;background:var(--g4);display:inline-block"></i>Своб. 3.1 ГБ</span>
-      </div>
-    </div>
+                if (!data.success || !data.data || data.data.length === 0) {
+                    document.getElementById('tilesContainer').innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#777;">Новостей пока нет</div>';
+                    document.getElementById('listContainer').innerHTML = '';
+                    return;
+                }
 
-    <div class="sec">Диск C: — Система</div>
-    <div class="card">
-      <div class="row"><div class="rl">C:\Windows<small>Системные файлы · 6.2 ГБ</small></div><div class="rv"><span class="ch">›</span></div></div>
-      <div class="row"><div class="rl">C:\Program Files<small>Приложения · 4.1 ГБ</small></div><div class="rv"><span class="ch">›</span></div></div>
-      <div class="row"><div class="rl">C:\Users<small>Пользователи · 2.1 ГБ</small></div><div class="rv"><span class="ch">›</span></div></div>
-      <div class="slrow" style="border-bottom:none">
-        <div class="slhd"><span>Размер C:</span><b id="cv">12 ГБ</b></div>
-        <input type="range" min="8" max="40" value="12" oninput="document.getElementById('cv').textContent=this.value+' ГБ'">
-      </div>
-    </div>
-
-    <div class="sec">Диск D: — Данные</div>
-    <div class="card">
-      <div class="row"><div class="rl">D:\Пользователи<small>6.2 ГБ из 8 ГБ</small></div><div class="rv"><span class="ch">›</span></div></div>
-      <div class="slrow" style="border-bottom:none">
-        <div class="slhd"><span>Размер D:</span><b id="dv">8 ГБ</b></div>
-        <input type="range" min="1" max="30" value="8" oninput="document.getElementById('dv').textContent=this.value+' ГБ'">
-      </div>
-    </div>
-
-    <div class="sec">Действия</div>
-    <div class="card">
-      <div class="row" onclick="toast('Форматирование диска D...')"><div class="rl">Форматировать D:</div><div class="rv"><span class="ch">›</span></div></div>
-      <div class="row" onclick="toast('Создание раздела...')"><div class="rl">Добавить раздел<small>Из свободного места</small></div><div class="rv"><span class="ch">›</span></div></div>
-    </div>
-  </div>
-
-  <!-- PAGE: INFO -->
-  <div class="page" id="pg-info">
-    <div class="ph" style="padding-top:48px"><h1>Информация</h1></div>
-
-    <div class="sec">Устройство</div>
-    <div class="card">
-      <div class="row"><div class="rl">Модель<small>Устройство Apple</small></div></div>
-      <div class="row"><div class="rl">Процессор<small>Чип Apple, поддерживающий Подсистему Windows</small></div></div>
-    </div>
-
-    <div class="sec">Подсистема</div>
-    <div class="card">
-      <div class="row"><div class="rl">Версия WSA<small>2.4.1.0</small></div></div>
-      <div class="row"><div class="rl">Ядро Windows<small>22H2 / 19045.6691 Pro</small></div></div>
-      <div class="row"><div class="rl">Гипервизор<small>Apple Hypervisor.framework 3.1</small></div></div>
-      <div class="row"><div class="rl">DirectX<small>DX12 Ultimate (Metal Bridge 4.2)</small></div></div>
-    </div>
-
-    <div class="sec">Производительность</div>
-    <div class="card" style="padding:20px 16px">
-      <div class="pring">
-        <svg viewBox="0 0 80 80" width="80" height="80">
-          <circle class="rb" cx="40" cy="40" r="35"/>
-          <circle class="rf" id="pc" cx="40" cy="40" r="35"/>
-        </svg>
-        <div class="plbl"><strong id="pp">70%</strong><span>эфф.</span></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center">
-        <div style="background:var(--g6);border-radius:10px;padding:10px"><div style="font-size:20px;font-weight:700;color:var(--blue)">4.2%</div><div style="font-size:12px;color:var(--lbl2)">ЦП</div></div>
-        <div style="background:var(--g6);border-radius:10px;padding:10px"><div style="font-size:20px;font-weight:700;color:var(--orange)">2.1 ГБ</div><div style="font-size:12px;color:var(--lbl2)">ОЗУ</div></div>
-        <div style="background:var(--g6);border-radius:10px;padding:10px"><div style="font-size:20px;font-weight:700;color:var(--green)">1.2 Мб/с</div><div style="font-size:12px;color:var(--lbl2)">Диск</div></div>
-        <div style="background:var(--g6);border-radius:10px;padding:10px"><div style="font-size:20px;font-weight:700;color:#AF52DE">18°C</div><div style="font-size:12px;color:var(--lbl2)">Темп.</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: DANGER -->
-  <div class="page" id="pg-danger">
-    <div class="ph" style="padding-top:48px"><h1>Опасная зона</h1></div>
-
-    <div class="sec">Редактор реестра</div>
-    <div class="card">
-      <div class="row" onclick="openReg()">
-        <div class="rl">Редактор реестра</div>
-        <div class="rv"><span class="ch">›</span></div>
-      </div>
-    </div>
-
-    <div class="sec">Уровень производительности</div>
-    <div class="card">
-      <div class="slrow">
-        <div class="slhd"><span>Приоритет CPU</span><b id="cpv">70%</b></div>
-        <input type="range" min="10" max="100" value="70" oninput="setPf(this.value)">
-      </div>
-      <div class="slrow">
-        <div class="slhd"><span>Выделить ОЗУ</span><b id="rav">4 ГБ</b></div>
-        <input type="range" min="1" max="12" value="4" oninput="document.getElementById('rav').textContent=this.value+' ГБ'">
-      </div>
-      <div class="slrow" style="border-bottom:none">
-        <div class="slhd"><span>Приоритет GPU</span><b id="gpv">50%</b></div>
-        <input type="range" min="0" max="100" value="50" oninput="document.getElementById('gpv').textContent=this.value+'%'">
-      </div>
-    </div>
-
-    <div class="sec">Назначение подсистемы</div>
-    <div class="card">
-      <div class="ucg">
-        <div class="ucc on" onclick="selUC(this)"><div class="un">Игры</div><div class="ud">Max FPS, DX12</div></div>
-        <div class="ucc" onclick="selUC(this)"><div class="un">Тестирование</div><div class="ud">Изоляция, снимки</div></div>
-        <div class="ucc" onclick="selUC(this)"><div class="un">Учёба</div><div class="ud">Баланс, Office</div></div>
-        <div class="ucc" onclick="selUC(this)"><div class="un">Работа</div><div class="ud">Стабильность</div></div>
-      </div>
-    </div>
-
-    <div class="sec">Удаление</div>
-    <div class="card dcard">
-      <div class="row" onclick="confirmDel()">
-        <div class="rl" style="color:var(--red)">Удалить подсистему<small style="color:var(--lbl2)">Все данные Windows будут стёрты</small></div>
-        <div class="rv"><span class="ch" style="color:var(--red)">›</span></div>
-      </div>
-      <div class="row" onclick="toast('Создание снимка состояния...')">
-        <div class="rl">Создать снимок<small>Сохранить текущее состояние</small></div>
-        <div class="rv"><span class="ch">›</span></div>
-      </div>
-      <div class="row" onclick="toast('Сброс подсистемы...')">
-        <div class="rl" style="color:var(--orange)">Сбросить подсистему<small style="color:var(--lbl2)">Очистка без удаления</small></div>
-        <div class="rv"><span class="ch" style="color:var(--orange)">›</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FLOATING NAV -->
-  <nav class="fnav">
-    <div class="ni on" id="ni-system" onclick="nav('system',this)">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
-      <span class="nl">Подсистема</span>
-    </div>
-    <div class="ni" id="ni-partitions" onclick="nav('partitions',this)">
-      <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/></svg>
-      <span class="nl">Разделы</span>
-    </div>
-    <div class="ni" id="ni-info" onclick="nav('info',this)">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="9"/><line x1="12" y1="11" x2="12" y2="16"/></svg>
-      <span class="nl">Инфо</span>
-    </div>
-    <div class="ni" id="ni-danger" onclick="nav('danger',this)">
-      <svg viewBox="0 0 24 24"><path d="M12 3L22 20H2L12 3z"/><line x1="12" y1="10" x2="12" y2="14"/><line x1="12" y1="17" x2="12" y2="17.5"/></svg>
-      <span class="nl">Опасная зона</span>
-    </div>
-  </nav>
-</div><!-- /app -->
-
-<!-- REGISTRY FULLSCREEN -->
-<div id="reg-screen">
-  <div class="reg-topbar">
-    <span class="reg-close-btn" onclick="closeReg()">Закрыть</span>
-    <h2>Редактор реестра</h2>
-    <span class="reg-add-btn" onclick="addReg()">+ Добавить</span>
-  </div>
-  <div class="reg-hive-seg">
-    <div class="seg">
-      <div class="si on" onclick="setHive(0,this)">HKLM</div>
-      <div class="si" onclick="setHive(1,this)">HKCU</div>
-      <div class="si" onclick="setHive(2,this)">HKU</div>
-      <div class="si" onclick="setHive(3,this)">HKCR</div>
-    </div>
-  </div>
-  <div class="reg-path" id="reg-path">HKEY_LOCAL_MACHINE\</div>
-  <div class="reg-body"><div class="reg-tree" id="reg-tree"></div></div>
-</div>
-
-<!-- REG EDIT MODAL -->
-<div class="mover" id="rem">
-  <div class="msheet">
-    <div class="mhandle"></div>
-    <div class="mtitle" id="rem-title">Редактировать параметр</div>
-    <input class="minput" id="rem-name" placeholder="Имя параметра" type="text">
-    <input class="minput" id="rem-val" placeholder="Значение (строка / hex)" type="text">
-    <div class="mactions">
-      <button class="mbtn btn-gray" onclick="closeModal('rem')">Отмена</button>
-      <button class="mbtn btn-blue" onclick="saveReg()">Сохранить</button>
-    </div>
-  </div>
-</div>
-
-<!-- ISO MODAL -->
-<div class="mover" id="isom">
-  <div class="msheet">
-    <div class="mhandle"></div>
-    <div class="mtitle">Добавить ISO-образ</div>
-    <input type="file" id="iso-file" accept=".iso" style="display:none" onchange="isoChosen(this)">
-    <div class="iso-drop" id="iso-drop" onclick="document.getElementById('iso-file').click()">
-      <div style="font-size:34px">*</div>
-      <div class="iso-drop-title">Выбрать файл</div>
-      <div class="iso-drop-sub" id="iso-name">ISO, до 7 ГБ</div>
-    </div>
-    <div class="ibar"><div class="ifill" id="iso-fill"></div></div>
-    <div class="istat" id="iso-stat">Файл не выбран</div>
-    <div class="mactions" style="margin-top:12px">
-      <button class="mbtn btn-gray" onclick="closeModal('isom')">Закрыть</button>
-      <button class="mbtn btn-blue" id="iso-install-btn" onclick="startIsoVerify()" disabled style="opacity:.5">Установить</button>
-    </div>
-  </div>
-</div>
-
-<!-- LICENSE SCREEN -->
-<div id="lic-screen">
-  <div class="lic-top">
-    <h2>Лицензионное соглашение</h2>
-  </div>
-  <div class="lic-body" id="lic-body"></div>
-  <div class="lic-bottom">
-    <button class="mbtn btn-gray" style="flex:1;height:52px;border-radius:var(--pill);font-size:17px;font-weight:600;border:none;cursor:pointer;font-family:var(--font)" onclick="licDecline()">Не принимаю</button>
-    <button class="mbtn btn-blue" style="flex:1;height:52px;border-radius:var(--pill);font-size:17px;font-weight:600;border:none;cursor:pointer;font-family:var(--font)" onclick="licAccept()">Принимаю</button>
-  </div>
-</div>
-
-<!-- INSTALL SCREEN -->
-<div id="install-screen">
-  <div class="inst-logo">
-    <svg viewBox="0 0 40 40"><rect x="3" y="3" width="14" height="14" rx="1"/><rect x="23" y="3" width="14" height="14" rx="1"/><rect x="3" y="23" width="14" height="14" rx="1"/><rect x="23" y="23" width="14" height="14" rx="1"/></svg>
-  </div>
-  <div class="inst-title" id="inst-title">Установка Windows</div>
-  <div class="inst-sub" id="inst-sub">Подготовка...</div>
-  <div class="inst-bar"><div class="inst-fill" id="inst-fill"></div></div>
-  <div class="inst-step" id="inst-step"></div>
-  <button class="btn btn-blue" id="inst-done-btn" style="display:none;max-width:340px" onclick="instDone()">Готово</button>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<script>
-// PWA check
-window.addEventListener('load',()=>{ if(window.navigator.standalone||window.matchMedia('(display-mode: standalone)').matches) enterApp(); });
-function closeTab(){ window.close(); }
-function enterApp(){
-  const g=document.getElementById('gate'), a=document.getElementById('app');
-  g.classList.add('out');
-  setTimeout(()=>{ g.style.display='none'; a.classList.add('on'); buildReg(); },300);
-}
-
-// Nav
-function nav(name, el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  document.getElementById('pg-'+name).classList.add('on');
-  document.getElementById('pg-'+name).scrollTop=0;
-  const ni=el||document.getElementById('ni-'+name);
-  if(ni) ni.classList.add('on');
-}
-
-// Toast
-let tt;
-function toast(m){
-  const t=document.getElementById('toast');
-  t.textContent=m; t.classList.add('on');
-  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2200);
-}
-
-// Perf
-function setPf(v){
-  document.getElementById('cpv').textContent=v+'%';
-  const c=document.getElementById('pc');
-  if(c) c.style.strokeDashoffset=220*(1-v/100);
-  const p=document.getElementById('pp');
-  if(p) p.textContent=v+'%';
-}
-
-// Use case
-function selUC(el){
-  document.querySelectorAll('.ucc').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  toast('Режим: '+el.querySelector('.un').textContent);
-}
-
-// Confirm delete
-function confirmDel(){
-  if(confirm('Вы уверены? Все данные Windows будут безвозвратно удалены.'))
-    toast('Удаление подсистемы...');
-}
-
-// Modal open/close
-function closeModal(id){ document.getElementById(id).classList.remove('on'); }
-document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('on'); }));
-
-// ISO FLOW
-let isoFileName='';
-function openIso(){ document.getElementById('isom').classList.add('on'); }
-
-function isoChosen(inp){
-  if(!inp.files||!inp.files[0]) return;
-  const f=inp.files[0];
-  isoFileName=f.name;
-  document.getElementById('iso-name').textContent=f.name;
-  document.getElementById('iso-stat').textContent='Файл выбран · '+Math.round(f.size/1024/1024)+' МБ';
-  const btn=document.getElementById('iso-install-btn');
-  btn.disabled=false; btn.style.opacity='1';
-}
-
-function startIsoVerify(){
-  if(!isoFileName){ toast('Выберите файл'); return; }
-  closeModal('isom');
-  // Fake verify: show install screen in verify mode
-  const is=document.getElementById('install-screen');
-  document.getElementById('inst-title').textContent='Проверка образа';
-  document.getElementById('inst-sub').textContent=isoFileName;
-  document.getElementById('inst-step').textContent='Проверка цифровой подписи Microsoft...';
-  document.getElementById('inst-fill').style.width='0%';
-  document.getElementById('inst-done-btn').style.display='none';
-  is.classList.add('on');
-
-  const steps=[
-    [5,'Проверка цифровой подписи Microsoft...'],
-    [20,'Валидация хэша SHA-256...'],
-    [40,'Проверка целостности файловой системы...'],
-    [60,'Сканирование загрузочных секторов...'],
-    [80,'Верификация лицензионного ключа...'],
-    [95,'Завершение проверки...'],
-    [100,'Проверка завершена.'],
-  ];
-
-  const totalMs = 34000 + Math.random()*6000; // 34–40 секунд
-  let idx=0;
-  const perStep=totalMs/steps.length;
-
-  function tick(){
-    if(idx>=steps.length){
-      // done verifying
-      setTimeout(()=>{
-        is.classList.remove('on');
-        showVerifyDone();
-      },600);
-      return;
-    }
-    const [pct,txt]=steps[idx++];
-    document.getElementById('inst-fill').style.width=pct+'%';
-    document.getElementById('inst-step').textContent=txt;
-    setTimeout(tick, perStep);
-  }
-  setTimeout(tick,400);
-}
-
-function showVerifyDone(){
-  // Build a nice name from filename
-  const name='Windows 10, Build 1903 (18362), ru-ru';
-  if(!confirm('Вы действительно хотите установить '+name+'?')){
-    toast('Установка отменена.'); return;
-  }
-  // Show license
-  showLicense();
-}
-
-// LICENSE
-function showLicense(){
-  document.getElementById('lic-body').innerHTML=LIC_TEXT;
-  document.getElementById('lic-screen').classList.add('on');
-}
-function licDecline(){
-  document.getElementById('lic-screen').classList.remove('on');
-  toast('Установка отменена.');
-}
-function licAccept(){
-  document.getElementById('lic-screen').classList.remove('on');
-  startInstall();
-}
-
-// INSTALL
-function startInstall(){
-  const is=document.getElementById('install-screen');
-  document.getElementById('inst-title').textContent='Установка Windows';
-  document.getElementById('inst-sub').textContent='Windows 10 Pro · Build 18362 · ru-ru';
-  document.getElementById('inst-fill').style.width='0%';
-  document.getElementById('inst-done-btn').style.display='none';
-  is.classList.add('on');
-
-  const steps=[
-    [3,'Подготовка дискового раздела...'],
-    [8,'Форматирование C: (NTFS)...'],
-    [13,'Копирование файлов загрузчика...'],
-    [20,'Распаковка install.wim...'],
-    [27,'Копирование системных файлов Windows...'],
-    [34,'Копирование файлов реестра...'],
-    [41,'Установка компонентов ядра...'],
-    [49,'Копирование драйверов...'],
-    [55,'Настройка компонентов Apple Hypervisor...'],
-    [61,'Установка Metal–DirectX Bridge...'],
-    [67,'Копирование пользовательских профилей...'],
-    [73,'Настройка сетевых компонентов...'],
-    [79,'Финализация реестра...'],
-    [85,'Создание точки восстановления...'],
-    [91,'Проверка целостности установки...'],
-    [96,'Подготовка к первому запуску...'],
-    [100,'Установка завершена.'],
-  ];
-
-  const totalMs=240000; // ~4 min
-  let idx=0;
-  const perStep=totalMs/steps.length;
-
-  function tick(){
-    if(idx>=steps.length){
-      document.getElementById('inst-sub').textContent='Система записана и установлена.';
-      document.getElementById('inst-step').textContent='';
-      document.getElementById('inst-done-btn').style.display='block';
-      return;
-    }
-    const [pct,txt]=steps[idx++];
-    document.getElementById('inst-fill').style.width=pct+'%';
-    document.getElementById('inst-step').textContent=txt;
-    setTimeout(tick, perStep);
-  }
-  setTimeout(tick,400);
-}
-
-function instDone(){
-  document.getElementById('install-screen').classList.remove('on');
-  toast('Система записана и установлена.');
-}
-
-// REGISTRY
-const RD={
-  HKLM:{
-    SOFTWARE:{
-      Microsoft:{
-        'Windows NT':{
-          CurrentVersion:{
-            _v:[
-              {n:'ProductName',t:'REG_SZ',d:'Windows 11 Pro'},
-              {n:'CurrentBuild',t:'REG_SZ',d:'19045'},
-              {n:'UBR',t:'REG_DWORD',d:'0x00001A3F'},
-              {n:'RegisteredOwner',t:'REG_SZ',d:'Apple User'},
-              {n:'InstallDate',t:'REG_DWORD',d:'0x65F4A1B2'},
-              {n:'EditionID',t:'REG_SZ',d:'Professional'},
-              {n:'SystemRoot',t:'REG_SZ',d:'C:\\Windows'},
-            ]
-          }
-        },
-        Windows:{
-          CurrentVersion:{
-            _v:[
-              {n:'ProgramFilesDir',t:'REG_SZ',d:'C:\\Program Files'},
-              {n:'ProgramFilesDir (x86)',t:'REG_SZ',d:'C:\\Program Files (x86)'},
-              {n:'CommonFilesDir',t:'REG_SZ',d:'C:\\Program Files\\Common Files'},
-              {n:'ProgramData',t:'REG_SZ',d:'C:\\ProgramData'},
-            ]
-          }
-        }
-      },
-      Apple:{
-        WSA:{
-          _v:[
-            {n:'Version',t:'REG_SZ',d:'2.4.1.0'},
-            {n:'HypervisorMode',t:'REG_DWORD',d:'0x00000001'},
-            {n:'GPUBridge',t:'REG_SZ',d:'Metal-DX12-4.2'},
-            {n:'MemoryAllocation',t:'REG_DWORD',d:'0x0F000000'},
-            {n:'NetworkMode',t:'REG_SZ',d:'NAT'},
-          ]
-        }
-      }
-    },
-    SYSTEM:{
-      CurrentControlSet:{
-        Control:{
-          ComputerName:{
-            _v:[{n:'ComputerName',t:'REG_SZ',d:'IPAD-WSA'}]
-          },
-          Session:{
-            _v:[
-              {n:'ObjectDirectory',t:'REG_SZ',d:'\\Windows'},
-              {n:'SubSystemType',t:'REG_DWORD',d:'0x00000000'},
-            ]
-          }
-        },
-        Services:{
-          _v:[
-            {n:'Start',t:'REG_DWORD',d:'0x00000002'},
-            {n:'Type',t:'REG_DWORD',d:'0x00000010'},
-          ]
-        }
-      }
-    },
-    HARDWARE:{
-      DESCRIPTION:{
-        System:{
-          _v:[
-            {n:'Identifier',t:'REG_SZ',d:'Apple M4 Hypervisor'},
-            {n:'SystemBiosDate',t:'REG_SZ',d:'06/06/2026'},
-            {n:'SystemBiosVersion',t:'REG_MULTI_SZ',d:'APPLE - 2.4'},
-            {n:'VideoBiosVersion',t:'REG_MULTI_SZ',d:'Metal 3.1'},
-          ]
-        }
-      }
-    }
-  },
-  HKCU:{
-    SOFTWARE:{
-      Microsoft:{
-        Windows:{
-          CurrentVersion:{
-            Explorer:{
-              _v:[
-                {n:'IconUnderline',t:'REG_DWORD',d:'0x00000002'},
-                {n:'ShowFrequent',t:'REG_DWORD',d:'0x00000001'},
-              ]
+                allNews = data.data;
+                renderMainScreen(allNews);
+            } catch (error) {
+                document.getElementById('tilesContainer').innerHTML = `
+                    <div style="grid-column:1/-1;padding:40px;text-align:center;color:#b00020;">
+                        Ошибка: ${error.message}
+                        <br><br>
+                        <button onclick="loadNews()" style="padding:8px 24px;background:#1a1a1a;color:#fff;border:none;font-size:14px;">Повторить</button>
+                    </div>
+                `;
+                document.getElementById('listContainer').innerHTML = '';
             }
-          }
         }
-      }
-    }
-  },
-  HKU:{
-    '.DEFAULT':{
-      SOFTWARE:{
-        _v:[{n:'DefaultUser',t:'REG_SZ',d:'WSA_DefaultUser'}]
-      }
-    }
-  },
-  HKCR:{
-    '.exe':{_v:[{n:'(По умолчанию)',t:'REG_SZ',d:'exefile'}]},
-    exefile:{shell:{open:{command:{_v:[{n:'(По умолчанию)',t:'REG_SZ',d:'"%1" %*'}]}}}}
-  }
-};
 
-const hiveNames=['HKEY_LOCAL_MACHINE','HKEY_CURRENT_USER','HKEY_USERS','HKEY_CLASSES_ROOT'];
-const hiveKeys=['HKLM','HKCU','HKU','HKCR'];
-let curHive='HKLM'; let regEdit=null;
+        // ============================================================
+        //  ОТРИСОВКА ГЛАВНОГО ЭКРАНА
+        // ============================================================
+        function renderMainScreen(news) {
+            // ТОП-3 для плиток
+            const top3 = news.slice(0, 3);
+            const rest = news.slice(3);
 
-function openReg(){ document.getElementById('reg-screen').classList.add('on'); buildReg(); }
-function closeReg(){ document.getElementById('reg-screen').classList.remove('on'); }
+            // === ПЛИТКИ ===
+            let tilesHtml = '';
+            for (const item of top3) {
+                const img = item.imageUrl ? item.imageUrl : '';
+                tilesHtml += `
+                    <div class="tile" onclick="openDetail(${item.id})">
+                        <img src="${escapeHtml(img)}" alt="" onerror="this.style.display='none'">
+                        <div class="tile-title">${escapeHtml(item.title)}</div>
+                    </div>
+                `;
+            }
+            document.getElementById('tilesContainer').innerHTML = tilesHtml;
 
-function buildReg(){
-  const t=document.getElementById('reg-tree');
-  t.innerHTML='';
-  renderNode(RD[curHive],t,'');
-  document.getElementById('reg-path').textContent=hiveNames[hiveKeys.indexOf(curHive)]+'\\';
-}
+            // === СПИСОК ОСТАЛЬНЫХ ===
+            let listHtml = '';
+            for (const item of rest) {
+                const img = item.imageUrl ? item.imageUrl : '';
+                listHtml += `
+                    <div class="list-item" onclick="openDetail(${item.id})">
+                        <img src="${escapeHtml(img)}" alt="" onerror="this.style.display='none'">
+                        <div>
+                            <div class="list-title">${escapeHtml(item.title)}</div>
+                            <div class="list-date">${escapeHtml(item.date)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('listContainer').innerHTML = listHtml || '<div style="padding:20px;text-align:center;color:#777;">Это все новости</div>';
+        }
 
-function renderNode(obj,cont,path){
-  Object.keys(obj).forEach(key=>{
-    if(key==='_v') return;
-    const v=obj[key];
-    const wrap=document.createElement('div');
-    const krow=document.createElement('div');
-    krow.className='rk';
-    krow.innerHTML=`<span class="tri">▶</span><span>${key}</span>`;
-    const ch=document.createElement('div');
-    ch.className='rch h';
-    // values
-    if(v._v){
-      v._v.forEach(val=>{
-        const vr=document.createElement('div');
-        vr.className='vrow';
-        vr.innerHTML=`<span class="vn">${val.n}</span><span class="vt">${val.t}</span><span class="vd">${val.d}</span>`;
-        vr.onclick=()=>openRegEdit(val,vr);
-        ch.appendChild(vr);
-      });
-    }
-    renderNode(v,ch,path+'\\'+key);
-    krow.onclick=()=>{ krow.classList.toggle('open'); ch.classList.toggle('h'); };
-    wrap.appendChild(krow); wrap.appendChild(ch);
-    cont.appendChild(wrap);
-  });
-}
+        // ============================================================
+        //  ОТКРЫТЬ ДЕТАЛЬНЫЙ ЭКРАН
+        // ============================================================
+        async function openDetail(newsId) {
+            const news = allNews.find(n => n.id === newsId);
+            if (!news) return;
 
-function setHive(idx,el){
-  document.querySelectorAll('.si').forEach(s=>s.classList.remove('on'));
-  el.classList.add('on');
-  curHive=hiveKeys[idx];
-  buildReg();
-}
+            currentNews = news;
+            const screen = document.getElementById('detailScreen');
+            const title = document.getElementById('detailTitle');
+            const content = document.getElementById('detailContent');
 
-function openRegEdit(val,row){
-  regEdit={val,row};
-  document.getElementById('rem-title').textContent='Редактировать: '+val.n;
-  document.getElementById('rem-name').value=val.n;
-  document.getElementById('rem-val').value=val.d;
-  document.getElementById('rem').classList.add('on');
-}
+            // Заголовок в шапке
+            title.textContent = news.title;
 
-function addReg(){
-  regEdit=null;
-  document.getElementById('rem-title').textContent='Новый параметр';
-  document.getElementById('rem-name').value='';
-  document.getElementById('rem-val').value='';
-  document.getElementById('rem').classList.add('on');
-}
+            // === КОНТЕНТ ===
+            const img = news.imageUrl ? news.imageUrl : '';
 
-function saveReg(){
-  const n=document.getElementById('rem-name').value.trim();
-  const d=document.getElementById('rem-val').value.trim();
-  if(!n){ toast('Введите имя параметра'); return; }
-  if(regEdit){
-    regEdit.val.n=n; regEdit.val.d=d;
-    regEdit.row.querySelector('.vn').textContent=n;
-    regEdit.row.querySelector('.vd').textContent=d;
-    toast('Параметр сохранён');
-  } else {
-    toast('Параметр создан: '+n);
-  }
-  closeModal('rem');
-}
+            // Счетчик лайков (локальный)
+            const likes = localStorage.getItem(`likes_${news.id}`) ? parseInt(localStorage.getItem(`likes_${news.id}`), 10) : 0;
 
-// LICENSE TEXT
-const LIC_TEXT=`<strong>Дата последнего обновления: июнь 2021 г.</strong><br><br>
-<strong>УСЛОВИЯ ЛИЦЕНЗИОННОГО СОГЛАШЕНИЯ НА ИСПОЛЬЗОВАНИЕ ПРОГРАММНОГО ОБЕСПЕЧЕНИЯ MICROSOFT</strong><br>
-<strong>ОПЕРАЦИОННАЯ СИСТЕМА WINDOWS</strong><br><br>
-ЕСЛИ ВЫ ПРОЖИВАЕТЕ В США (ИЛИ ЕСЛИ ЭТА СТРАНА ЯВЛЯЕТСЯ ВАШИМ ОСНОВНЫМ МЕСТОМ ВЕДЕНИЯ БИЗНЕСА), ОЗНАКОМЬТЕСЬ С ПОЛОЖЕНИЯМИ ОБ ОБЯЗАТЕЛЬНОМ АРБИТРАЖЕ И ОТКАЗЕ ОТ ГРУППОВОГО ИСКА В РАЗДЕЛЕ 11. ЭТО ВЛИЯЕТ НА СПОСОБ РАЗРЕШЕНИЯ СПОРОВ.<br><br>
-Благодарим за выбор Microsoft!<br><br>
-В зависимости от того, как вы получили программное обеспечение Windows, настоящий документ является лицензионным соглашением между: (i) вами и изготовителем устройства или установщиком программного обеспечения, который распространяет программное обеспечение вместе с вашим устройством; (ii) вами и корпорацией Microsoft (или одним из её аффилированных лиц), если вы приобрели программное обеспечение у розничного продавца.<br><br>
-В настоящем соглашении описываются ваши права, обязательства и условия использования программного обеспечения Windows. Изучите полное соглашение, включая какие-либо дополнительные условия лицензии, поскольку все положения являются неотъемлемой частью применимого к вам соглашения.<br><br>
-Принимая это соглашение или используя программное обеспечение, вы соглашаетесь со всеми настоящими условиями, а также даёте согласие на передачу определённой информации в процессе активации и использования программного обеспечения.<br><br>
-<strong>1. Общие сведения.</strong><br><br>
-<strong>a. Применимость.</strong> Настоящее соглашение относится к программному обеспечению Windows, которое было предварительно установлено на вашем устройстве или приобретено у розничного продавца, носителям, на которых вы получили программное обеспечение (если таковые имеются), любым шрифтам, значкам, изображениям или звуковым файлам, предоставляемым в составе программного обеспечения, а также ко всем обновлениям, дополнениям или службам Microsoft для программного обеспечения.<br><br>
-<strong>b. Дополнительные условия.</strong> К использованию некоторых функций, служб и приложений могут применяться дополнительные условия Microsoft или третьих лиц в зависимости от возможностей вашего устройства, его конфигурации и способа использования.<br><br>
-<strong>2. Права на установку и использование.</strong><br><br>
-<strong>a. Лицензия.</strong> Программное обеспечение не продаётся, а предоставляется по лицензии. В рамках настоящего соглашения вам предоставляется право установить и запустить один экземпляр программного обеспечения на устройстве для одновременного использования одним лицом, если вы соблюдаете условия и ограничения настоящего соглашения.<br><br>
-<strong>c. Ограничения.</strong> Производитель или сборщик оборудования и Microsoft сохраняют за собой все права, не предоставленные явным образом в рамках настоящего соглашения. Вы не имеете права:<br>
-(i) отдельно использовать и виртуализировать компоненты программного обеспечения;<br>
-(ii) публиковать, копировать или предоставлять программное обеспечение в прокат;<br>
-(iii) передавать программное обеспечение (за исключением случаев, предусмотренных настоящим соглашением);<br>
-(iv) пытаться обойти технические ограничения в программном обеспечении;<br>
-(v) использовать программное обеспечение в качестве серверного программного обеспечения в коммерческих целях;<br>
-(vi) изучать технологию, декомпилировать или деассемблировать программное обеспечение, кроме случаев, разрешённых применимым правом.`;
-</script>
+            content.innerHTML = `
+                <img class="detail-image" src="${escapeHtml(img)}" alt="" onerror="this.style.display='none'">
+                <div class="detail-headline">${escapeHtml(news.title)}</div>
+                <div class="detail-body">${escapeHtml(news.text)}</div>
+
+                <div class="like-container">
+                    <button class="like-btn" id="likeBtn" onclick="toggleLike()">Лайк</button>
+                    <span class="like-count" id="likeCount">${likes}</span>
+                </div>
+
+                <div class="comments-section" id="commentsSection">
+                    <div class="comments-title">Комментарии</div>
+                    <div id="commentsList">Загрузка...</div>
+
+                    <div class="add-comment-form">
+                        <div class="comment-row">
+                            <input type="text" id="commentName" placeholder="Имя" value="Аноним">
+                            <input type="text" id="commentText" placeholder="Написать комментарий...">
+                        </div>
+                        <button class="submit-comment" onclick="submitComment()">Отправить</button>
+                    </div>
+                </div>
+            `;
+
+            // Показываем экран
+            screen.classList.add('active');
+
+            // Загружаем комментарии
+            loadComments(newsId);
+
+            // Обновляем состояние лайка
+            updateLikeButton();
+        }
+
+        // ============================================================
+        //  ЗАГРУЗКА КОММЕНТАРИЕВ
+        // ============================================================
+        async function loadComments(newsId) {
+            const list = document.getElementById('commentsList');
+            if (!list) return;
+
+            try {
+                const url = `${API_BASE}?action=getComments&newsId=${newsId}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.success || !data.data || data.data.length === 0) {
+                    list.innerHTML = '<div style="color:#777;padding:8px 0;">Нет комментариев</div>';
+                    return;
+                }
+
+                let html = '';
+                for (const c of data.data) {
+                    html += `
+                        <div class="comment-item">
+                            <div class="comment-author">
+                                ${escapeHtml(c.name)}
+                                <span>${escapeHtml(c.date)}</span>
+                            </div>
+                            <div class="comment-text">${escapeHtml(c.text)}</div>
+                            <div class="comment-actions">
+                                <button onclick="replyComment('${escapeHtml(c.name)}')">Ответить</button>
+                                <button onclick="likeComment()">Нравится</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                list.innerHTML = html;
+            } catch (error) {
+                list.innerHTML = '<div style="color:#b00020;padding:8px 0;">Ошибка загрузки</div>';
+            }
+        }
+
+        // ============================================================
+        //  ДОБАВЛЕНИЕ КОММЕНТАРИЯ
+        // ============================================================
+        async function submitComment() {
+            if (!currentNews) return;
+            const name = document.getElementById('commentName').value.trim() || 'Аноним';
+            const text = document.getElementById('commentText').value.trim();
+            if (!text) {
+                alert('Напишите текст комментария');
+                return;
+            }
+
+            const btn = document.querySelector('.submit-comment');
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                const url = `${API_BASE}?action=addComment&newsId=${currentNews.id}&name=${encodeURIComponent(name)}&text=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('commentText').value = '';
+                    loadComments(currentNews.id);
+                } else {
+                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Отправить';
+            }
+        }
+
+        // ============================================================
+        //  ЛАЙК
+        // ============================================================
+        function toggleLike() {
+            if (!currentNews) return;
+            const key = `likes_${currentNews.id}`;
+            let count = localStorage.getItem(key) ? parseInt(localStorage.getItem(key), 10) : 0;
+            count += 1;
+            localStorage.setItem(key, count);
+            updateLikeButton();
+        }
+
+        function updateLikeButton() {
+            if (!currentNews) return;
+            const btn = document.getElementById('likeBtn');
+            const count = document.getElementById('likeCount');
+            if (!btn || !count) return;
+            const val = localStorage.getItem(`likes_${currentNews.id}`) ? parseInt(localStorage.getItem(`likes_${currentNews.id}`), 10) : 0;
+            count.textContent = val;
+            btn.textContent = val > 0 ? 'Лайкнут' : 'Лайк';
+            btn.classList.toggle('liked', val > 0);
+        }
+
+        // ============================================================
+        //  ЗАГЛУШКИ ДЛЯ КОММЕНТАРИЕВ (Google News стиль)
+        // ============================================================
+        function replyComment(name) {
+            const input = document.getElementById('commentText');
+            if (input) {
+                input.value = `@${name} `;
+                input.focus();
+            }
+        }
+
+        function likeComment() {
+            // Просто визуальный фидбек — без сохранения
+            const btn = event.target;
+            btn.textContent = 'Нравится ❤️';
+            setTimeout(() => { btn.textContent = 'Нравится'; }, 1000);
+        }
+
+        // ============================================================
+        //  ЗАКРЫТЬ ДЕТАЛЬНЫЙ ЭКРАН
+        // ============================================================
+        document.getElementById('backBtn').addEventListener('click', function() {
+            document.getElementById('detailScreen').classList.remove('active');
+        });
+
+        // Закрытие по свайпу вниз (для мобилок)
+        let startY = 0;
+        document.getElementById('detailScreen').addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+        });
+        document.getElementById('detailScreen').addEventListener('touchmove', function(e) {
+            const delta = e.touches[0].clientY - startY;
+            if (delta > 80 && this.scrollTop === 0) {
+                this.classList.remove('active');
+            }
+        });
+
+        // ============================================================
+        //  ESCAPE HTML
+        // ============================================================
+        function escapeHtml(str) {
+            if (!str) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(str).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // ============================================================
+        //  ЗАПУСК
+        // ============================================================
+        window.onload = function() {
+            loadNews();
+        };
+    </script>
+
 </body>
 </html>
