@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>Новости</title>
     <style>
-        /* ===== ГЛОБАЛЬНЫЙ СБРОС (НИКАКИХ ТЕНЕЙ, СМАЙЛИКОВ, СКРУГЛЕНИЙ) ===== */
+        /* ===== ГЛОБАЛЬНЫЙ СБРОС ===== */
         * {
             margin: 0;
             padding: 0;
@@ -20,7 +20,6 @@
             margin: 0;
         }
 
-        /* ===== ОБЩИЕ КНОПКИ ===== */
         button {
             background: none;
             border: none;
@@ -28,10 +27,7 @@
             font-family: inherit;
             font-size: 16px;
         }
-
-        button:active {
-            opacity: 0.6;
-        }
+        button:active { opacity: 0.6; }
 
         /* ===== ШАПКА ГЛАВНОГО ЭКРАНА ===== */
         .main-header {
@@ -42,7 +38,6 @@
             top: 0;
             z-index: 10;
         }
-
         .main-header h1 {
             font-size: 20px;
             font-weight: 600;
@@ -59,7 +54,6 @@
             margin: 0;
             padding: 0;
         }
-
         .grid-3 .tile {
             background: #ffffff;
             aspect-ratio: 1 / 1;
@@ -72,7 +66,6 @@
             cursor: pointer;
             border: none;
         }
-
         .grid-3 .tile img {
             width: 100%;
             height: 100%;
@@ -81,7 +74,6 @@
             top: 0;
             left: 0;
         }
-
         .grid-3 .tile .tile-title {
             background: rgba(0, 0, 0, 0.7);
             color: #ffffff;
@@ -92,52 +84,44 @@
             position: relative;
             z-index: 2;
             text-align: left;
-            letter-spacing: 0.2px;
             border: none;
         }
 
-        /* ===== ОСТАЛЬНЫЕ НОВОСТИ (СПИСОК) ===== */
+        /* ===== СПИСОК НОВОСТЕЙ (картинка справа, заголовок слева) ===== */
         .news-list {
             padding: 0;
             margin: 0;
         }
-
         .news-list .list-item {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 14px;
             padding: 12px 16px;
             border-bottom: 1px solid #e5e5e5;
             cursor: pointer;
             background: #ffffff;
         }
-
         .news-list .list-item:active {
             background: #f0f0f0;
         }
-
+        .news-list .list-item .list-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.3;
+            color: #1a1a1a;
+            flex: 1;
+        }
         .news-list .list-item img {
             width: 80px;
             height: 80px;
             object-fit: cover;
             flex-shrink: 0;
             background: #e5e5e5;
+            order: 2; /* Картинка справа */
         }
 
-        .news-list .list-item .list-title {
-            font-size: 16px;
-            font-weight: 500;
-            line-height: 1.3;
-            color: #1a1a1a;
-        }
-
-        .news-list .list-item .list-date {
-            font-size: 12px;
-            color: #777;
-            margin-top: 4px;
-        }
-
-        /* ===== ДЕТАЛЬНЫЙ ЭКРАН (НОВОСТЬ) ===== */
+        /* ===== ДЕТАЛЬНЫЙ ЭКРАН ===== */
         .detail-screen {
             display: none;
             position: fixed;
@@ -151,12 +135,8 @@
             padding: 0;
             margin: 0;
         }
+        .detail-screen.active { display: block; }
 
-        .detail-screen.active {
-            display: block;
-        }
-
-        /* Шапка детального экрана */
         .detail-header {
             display: flex;
             align-items: center;
@@ -168,7 +148,6 @@
             top: 0;
             z-index: 10;
         }
-
         .detail-header .back-btn {
             font-size: 28px;
             font-weight: 300;
@@ -179,7 +158,6 @@
             border: none;
             cursor: pointer;
         }
-
         .detail-header .detail-title {
             font-size: 18px;
             font-weight: 500;
@@ -190,11 +168,9 @@
             text-overflow: ellipsis;
         }
 
-        /* Контент детального экрана */
         .detail-content {
             padding: 16px 20px 40px;
         }
-
         .detail-content .detail-image {
             width: 100%;
             max-height: 300px;
@@ -202,7 +178,6 @@
             margin-bottom: 16px;
             background: #e5e5e5;
         }
-
         .detail-content .detail-headline {
             font-size: 22px;
             font-weight: 600;
@@ -210,7 +185,6 @@
             margin-bottom: 12px;
             color: #1a1a1a;
         }
-
         .detail-content .detail-body {
             font-size: 16px;
             line-height: 1.6;
@@ -218,46 +192,40 @@
             margin-bottom: 20px;
         }
 
-        /* Кнопка лайка */
+        /* ===== КНОПКА ЛАЙКА ===== */
         .like-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             padding: 12px 0;
             border-top: 1px solid #e5e5e5;
             border-bottom: 1px solid #e5e5e5;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
-
         .like-btn {
             font-size: 16px;
             font-weight: 500;
             color: #1a1a1a;
             background: none;
-            border: none;
-            cursor: pointer;
-            padding: 6px 12px;
             border: 1px solid #1a1a1a;
-            min-width: 80px;
+            padding: 6px 16px;
+            min-width: 100px;
             text-align: center;
         }
-
         .like-btn.liked {
             background: #1a1a1a;
             color: #ffffff;
         }
-
         .like-count {
             font-size: 14px;
             color: #555;
         }
 
-        /* ===== КОММЕНТАРИИ (Google News стиль) ===== */
+        /* ===== КОММЕНТАРИИ ===== */
         .comments-section {
             margin-top: 12px;
         }
-
-        .comments-section .comments-title {
+        .comments-title {
             font-size: 14px;
             font-weight: 600;
             color: #1a1a1a;
@@ -269,27 +237,23 @@
             padding: 12px 0;
             border-bottom: 1px solid #f0f0f0;
         }
-
         .comment-item .comment-author {
             font-size: 14px;
             font-weight: 600;
             color: #1a1a1a;
         }
-
         .comment-item .comment-author span {
             font-weight: 400;
             color: #777;
             font-size: 12px;
             margin-left: 8px;
         }
-
         .comment-item .comment-text {
             font-size: 15px;
             color: #222;
             line-height: 1.4;
             margin-top: 4px;
         }
-
         .comment-item .comment-actions {
             display: flex;
             gap: 16px;
@@ -297,7 +261,6 @@
             font-size: 13px;
             color: #555;
         }
-
         .comment-item .comment-actions button {
             background: none;
             border: none;
@@ -306,74 +269,61 @@
             cursor: pointer;
             padding: 0;
         }
-
         .comment-item .comment-actions button:active {
             color: #1a1a1a;
         }
 
-        /* Форма добавления комментария */
+        /* ===== ФОРМА ДОБАВЛЕНИЯ КОММЕНТАРИЯ (раздельно) ===== */
         .add-comment-form {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 16px;
-            padding-top: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
             border-top: 1px solid #e5e5e5;
         }
-
+        .add-comment-form .form-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
         .add-comment-form input {
+            width: 100%;
             padding: 10px 12px;
             border: 1px solid #d0d0d0;
             font-size: 15px;
             font-family: inherit;
             background: #ffffff;
             color: #1a1a1a;
-            width: 100%;
+            margin-bottom: 8px;
         }
-
-        .add-comment-form .comment-row {
-            display: flex;
-            gap: 8px;
+        .add-comment-form input::placeholder {
+            color: #999;
         }
-
-        .add-comment-form .comment-row input:first-child {
-            flex: 0 0 120px;
-        }
-
-        .add-comment-form .comment-row input:last-child {
-            flex: 1;
-        }
-
         .add-comment-form .submit-comment {
-            align-self: flex-end;
-            padding: 8px 20px;
+            padding: 8px 24px;
             background: #1a1a1a;
             color: #ffffff;
             border: none;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
+            margin-top: 4px;
         }
-
         .add-comment-form .submit-comment:active {
             opacity: 0.7;
         }
 
-        /* ===== ЗАГРУЗКА ===== */
+        /* ===== ЗАГРУЗКА / ОШИБКА ===== */
         .loading {
             text-align: center;
             padding: 60px 20px;
             color: #777;
             font-size: 15px;
         }
-
-        /* ===== ОШИБКА ===== */
         .error {
             text-align: center;
             padding: 40px 20px;
             color: #b00020;
         }
-
         .error button {
             margin-top: 12px;
             padding: 8px 24px;
@@ -405,52 +355,38 @@
 <body>
 
     <!-- ============================================================ -->
-    <!--  ГЛАВНЫЙ ЭКРАН                                              -->
+    <!--  ГЛАВНЫЙ ЭКРАН -->
     <!-- ============================================================ -->
     <div id="mainScreen">
         <div class="main-header">
             <h1>Новости</h1>
         </div>
 
-        <!-- 3 плитки (заполняются скриптом) -->
         <div class="grid-3" id="tilesContainer"></div>
-
-        <!-- Список остальных новостей -->
         <div class="news-list" id="listContainer"></div>
     </div>
 
     <!-- ============================================================ -->
-    <!--  ДЕТАЛЬНЫЙ ЭКРАН                                            -->
+    <!--  ДЕТАЛЬНЫЙ ЭКРАН -->
     <!-- ============================================================ -->
     <div class="detail-screen" id="detailScreen">
         <div class="detail-header">
             <button class="back-btn" id="backBtn">←</button>
             <span class="detail-title" id="detailTitle">Новость</span>
         </div>
-
-        <div class="detail-content" id="detailContent">
-            <!-- Заполняется скриптом -->
-        </div>
+        <div class="detail-content" id="detailContent"></div>
     </div>
 
     <!-- ============================================================ -->
-    <!--  СКРИПТ                                                      -->
+    <!--  СКРИПТ -->
     <!-- ============================================================ -->
     <script>
-        // ============================================================
-        //  КОНФИГУРАЦИЯ
-        // ============================================================
         const API_BASE = 'https://script.google.com/macros/s/AKfycbzoUIyPjK6So3sVlM3QCvabCExZLjuqI4Jn_cNlpx_eOjRWbNu-qZYFOw902OjzWKMKFg/exec';
 
-        // ============================================================
-        //  СОСТОЯНИЕ
-        // ============================================================
         let allNews = [];
         let currentNews = null;
 
-        // ============================================================
-        //  ЗАГРУЗКА НОВОСТЕЙ
-        // ============================================================
+        // ===== ЗАГРУЗКА НОВОСТЕЙ =====
         async function loadNews() {
             try {
                 const url = `${API_BASE}?action=getNews`;
@@ -478,63 +414,47 @@
             }
         }
 
-        // ============================================================
-        //  ОТРИСОВКА ГЛАВНОГО ЭКРАНА
-        // ============================================================
+        // ===== ОТРИСОВКА ГЛАВНОГО ЭКРАНА =====
         function renderMainScreen(news) {
-            // ТОП-3 для плиток
             const top3 = news.slice(0, 3);
             const rest = news.slice(3);
 
-            // === ПЛИТКИ ===
+            // Плитки
             let tilesHtml = '';
             for (const item of top3) {
-                const img = item.imageUrl ? item.imageUrl : '';
                 tilesHtml += `
                     <div class="tile" onclick="openDetail(${item.id})">
-                        <img src="${escapeHtml(img)}" alt="" onerror="this.style.display='none'">
+                        <img src="${escapeHtml(item.imageUrl)}" alt="" onerror="this.style.display='none'">
                         <div class="tile-title">${escapeHtml(item.title)}</div>
                     </div>
                 `;
             }
             document.getElementById('tilesContainer').innerHTML = tilesHtml;
 
-            // === СПИСОК ОСТАЛЬНЫХ ===
+            // Список: картинка справа, заголовок слева
             let listHtml = '';
             for (const item of rest) {
-                const img = item.imageUrl ? item.imageUrl : '';
                 listHtml += `
                     <div class="list-item" onclick="openDetail(${item.id})">
-                        <img src="${escapeHtml(img)}" alt="" onerror="this.style.display='none'">
-                        <div>
-                            <div class="list-title">${escapeHtml(item.title)}</div>
-                            <div class="list-date">${escapeHtml(item.date)}</div>
-                        </div>
+                        <div class="list-title">${escapeHtml(item.title)}</div>
+                        <img src="${escapeHtml(item.imageUrl)}" alt="" onerror="this.style.display='none'">
                     </div>
                 `;
             }
             document.getElementById('listContainer').innerHTML = listHtml || '<div style="padding:20px;text-align:center;color:#777;">Это все новости</div>';
         }
 
-        // ============================================================
-        //  ОТКРЫТЬ ДЕТАЛЬНЫЙ ЭКРАН
-        // ============================================================
+        // ===== ОТКРЫТЬ ДЕТАЛЬНЫЙ ЭКРАН =====
         async function openDetail(newsId) {
             const news = allNews.find(n => n.id === newsId);
             if (!news) return;
 
             currentNews = news;
-            const screen = document.getElementById('detailScreen');
-            const title = document.getElementById('detailTitle');
+            document.getElementById('detailTitle').textContent = news.title;
+
             const content = document.getElementById('detailContent');
+            const img = news.imageUrl || '';
 
-            // Заголовок в шапке
-            title.textContent = news.title;
-
-            // === КОНТЕНТ ===
-            const img = news.imageUrl ? news.imageUrl : '';
-
-            // Счетчик лайков (локальный)
             const likes = localStorage.getItem(`likes_${news.id}`) ? parseInt(localStorage.getItem(`likes_${news.id}`), 10) : 0;
 
             content.innerHTML = `
@@ -543,37 +463,29 @@
                 <div class="detail-body">${escapeHtml(news.text)}</div>
 
                 <div class="like-container">
-                    <button class="like-btn" id="likeBtn" onclick="toggleLike()">Лайк</button>
+                    <button class="like-btn" id="likeBtn" onclick="toggleLike()">Поставить лайк новости</button>
                     <span class="like-count" id="likeCount">${likes}</span>
                 </div>
 
-                <div class="comments-section" id="commentsSection">
+                <div class="comments-section">
                     <div class="comments-title">Комментарии</div>
                     <div id="commentsList">Загрузка...</div>
 
                     <div class="add-comment-form">
-                        <div class="comment-row">
-                            <input type="text" id="commentName" placeholder="Имя" value="Аноним">
-                            <input type="text" id="commentText" placeholder="Написать комментарий...">
-                        </div>
+                        <div class="form-title">Хотите оставить мнение?</div>
+                        <input type="text" id="commentName" placeholder="Укажите имя..." value="Аноним">
+                        <input type="text" id="commentText" placeholder="Напишите комментарий...">
                         <button class="submit-comment" onclick="submitComment()">Отправить</button>
                     </div>
                 </div>
             `;
 
-            // Показываем экран
-            screen.classList.add('active');
-
-            // Загружаем комментарии
+            document.getElementById('detailScreen').classList.add('active');
             loadComments(newsId);
-
-            // Обновляем состояние лайка
             updateLikeButton();
         }
 
-        // ============================================================
-        //  ЗАГРУЗКА КОММЕНТАРИЕВ
-        // ============================================================
+        // ===== ЗАГРУЗКА КОММЕНТАРИЕВ =====
         async function loadComments(newsId) {
             const list = document.getElementById('commentsList');
             if (!list) return;
@@ -610,9 +522,7 @@
             }
         }
 
-        // ============================================================
-        //  ДОБАВЛЕНИЕ КОММЕНТАРИЯ
-        // ============================================================
+        // ===== ДОБАВЛЕНИЕ КОММЕНТАРИЯ =====
         async function submitComment() {
             if (!currentNews) return;
             const name = document.getElementById('commentName').value.trim() || 'Аноним';
@@ -645,9 +555,7 @@
             }
         }
 
-        // ============================================================
-        //  ЛАЙК
-        // ============================================================
+        // ===== ЛАЙК =====
         function toggleLike() {
             if (!currentNews) return;
             const key = `likes_${currentNews.id}`;
@@ -664,13 +572,11 @@
             if (!btn || !count) return;
             const val = localStorage.getItem(`likes_${currentNews.id}`) ? parseInt(localStorage.getItem(`likes_${currentNews.id}`), 10) : 0;
             count.textContent = val;
-            btn.textContent = val > 0 ? 'Лайкнут' : 'Лайк';
+            btn.textContent = val > 0 ? 'Вы поставили лайк' : 'Поставить лайк новости';
             btn.classList.toggle('liked', val > 0);
         }
 
-        // ============================================================
-        //  ЗАГЛУШКИ ДЛЯ КОММЕНТАРИЕВ (Google News стиль)
-        // ============================================================
+        // ===== ЗАГЛУШКИ ДЛЯ КОММЕНТАРИЕВ =====
         function replyComment(name) {
             const input = document.getElementById('commentText');
             if (input) {
@@ -680,20 +586,17 @@
         }
 
         function likeComment() {
-            // Просто визуальный фидбек — без сохранения
             const btn = event.target;
-            btn.textContent = 'Нравится ❤️';
+            btn.textContent = 'Нравится';
             setTimeout(() => { btn.textContent = 'Нравится'; }, 1000);
         }
 
-        // ============================================================
-        //  ЗАКРЫТЬ ДЕТАЛЬНЫЙ ЭКРАН
-        // ============================================================
+        // ===== ЗАКРЫТИЕ ДЕТАЛЬНОГО ЭКРАНА =====
         document.getElementById('backBtn').addEventListener('click', function() {
             document.getElementById('detailScreen').classList.remove('active');
         });
 
-        // Закрытие по свайпу вниз (для мобилок)
+        // Свайп вниз
         let startY = 0;
         document.getElementById('detailScreen').addEventListener('touchstart', function(e) {
             startY = e.touches[0].clientY;
@@ -705,9 +608,7 @@
             }
         });
 
-        // ============================================================
-        //  ESCAPE HTML
-        // ============================================================
+        // ===== ESCAPE HTML =====
         function escapeHtml(str) {
             if (!str) return '';
             const map = {
@@ -720,9 +621,7 @@
             return String(str).replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
-        // ============================================================
-        //  ЗАПУСК
-        // ============================================================
+        // ===== ЗАПУСК =====
         window.onload = function() {
             loadNews();
         };
