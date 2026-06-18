@@ -55,7 +55,6 @@
         }
         .refresh-btn:active { opacity: 0.5; }
 
-
         /* ===== ПРЕДУПРЕЖДЕНИЕ О БЕСПИЛОТНИКАХ ===== */
         .drone-alert {
             background: #fff3cd;
@@ -110,7 +109,6 @@
             z-index: 2;
             text-align: left;
             border: none;
-            /* Обрезаем до 2 строк */
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -118,7 +116,7 @@
             text-overflow: ellipsis;
         }
 
-        /* ===== СПИСОК НОВОСТЕЙ ===== */
+        /* ===== СПИСОК НОВОСТЕЙ (картинка справа, ФИКСИРОВАННЫЙ РАЗМЕР) ===== */
         .news-list {
             padding: 0;
             margin: 0;
@@ -406,10 +404,9 @@
         <button class="refresh-btn" id="refreshBtn" title="Обновить новости">⟳</button>
     </div>
 
-
     <!-- ===== ПРЕДУПРЕЖДЕНИЕ О БЕСПИЛОТНИКАХ ===== -->
     <div class="drone-alert" id="droneAlert">
-         <span id="droneText">В Москве атака беспилотников продолжается. Берегите себя!</span>
+        ⚠️ <span id="droneText">В Москве атака беспилотников продолжается. Берегите себя!</span>
     </div>
 
     <!-- ===== КОНТЕЙНЕРЫ ===== -->
@@ -440,40 +437,6 @@
         // ============================================================
         let allNews = [];
         let currentNews = null;
-
-        // ============================================================
-        //  ПОГОДА (wttr.in)
-        // ============================================================
-        async function loadWeather() {
-            const row = document.getElementById('weatherRow');
-            try {
-                const url = 'https://wttr.in/Kirov?format=j1&lang=ru';
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Ошибка погоды');
-                const data = await response.json();
-
-                const days = data.weather.slice(0, 3);
-                const dayNames = ['Сегодня', 'Завтра', 'Послезавтра'];
-
-                let html = '';
-                days.forEach((day, index) => {
-                    const temp = day.avgtempC || '—';
-                    const desc = day.hourly?.[0]?.weatherDesc?.[0]?.value || '';
-                    const icon = day.hourly?.[0]?.weatherIconUrl?.[0]?.value || '';
-                    html += `
-                        <div class="weather-day">
-                            <div class="day-name">${dayNames[index]}</div>
-                            <div class="day-temp">${temp}°</div>
-                            <div class="day-icon">${icon ? `<img src="${icon}" alt="" style="width:32px;height:32px;display:block;margin:0 auto;">` : ''}</div>
-                            <div class="day-desc">${desc}</div>
-                        </div>
-                    `;
-                });
-                row.innerHTML = html;
-            } catch (error) {
-                row.innerHTML = '<div style="color:#777;font-size:13px;">Не удалось загрузить погоду</div>';
-            }
-        }
 
         // ============================================================
         //  НОВОСТИ
@@ -730,7 +693,6 @@
         // ============================================================
         document.getElementById('refreshBtn').addEventListener('click', function() {
             loadNews();
-            loadWeather();
         });
 
         // ============================================================
@@ -751,7 +713,6 @@
         //  ЗАПУСК
         // ============================================================
         window.onload = function() {
-            loadWeather();
             loadNews();
         };
     </script>
