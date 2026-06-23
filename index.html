@@ -787,7 +787,7 @@
         (function initDroneAlert() {
             const alertEl = document.getElementById('droneAlert');
             const textEl = document.getElementById('droneText');
-            if (DRONE_ALERT_ENABLED === 1) {
+            if (DRONE_ALERT_ENABLED === 0) {
                 alertEl.classList.add('active');
                 textEl.textContent = DRONE_ALERT_TEXT;
             } else {
