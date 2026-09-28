@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Черный экран · финальные значения</title>
+  <title>Черный экран · финал</title>
   <style>
     * {
       margin: 0;
@@ -21,68 +21,6 @@
       overflow: hidden;
       font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
       cursor: pointer;
-    }
-
-    .controls {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: rgba(15, 15, 15, 0.95);
-      padding: 12px 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px 24px;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      border-bottom: 1px solid #222;
-      cursor: default;
-      font-size: 13px;
-      color: #eee;
-    }
-
-    .control-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-
-    .control-item label {
-      color: #aaa;
-      font-size: 12px;
-      min-width: 180px;
-    }
-
-    .control-item input[type="range"] {
-      width: 140px;
-      cursor: pointer;
-      accent-color: #fff;
-    }
-
-    .control-item .value {
-      color: #fff;
-      font-variant-numeric: tabular-nums;
-      min-width: 42px;
-      text-align: right;
-      font-size: 12px;
-    }
-
-    .controls button {
-      padding: 6px 14px;
-      font-size: 13px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid #444;
-      background: #1a1a1a;
-      color: #fff;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
-
-    .controls button:hover {
-      background: #2a2a2a;
     }
 
     .bottom-area {
@@ -112,8 +50,7 @@
       padding: 0;
       -webkit-tap-highlight-color: transparent;
       visibility: hidden;
-      align-self: center;
-      transition: transform 0s;
+      transform: translateY(34px);
     }
 
     .side-btn.active {
@@ -143,6 +80,14 @@
       fill: #ffffff;
     }
 
+    #leftBtn {
+      margin-right: 78px;
+    }
+
+    #rightBtn {
+      margin-left: 78px;
+    }
+
     .video-stage {
       position: relative;
       display: flex;
@@ -150,7 +95,6 @@
       justify-content: center;
       pointer-events: none;
       flex-shrink: 0;
-      align-self: center;
       width: 113px;
       height: 113px;
       transform: translateY(7px);
@@ -210,15 +154,6 @@
   </style>
 </head>
 <body>
-  <div class="controls" id="controls">
-    <div class="control-item">
-      <label>Положение иконок ↑↓</label>
-      <input type="range" id="iconOffsetY" min="-300" max="300" value="0" step="1">
-      <span class="value" id="iconOffsetYVal">0</span>
-    </div>
-    <button id="reportBtn" type="button">Выдать значение</button>
-  </div>
-
   <div class="bottom-area" id="bottomArea">
     <button class="side-btn" id="leftBtn" aria-label="toggle-icon">
       <img src="buttons.png" alt="">
@@ -240,15 +175,9 @@
   <script>
     (function() {
       const videoStage = document.getElementById('videoStage');
-      const bottomArea = document.getElementById('bottomArea');
       const leftBtn = document.getElementById('leftBtn');
       const rightBtn = document.getElementById('rightBtn');
       const leftIcon = document.getElementById('leftIcon');
-      const rightIcon = document.getElementById('rightIcon');
-
-      const iconOffsetYInput = document.getElementById('iconOffsetY');
-      const iconOffsetYVal = document.getElementById('iconOffsetYVal');
-      const reportBtn = document.getElementById('reportBtn');
 
       const FIRST_VIDEO = '1790618271.MP4';
       const SECOND_VIDEO = '1790618830.MP4';
@@ -263,23 +192,6 @@
       let videoB = null;
       let activeVideo = null;
       let isActive = false;
-
-      function applySizes() {
-        const offsetY = parseInt(iconOffsetYInput.value, 10);
-        iconOffsetYVal.textContent = offsetY;
-
-        /* Смещаем обе иконки по вертикали относительно их центральной линии */
-        leftBtn.style.transform = 'translateY(' + (-offsetY) + 'px)';
-        rightBtn.style.transform = 'translateY(' + (-offsetY) + 'px)';
-      }
-
-      iconOffsetYInput.addEventListener('input', applySizes);
-      applySizes();
-
-      reportBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        alert('Положение иконок по вертикали: ' + iconOffsetYInput.value + 'px');
-      });
 
       function setIcon(svgEl, path, viewBox) {
         svgEl.setAttribute('viewBox', viewBox);
@@ -426,7 +338,6 @@
       }
 
       document.body.addEventListener('click', function(e) {
-        if (controls.contains(e.target)) return;
         if (leftBtn.contains(e.target) || rightBtn.contains(e.target)) return;
         if (!isActive) {
           startPlayback();
