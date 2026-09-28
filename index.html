@@ -150,9 +150,8 @@
       const activateBtn = document.getElementById('activateBtn');
       const offBtn = document.getElementById('offBtn');
 
-      const BASE_URL = 'https://internalworkspace.peretsbonus.ru/siriext/';
-      const FIRST_VIDEO = BASE_URL + '1790618271.MP4';
-      const SECOND_VIDEO = BASE_URL + '1790618830.MP4';
+      const FIRST_VIDEO = '1790618271.MP4';
+      const SECOND_VIDEO = '1790618830.MP4';
 
       let videoA = null;
       let videoB = null;
@@ -168,7 +167,6 @@
         v.preload = 'auto';
         v.loop = loop;
         v.muted = false;
-        v.crossOrigin = 'anonymous';
         v.disablePictureInPicture = true;
         v.setAttribute('disablePictureInPicture', '');
         v.setAttribute('controlsList', 'nodownload nofullscreen noremoteplayback');
