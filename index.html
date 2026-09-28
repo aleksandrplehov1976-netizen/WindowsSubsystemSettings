@@ -56,7 +56,7 @@
     }
 
     .control-item input[type="range"] {
-      width: 120px;
+      width: 110px;
       cursor: pointer;
       accent-color: #fff;
     }
@@ -67,6 +67,22 @@
       min-width: 42px;
       text-align: right;
       font-size: 12px;
+    }
+
+    .controls button {
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #1a1a1a;
+      color: #fff;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .controls button:hover {
+      background: #2a2a2a;
     }
 
     .bottom-area {
@@ -130,7 +146,6 @@
       pointer-events: none;
       flex-shrink: 0;
       align-self: center;
-      transition: transform 0s;
     }
 
     .video-stage video {
@@ -204,9 +219,14 @@
       <span class="value" id="btnSizeVal">88</span>
     </div>
     <div class="control-item">
-      <label>Размер иконок</label>
-      <input type="range" id="iconSize" min="20" max="400" value="77" step="1">
-      <span class="value" id="iconSizeVal">77</span>
+      <label>Ширина иконок</label>
+      <input type="range" id="iconW" min="20" max="400" value="77" step="1">
+      <span class="value" id="iconWVal">77</span>
+    </div>
+    <div class="control-item">
+      <label>Высота иконок</label>
+      <input type="range" id="iconH" min="20" max="400" value="77" step="1">
+      <span class="value" id="iconHVal">77</span>
     </div>
     <div class="control-item">
       <label>Расстояние</label>
@@ -218,6 +238,7 @@
       <input type="range" id="bottomOffset" min="0" max="400" value="40" step="1">
       <span class="value" id="bottomOffsetVal">40</span>
     </div>
+    <button id="reportBtn" type="button">Выдать значения</button>
   </div>
 
   <div class="bottom-area" id="bottomArea">
@@ -245,20 +266,25 @@
       const leftBtn = document.getElementById('leftBtn');
       const rightBtn = document.getElementById('rightBtn');
       const leftIcon = document.getElementById('leftIcon');
+      const rightIcon = document.getElementById('rightIcon');
 
       const videoSizeInput = document.getElementById('videoSize');
       const videoOffsetYInput = document.getElementById('videoOffsetY');
       const btnSizeInput = document.getElementById('btnSize');
-      const iconSizeInput = document.getElementById('iconSize');
+      const iconWInput = document.getElementById('iconW');
+      const iconHInput = document.getElementById('iconH');
       const gapSizeInput = document.getElementById('gapSize');
       const bottomOffsetInput = document.getElementById('bottomOffset');
 
       const videoSizeVal = document.getElementById('videoSizeVal');
       const videoOffsetYVal = document.getElementById('videoOffsetYVal');
       const btnSizeVal = document.getElementById('btnSizeVal');
-      const iconSizeVal = document.getElementById('iconSizeVal');
+      const iconWVal = document.getElementById('iconWVal');
+      const iconHVal = document.getElementById('iconHVal');
       const gapSizeVal = document.getElementById('gapSizeVal');
       const bottomOffsetVal = document.getElementById('bottomOffsetVal');
+
+      const reportBtn = document.getElementById('reportBtn');
 
       const FIRST_VIDEO = '1790618271.MP4';
       const SECOND_VIDEO = '1790618830.MP4';
@@ -278,20 +304,21 @@
         const vSize = parseInt(videoSizeInput.value, 10);
         const vOffsetY = parseInt(videoOffsetYInput.value, 10);
         const bSize = parseInt(btnSizeInput.value, 10);
-        const iSize = parseInt(iconSizeInput.value, 10);
+        const iW = parseInt(iconWInput.value, 10);
+        const iH = parseInt(iconHInput.value, 10);
         const gap = parseInt(gapSizeInput.value, 10);
         const bottomOff = parseInt(bottomOffsetInput.value, 10);
 
         videoSizeVal.textContent = vSize;
         videoOffsetYVal.textContent = vOffsetY;
         btnSizeVal.textContent = bSize;
-        iconSizeVal.textContent = iSize;
+        iconWVal.textContent = iW;
+        iconHVal.textContent = iH;
         gapSizeVal.textContent = gap;
         bottomOffsetVal.textContent = bottomOff;
 
         videoStage.style.width = vSize + 'px';
         videoStage.style.height = vSize + 'px';
-        /* Смещение видео по вертикали относительно центральной линии кнопок */
         videoStage.style.transform = 'translateY(' + (-vOffsetY) + 'px)';
 
         leftBtn.style.width = bSize + 'px';
@@ -299,10 +326,10 @@
         rightBtn.style.width = bSize + 'px';
         rightBtn.style.height = bSize + 'px';
 
-        leftIcon.style.width = iSize + 'px';
-        leftIcon.style.height = iSize + 'px';
-        rightIcon.style.width = iSize + 'px';
-        rightIcon.style.height = iSize + 'px';
+        leftIcon.style.width = iW + 'px';
+        leftIcon.style.height = iH + 'px';
+        rightIcon.style.width = iW + 'px';
+        rightIcon.style.height = iH + 'px';
 
         leftBtn.style.marginRight = gap + 'px';
         rightBtn.style.marginLeft = gap + 'px';
@@ -313,11 +340,25 @@
       videoSizeInput.addEventListener('input', applySizes);
       videoOffsetYInput.addEventListener('input', applySizes);
       btnSizeInput.addEventListener('input', applySizes);
-      iconSizeInput.addEventListener('input', applySizes);
+      iconWInput.addEventListener('input', applySizes);
+      iconHInput.addEventListener('input', applySizes);
       gapSizeInput.addEventListener('input', applySizes);
       bottomOffsetInput.addEventListener('input', applySizes);
 
       applySizes();
+
+      reportBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const data =
+          'Размер видео: ' + videoSizeInput.value + 'px\n' +
+          'Смещение видео по вертикали: ' + videoOffsetYInput.value + 'px\n' +
+          'Размер текстур кнопок: ' + btnSizeInput.value + 'px\n' +
+          'Ширина иконок: ' + iconWInput.value + 'px\n' +
+          'Высота иконок: ' + iconHInput.value + 'px\n' +
+          'Расстояние от видео до кнопок: ' + gapSizeInput.value + 'px\n' +
+          'Отступ снизу: ' + bottomOffsetInput.value + 'px';
+        alert(data);
+      });
 
       function setIcon(svgEl, path, viewBox) {
         svgEl.setAttribute('viewBox', viewBox);
