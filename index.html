@@ -23,17 +23,16 @@
       cursor: pointer;
     }
 
-    /* Панель управления */
     .controls {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       background: rgba(15, 15, 15, 0.95);
-      padding: 12px 20px;
+      padding: 10px 20px;
       display: flex;
       flex-wrap: wrap;
-      gap: 16px 24px;
+      gap: 12px 22px;
       align-items: center;
       justify-content: center;
       z-index: 100;
@@ -53,11 +52,11 @@
     .control-item label {
       color: #aaa;
       font-size: 12px;
-      min-width: 90px;
+      min-width: 110px;
     }
 
     .control-item input[type="range"] {
-      width: 130px;
+      width: 120px;
       cursor: pointer;
       accent-color: #fff;
     }
@@ -65,12 +64,11 @@
     .control-item .value {
       color: #fff;
       font-variant-numeric: tabular-nums;
-      min-width: 38px;
+      min-width: 42px;
       text-align: right;
       font-size: 12px;
     }
 
-    /* Нижняя область */
     .bottom-area {
       position: absolute;
       left: 50%;
@@ -96,6 +94,7 @@
       padding: 0;
       -webkit-tap-highlight-color: transparent;
       visibility: hidden;
+      align-self: center;
     }
 
     .side-btn.active {
@@ -130,6 +129,8 @@
       justify-content: center;
       pointer-events: none;
       flex-shrink: 0;
+      align-self: center;
+      transition: transform 0s;
     }
 
     .video-stage video {
@@ -193,6 +194,11 @@
       <span class="value" id="videoSizeVal">120</span>
     </div>
     <div class="control-item">
+      <label>Смещение видео ↑↓</label>
+      <input type="range" id="videoOffsetY" min="-200" max="200" value="0" step="1">
+      <span class="value" id="videoOffsetYVal">0</span>
+    </div>
+    <div class="control-item">
       <label>Размер текстур</label>
       <input type="range" id="btnSize" min="40" max="400" value="88" step="1">
       <span class="value" id="btnSizeVal">88</span>
@@ -241,12 +247,14 @@
       const leftIcon = document.getElementById('leftIcon');
 
       const videoSizeInput = document.getElementById('videoSize');
+      const videoOffsetYInput = document.getElementById('videoOffsetY');
       const btnSizeInput = document.getElementById('btnSize');
       const iconSizeInput = document.getElementById('iconSize');
       const gapSizeInput = document.getElementById('gapSize');
       const bottomOffsetInput = document.getElementById('bottomOffset');
 
       const videoSizeVal = document.getElementById('videoSizeVal');
+      const videoOffsetYVal = document.getElementById('videoOffsetYVal');
       const btnSizeVal = document.getElementById('btnSizeVal');
       const iconSizeVal = document.getElementById('iconSizeVal');
       const gapSizeVal = document.getElementById('gapSizeVal');
@@ -266,15 +274,16 @@
       let activeVideo = null;
       let isActive = false;
 
-      /* Применение размеров */
       function applySizes() {
         const vSize = parseInt(videoSizeInput.value, 10);
+        const vOffsetY = parseInt(videoOffsetYInput.value, 10);
         const bSize = parseInt(btnSizeInput.value, 10);
         const iSize = parseInt(iconSizeInput.value, 10);
         const gap = parseInt(gapSizeInput.value, 10);
         const bottomOff = parseInt(bottomOffsetInput.value, 10);
 
         videoSizeVal.textContent = vSize;
+        videoOffsetYVal.textContent = vOffsetY;
         btnSizeVal.textContent = bSize;
         iconSizeVal.textContent = iSize;
         gapSizeVal.textContent = gap;
@@ -282,6 +291,8 @@
 
         videoStage.style.width = vSize + 'px';
         videoStage.style.height = vSize + 'px';
+        /* Смещение видео по вертикали относительно центральной линии кнопок */
+        videoStage.style.transform = 'translateY(' + (-vOffsetY) + 'px)';
 
         leftBtn.style.width = bSize + 'px';
         leftBtn.style.height = bSize + 'px';
@@ -293,7 +304,6 @@
         rightIcon.style.width = iSize + 'px';
         rightIcon.style.height = iSize + 'px';
 
-        /* Расстояние: слева кнопка | gap | видео | gap | правая кнопка */
         leftBtn.style.marginRight = gap + 'px';
         rightBtn.style.marginLeft = gap + 'px';
 
@@ -301,6 +311,7 @@
       }
 
       videoSizeInput.addEventListener('input', applySizes);
+      videoOffsetYInput.addEventListener('input', applySizes);
       btnSizeInput.addEventListener('input', applySizes);
       iconSizeInput.addEventListener('input', applySizes);
       gapSizeInput.addEventListener('input', applySizes);
@@ -308,7 +319,6 @@
 
       applySizes();
 
-      /* Логика видео */
       function setIcon(svgEl, path, viewBox) {
         svgEl.setAttribute('viewBox', viewBox);
         svgEl.innerHTML = '<path d="' + path + '"/>';
