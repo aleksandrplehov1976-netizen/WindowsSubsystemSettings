@@ -1,359 +1,428 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Черный экран · финал</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Папки</title>
+<style>
+:root{--bg1:#fbfbfd;--bg2:#e8e8ee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2b2b30;--bg2:#111113}}
+:root[data-theme="dark"]{--bg1:#2b2b30;--bg2:#111113}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg2);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
+body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-family:-apple-system,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif}
+#sa{position:fixed;visibility:hidden;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+/* Сцена плоская: порядок папок определяет только z-index, глубину слоёв браузер не сортирует */
+#stage{position:fixed;inset:0;perspective-origin:50% 38%}
+.b,.c{position:absolute;left:50%;top:0;will-change:transform}
+.tab,.bb,.sheet,.c{position:absolute}
+.tab{left:calc(var(--u)*9);top:0;width:calc(var(--u)*362);height:calc(var(--u)*74);border-radius:calc(var(--u)*40) calc(var(--u)*37) 0 0}
+.bb{left:calc(var(--u)*9);right:calc(var(--u)*9);top:calc(var(--u)*37);border-radius:0 calc(var(--u)*32) calc(var(--u)*26) calc(var(--u)*26)}
+.tl{position:absolute;left:calc(var(--u)*34);top:5px;font-size:12px;font-weight:600;letter-spacing:.01em;opacity:0}
+.sheet{left:calc(var(--u)*22);right:calc(var(--u)*22);top:calc(var(--u)*74);border-radius:12px 12px 14px 14px;overflow:auto;box-sizing:border-box;padding:24px 22px 40px;color:#3a3a3c;background:#fffefd;box-shadow:inset 0 10px 14px -10px rgba(0,0,0,.16);-webkit-overflow-scrolling:touch}
+.sheet h2{margin:0 0 4px;font-size:32px;font-weight:600;letter-spacing:-.6px}
+.sheet small{display:block;margin-bottom:16px;opacity:.5;font-size:13px}
+.sheet p{margin:0 0 14px;font-size:16px;line-height:1.5}
+/* Обложка: один плоский слой, шарнир по нижней кромке, изнанка скрыта */
+.c{top:calc(var(--u)*60);transform-origin:50% 100%;border-radius:calc(var(--u)*32) calc(var(--u)*32) calc(var(--u)*26) calc(var(--u)*26);box-shadow:0 -3px 16px rgba(0,0,0,.13);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.label{position:absolute;left:calc(var(--u)*40);top:calc(var(--u)*30);line-height:1;font-weight:400;letter-spacing:-.02em;white-space:nowrap}
+.sh{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to bottom,rgba(0,0,0,.5),rgba(0,0,0,.05));opacity:0;pointer-events:none}
+#strip{position:fixed;left:0;right:0;bottom:0;height:150px;z-index:99;display:none;touch-action:none}
 
-    html, body {
-      width: 100%;
-      height: 100%;
-    }
+/* ===== Редактор стикеров ===== */
+#editor{
+  position:fixed;inset:0;z-index:200;display:none;
+  background:rgba(0,0,0,.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  pointer-events:none;
+}
+#editor.on{display:block}
+#editor .topbar{
+  position:absolute;left:0;right:0;top:0;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 18px 14px;gap:12px;
+  color:#fff;font-size:15px;font-weight:600;
+  background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,0));
+  pointer-events:auto;
+}
+#editor .topbar button{
+  border:0;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;
+  background:rgba(255,255,255,.92);color:#111;
+}
+#editor .topbar button.ghost{background:rgba(255,255,255,.18);color:#fff}
+#canvas{
+  position:absolute;inset:0;pointer-events:none;
+}
+#canvas.on{pointer-events:auto}
+.st{
+  position:absolute;left:0;top:0;transform-origin:50% 50%;
+  pointer-events:auto;touch-action:none;will-change:transform;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.22));
+}
+.st img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none}
+.st .grip{
+  position:absolute;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:2px solid #111;box-shadow:0 2px 6px rgba(0,0,0,.25);
+  opacity:0;transition:opacity .15s;
+}
+.st.sel .grip{opacity:1}
+.st .grip.rot{left:50%;top:-30px;transform:translateX(-50%);cursor:grab}
+.st .grip.sz{right:-12px;bottom:-12px;cursor:nwse-resize}
+.st .del{
+  position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);
+  background:#ff3b30;color:#fff;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;
+  opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;
+}
+.st.sel .del{opacity:1;pointer-events:auto}
 
-    body {
-      background: #000;
-      overflow: hidden;
-      font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-      cursor: pointer;
-    }
-
-    .bottom-area {
-      position: absolute;
-      left: 50%;
-      bottom: 35px;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .side-btn {
-      width: 46px;
-      height: 46px;
-      flex-shrink: 0;
-      pointer-events: auto;
-      cursor: pointer;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: none;
-      border: none;
-      outline: none;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-      visibility: hidden;
-      transform: translateY(34px);
-    }
-
-    .side-btn.active {
-      visibility: visible;
-    }
-
-    .side-btn img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: fill;
-      display: block;
-      user-select: none;
-      -webkit-user-drag: none;
-      pointer-events: none;
-    }
-
-    .side-btn svg {
-      position: relative;
-      width: 22px;
-      height: 77px;
-      display: block;
-      pointer-events: none;
-      z-index: 2;
-      fill: #ffffff;
-    }
-
-    #leftBtn {
-      margin-right: 78px;
-    }
-
-    #rightBtn {
-      margin-left: 78px;
-    }
-
-    .video-stage {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      flex-shrink: 0;
-      width: 113px;
-      height: 113px;
-      transform: translateY(7px);
-    }
-
-    .video-stage video {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: block;
-      object-fit: contain;
-      background: transparent;
-      pointer-events: none;
-      border: none;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-      box-shadow: none;
-      opacity: 0;
-      visibility: hidden;
-      width: 100%;
-      height: 100%;
-    }
-
-    .video-stage video.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .video-stage video.fade-in {
-      visibility: visible;
-      opacity: 0;
-      transition: opacity 1.7s ease;
-    }
-
-    .video-stage video.fade-in-active {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .video-stage video.fade-out {
-      visibility: visible;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    button {
-      background: transparent;
-      border: none;
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    button:focus-visible {
-      outline: none;
-    }
-  </style>
+#shelf{
+  position:absolute;left:0;right:0;bottom:0;
+  height:220px;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 14px);
+  background:rgba(20,20,22,.82);color:#fff;
+  display:flex;flex-direction:column;gap:10px;
+  pointer-events:auto;
+  border-top-left-radius:22px;border-top-right-radius:22px;
+  box-shadow:0 -10px 30px rgba(0,0,0,.35);
+}
+#shelf .row{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:4px 2px;scrollbar-width:none}
+#shelf .row::-webkit-scrollbar{display:none}
+#shelf .pick{
+  flex:0 0 auto;width:96px;height:96px;border-radius:14px;background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:transform .12s, background .12s;
+}
+#shelf .pick:active{transform:scale(.94);background:rgba(255,255,255,.16)}
+#shelf .pick img{max-width:78px;max-height:78px;object-fit:contain;pointer-events:none}
+#shelf .hint{font-size:12px;opacity:.7;padding:0 4px}
+</style>
 </head>
 <body>
-  <div class="bottom-area" id="bottomArea">
-    <button class="side-btn" id="leftBtn" aria-label="toggle-icon">
-      <img src="buttons.png" alt="">
-      <svg id="leftIcon" xmlns="http://www.w3.org/2000/svg" viewBox="305 -1603 2232 1764" width="22" height="77" fill="#ffffff">
-        <path d="M1383 161C1449 161 1496 114 1496 49V-1485C1496 -1550 1449 -1603 1381 -1603C1334 -1603 1303 -1582 1252 -1534L825 -1134C819 -1128 810 -1125 800 -1125H514C378 -1125 305 -1050 305 -906V-534C305 -389 378 -315 514 -315H800C810 -315 819 -312 825 -306L1252 98C1297 142 1336 161 1383 161ZM2224 -35C2261 -10 2307 -19 2334 -57C2462 -233 2537 -475 2537 -722C2537 -969 2463 -1213 2334 -1387C2307 -1425 2261 -1434 2224 -1409C2187 -1384 2181 -1337 2210 -1296C2319 -1142 2382 -935 2382 -722C2382 -509 2317 -304 2210 -148C2182 -107 2187 -60 2224 -35ZM1854 -296C1887 -273 1934 -280 1961 -319C2038 -420 2084 -569 2084 -722C2084 -875 2038 -1023 1961 -1125C1934 -1164 1887 -1172 1854 -1148C1813 -1120 1807 -1070 1838 -1029C1896 -949 1929 -838 1929 -722C1929 -606 1895 -496 1838 -415C1808 -373 1813 -325 1854 -296Z"/>
-      </svg>
-    </button>
+<div id="sa"></div><div id="stage"></div><div id="strip"></div>
 
-    <div class="video-stage" id="videoStage"></div>
-
-    <button class="side-btn" id="rightBtn" aria-label="close">
-      <img src="buttons.png" alt="">
-      <svg id="rightIcon" xmlns="http://www.w3.org/2000/svg" viewBox="255 -1512 2517 1580" width="22" height="77" fill="#ffffff">
-        <path d="M569 68H2458C2666 68 2772 -36 2772 -242V-1203C2772 -1408 2666 -1512 2458 -1512H569C359 -1512 255 -1409 255 -1203V-242C255 -36 359 68 569 68ZM571 -93C471 -93 416 -147 416 -251V-1194C416 -1298 471 -1351 571 -1351H2455C2554 -1351 2611 -1298 2611 -1194V-251C2611 -147 2554 -93 2455 -93ZM661 -955H753C781 -955 798 -972 798 -999V-1091C798 -1119 781 -1136 753 -1136H661C634 -1136 617 -1119 617 -1091V-999C617 -972 634 -955 661 -955ZM983 -955H1075C1102 -955 1119 -972 1119 -999V-1091C1119 -1119 1102 -1136 1075 -1136H983C955 -1136 938 -1119 938 -1091V-999C938 -972 955 -955 983 -955ZM1305 -955H1396C1424 -955 1441 -972 1441 -999V-1091C1441 -1119 1424 -1136 1396 -1136H1305C1277 -1136 1260 -1119 1260 -1091V-999C1260 -972 1277 -955 1305 -955ZM1626 -955H1718C1746 -955 1763 -972 1763 -999V-1091C1763 -1119 1746 -1136 1718 -1136H1626C1599 -1136 1582 -1119 1582 -1091V-999C1582 -972 1599 -955 1626 -955ZM1948 -955H2040C2067 -955 2084 -972 2084 -999V-1091C2084 -1119 2067 -1136 2040 -1136H1948C1920 -1136 1903 -1119 1903 -1091V-999C1903 -972 1920 -955 1948 -955ZM2270 -955H2361C2389 -955 2406 -972 2406 -999V-1091C2406 -1119 2389 -1136 2361 -1136H2270C2242 -1136 2225 -1119 2225 -1091V-999C2225 -972 2242 -955 2270 -955ZM661 -633H753C781 -633 798 -650 798 -678V-769C798 -797 781 -814 753 -814H661C634 -814 617 -797 617 -769V-678C617 -650 634 -633 661 -633ZM983 -633H1075C1102 -633 1119 -650 1119 -678V-769C1119 -797 1102 -814 1075 -814H983C955 -814 938 -797 938 -769V-678C938 -650 955 -633 983 -633ZM1305 -633H1396C1424 -633 1441 -650 1441 -678V-769C1441 -797 1424 -814 1396 -814H1305C1277 -814 1260 -797 1260 -769V-678C1260 -650 1277 -633 1305 -633ZM1626 -633H1718C1746 -633 1763 -650 1763 -678V-769C1763 -797 1746 -814 1718 -814H1626C1599 -814 1582 -797 1582 -769V-678C1582 -650 1599 -633 1626 -633ZM1948 -633H2040C2067 -633 2084 -650 2084 -678V-769C2084 -797 2067 -814 2040 -814H1948C1920 -814 1903 -797 1903 -769V-678C1903 -650 1920 -633 1948 -633ZM2270 -633H2361C2389 -633 2406 -650 2406 -678V-769C2406 -797 2389 -814 2361 -814H2270C2242 -814 2225 -797 2225 -769V-678C2225 -650 2242 -633 2270 -633ZM661 -311H753C781 -311 798 -328 798 -356V-448C798 -475 781 -492 753 -492H661C634 -492 617 -475 617 -448V-356C617 -328 634 -311 661 -311ZM993 -311H2030C2064 -311 2084 -331 2084 -366V-438C2084 -472 2064 -492 2030 -492H993C958 -492 938 -472 938 -438V-366C938 -331 958 -311 993 -311ZM2270 -311H2361C2389 -311 2406 -328 2406 -356V-448C2406 -475 2389 -492 2361 -492H2270C2242 -492 2225 -475 2225 -448V-356C2225 -328 2242 -311 2270 -311Z"/>
-      </svg>
-    </button>
+<div id="editor">
+  <div class="topbar">
+    <button class="ghost" id="btn-cancel">Отмена</button>
+    <span id="editor-title">Стикеры</span>
+    <button id="btn-save">Готово</button>
   </div>
+  <div id="canvas"></div>
+  <div id="shelf">
+    <div class="hint">Тапни стикер — он появится на папке. Тащи, крути, меняй размер.</div>
+    <div class="row" id="shelf-row"></div>
+  </div>
+</div>
 
-  <script>
-    (function() {
-      const videoStage = document.getElementById('videoStage');
-      const leftBtn = document.getElementById('leftBtn');
-      const rightBtn = document.getElementById('rightBtn');
-      const leftIcon = document.getElementById('leftIcon');
+<script>
+/* ===== Стикеры. Поменяй пути, если папка называется иначе ===== */
+const STICKERS = [
+  "./src/sticker1.png", "./src/sticker2.png", "./src/sticker3.png",
+  "./src/sticker4.png", "./src/sticker5.png", "./src/sticker6.png",
+  "./src/sticker7.png", "./src/sticker8.png", "./src/sticker9.png",
+  "./src/sticker10.png", "./src/sticker11.png"
+];
 
-      const FIRST_VIDEO = '1790618271.MP4';
-      const SECOND_VIDEO = '1790618830.MP4';
+const DATA=[
+ {t:"A1",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
+ {t:"A2",b:"#A18594",f:"#AD94A1",c:"#fff"},
+ {t:"B1",b:"#FF9BAA",f:"#FFA9B6",c:"#fff"},
+ {t:"B2",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
+ {t:"Носитель (C)",b:"#FFF0F5",f:"#FFF5F8",c:"#555"}
+];
+const LOREM="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+const stage=document.getElementById("stage"),strip=document.getElementById("strip"),sa=document.getElementById("sa");
+const clamp=(v,a,b)=>v<a?a:v>b?b:v, n=DATA.length;
+let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
+const s={p:0,v:0,t:0};
 
-      const ICON_PLAY = 'M1383 161C1449 161 1496 114 1496 49V-1485C1496 -1550 1449 -1603 1381 -1603C1334 -1603 1303 -1582 1252 -1534L825 -1134C819 -1128 810 -1125 800 -1125H514C378 -1125 305 -1050 305 -906V-534C305 -389 378 -315 514 -315H800C810 -315 819 -312 825 -306L1252 98C1297 142 1336 161 1383 161ZM2224 -35C2261 -10 2307 -19 2334 -57C2462 -233 2537 -475 2537 -722C2537 -969 2463 -1213 2334 -1387C2307 -1425 2261 -1434 2224 -1409C2187 -1384 2181 -1337 2210 -1296C2319 -1142 2382 -935 2382 -722C2382 -509 2317 -304 2210 -148C2182 -107 2187 -60 2224 -35ZM1854 -296C1887 -273 1934 -280 1961 -319C2038 -420 2084 -569 2084 -722C2084 -875 2038 -1023 1961 -1125C1934 -1164 1887 -1172 1854 -1148C1813 -1120 1807 -1070 1838 -1029C1896 -949 1929 -838 1929 -722C1929 -606 1895 -496 1838 -415C1808 -373 1813 -325 1854 -296Z';
-      const ICON_PLAY_VIEWBOX = '305 -1603 2232 1764';
+/* ===== Хранилище стикеров: { folderIndex: [ {id,src,x,y,rot,scale}, ... ] } ===== */
+const STORE_KEY = "stickers_v1";
+let stickerStore = loadStore();
+function loadStore(){ try{return JSON.parse(localStorage.getItem(STORE_KEY))||{}}catch(e){return{}} }
+function saveStore(){ try{localStorage.setItem(STORE_KEY, JSON.stringify(stickerStore))}catch(e){} }
 
-      const ICON_STOP = 'M1496 -461V-1485C1496 -1550 1449 -1603 1381 -1603C1334 -1603 1303 -1582 1251 -1534L849 -1161C844 -1157 838 -1153 832 -1153H802ZM1841 266C1871 296 1921 296 1950 266C1980 235 1980 187 1950 157L238 -1555C208 -1585 158 -1585 128 -1555C98 -1526 98 -1475 128 -1446ZM509 -315H794C804 -315 812 -312 819 -306L1251 98C1298 142 1336 161 1382 161C1434 161 1473 135 1489 78L349 -1061C320 -1028 305 -978 305 -911V-528C305 -383 373 -315 509 -315Z';
-      const ICON_STOP_VIEWBOX = '106 -1603 1866 1891';
+/* ===== Папки (без изменений в логике) ===== */
+const els=DATA.map((d,i)=>{
+  const b=document.createElement("div");b.className="b";b.style.zIndex=2*i;
+  b.innerHTML=`<div class="bb" style="background:${d.b}"></div><div class="tab" style="background:${d.b}"><span class="tl" style="color:${d.c}">${d.t}</span></div>`+
+    `<div class="sheet"><h2>${d.t}</h2><small>Заметки · обновлено сегодня</small><p>${LOREM}</p><p>${LOREM}</p><p>${LOREM}</p></div>`;
+  const c=document.createElement("div");c.className="c";c.style.zIndex=2*i+1;c.style.background=d.f;
+  c.innerHTML=`<span class="label" style="color:${d.c}">${d.t}</span><i class="sh"></i>`;
+  stage.append(b,c);
+  const e={b,c,bb:b.querySelector(".bb"),tab:b.querySelector(".tab"),tl:b.querySelector(".tl"),sheet:b.querySelector(".sheet"),label:c.querySelector(".label"),sh:c.querySelector(".sh")};
+  const tap=()=>{if(o<0)open(i)};
+  c.addEventListener("click",tap);e.tab.addEventListener("click",()=>{o<0?open(i):(o===i&&s.p>.9&&close())});
+  /* Long-press на обложке — редактор стикеров */
+  attachLongPress(c, ()=>openStickerEditor(i));
+  attachLongPress(e.tab, ()=>openStickerEditor(i));
+  return e;
+});
 
-      let videoA = null;
-      let videoB = null;
-      let activeVideo = null;
-      let isActive = false;
+function attachLongPress(el, fn){
+  let t=null, sx=0, sy=0, fired=false;
+  const start=(x,y)=>{fired=false;sx=x;sy=y;clearTimeout(t);t=setTimeout(()=>{fired=true;fn()},450)};
+  const move=(x,y)=>{if(!t)return;if(Math.hypot(x-sx,y-sy)>10){clearTimeout(t);t=null}};
+  const end=()=>{clearTimeout(t);t=null};
+  el.addEventListener("pointerdown",e=>{if(e.button&&e.button!==0)return;start(e.clientX,e.clientY)});
+  el.addEventListener("pointermove",e=>move(e.clientX,e.clientY));
+  el.addEventListener("pointerup",end);
+  el.addEventListener("pointercancel",end);
+  el.addEventListener("pointerleave",end);
+  el.addEventListener("contextmenu",e=>{if(fired){e.preventDefault();fired=false}});
+}
 
-      function setIcon(svgEl, path, viewBox) {
-        svgEl.setAttribute('viewBox', viewBox);
-        svgEl.innerHTML = '<path d="' + path + '"/>';
+function layout(){
+  H=innerHeight;const cs=getComputedStyle(sa);
+  top0=(parseFloat(cs.paddingTop)||0)+20;sab=parseFloat(cs.paddingBottom)||0;
+  W=Math.min(innerWidth-32,460);u=W/725;
+  stage.style.setProperty("--u",u+"px");stage.style.perspective="2400px";
+  base=H-sab-132;
+  Hb=base-top0;
+  step=Math.min(204*u,(H-sab-top0-60*u-200)/4);
+  ys=DATA.map((_,i)=>top0+i*step);
+  els.forEach(e=>{
+    for(const el of [e.b,e.c]){el.style.width=W+"px";el.style.marginLeft=(-W/2)+"px"}
+    e.b.style.height=Hb+"px";
+    e.bb.style.height=(Hb-37*u)+"px";
+    e.c.style.height=(Hb-60*u)+"px";
+    e.sheet.style.height=(Hb-74*u-18)+"px";
+    e.label.style.fontSize=Math.min(96*u,step*.48)+"px";
+  });
+  render();
+  if(editorFolder>=0) layoutCanvas();
+}
+
+function render(){
+  const p=s.p;
+  els.forEach((e,i)=>{
+    let ty=0,z=0,rx=0,q=0,shade=0;
+    if(o>=0){
+      if(i===o){
+        ty=(top0-ys[i])*p;
+        z=56*clamp(p,0,1);
+        const t=clamp((p-.1)/.62,0,1);
+        const ant=3.5*Math.sin(Math.PI*clamp(p/.12,0,1));
+        const th=84*t*t;
+        rx=ant-th;shade=.38*Math.sin(th*Math.PI/180);
+      }else{
+        const r=i<o?i:i-1,d=.045*(n-1-i);
+        q=clamp((p-d)/(.8-d),0,1.02);
+        ty=(base+10+r*22-ys[i])*q;
       }
+    }
+    const T=`translate3d(0,${(ys[i]+ty).toFixed(2)}px,${z.toFixed(2)}px)`;
+    e.b.style.transform=T;
+    e.c.style.transform=T+(rx?` rotateX(${rx.toFixed(2)}deg)`:"");
+    e.sh.style.opacity=shade.toFixed(3);
+    const qc=clamp(q,0,1);
+    e.tl.style.opacity=qc;
+    e.label.style.opacity=1-clamp(qc*3,0,1);
+  });
+  strip.style.display=(o>=0&&p>.6)?"block":"none";
+}
 
-      function createVideo(src, loop) {
-        const v = document.createElement('video');
-        v.src = src;
-        v.controls = false;
-        v.autoplay = false;
-        v.playsInline = true;
-        v.preload = 'auto';
-        v.loop = loop;
-        v.muted = false;
-        v.disablePictureInPicture = true;
-        v.setAttribute('disablePictureInPicture', '');
-        v.setAttribute('controlsList', 'nodownload nofullscreen noremoteplayback');
-        return v;
-      }
+let last=0,raf=0;
+function loop(t){
+  let dt=Math.min(.033,((t-last)/1000)||.016);last=t;
+  const k=105,c=18.5;
+  s.v+=(k*(s.t-s.p)-c*s.v)*dt;s.p+=s.v*dt;
+  if(Math.abs(s.v)<.002&&Math.abs(s.t-s.p)<.0008){s.p=s.t;s.v=0;if(s.t===0)o=-1;render();raf=0;return}
+  render();raf=requestAnimationFrame(loop);
+}
+function go(){if(!raf){last=performance.now();raf=requestAnimationFrame(loop)}}
+function open(i){if(o>=0)return;o=i;s.t=1;go()}
+function close(){if(o<0)return;s.t=0;go()}
 
-      function init() {
-        if (videoA) return;
+let sy=0,done=false;
+strip.addEventListener("pointerdown",e=>{strip.setPointerCapture(e.pointerId);sy=e.clientY;done=false});
+strip.addEventListener("pointermove",e=>{if(!done&&sy-e.clientY>14){done=true;close()}});
+strip.addEventListener("pointerup",()=>{if(!done){done=true;close()}});
 
-        videoA = createVideo(FIRST_VIDEO, false);
-        videoB = createVideo(SECOND_VIDEO, true);
+addEventListener("resize",layout);
 
-        videoStage.appendChild(videoA);
-        videoStage.appendChild(videoB);
+/* ============================================================
+   ==================  РЕДАКТОР СТИКЕРОВ  =====================
+   ============================================================ */
 
-        videoA.addEventListener('ended', onFirstEnded);
-      }
+const editor = document.getElementById("editor");
+const canvas = document.getElementById("canvas");
+const shelfRow = document.getElementById("shelf-row");
+const editorTitle = document.getElementById("editor-title");
+let editorFolder = -1;            // индекс папки, которую редактируем
+let editing = [];                 // рабочие копии стикеров текущей папки
+let selectedId = null;
+let idSeq = 1;
+const uid = () => "s" + (Date.now().toString(36)) + (idSeq++);
 
-      function safePlay(v) {
-        const p = v.play();
-        if (p !== undefined) {
-          p.catch(() => {
-            v.muted = true;
-            v.play().catch(() => {});
-          });
-        }
-      }
+/* Наполняем полку стикеров */
+STICKERS.forEach(src=>{
+  const d = document.createElement("div");
+  d.className = "pick";
+  const img = document.createElement("img");
+  img.src = src; img.alt = "";
+  img.onerror = ()=>{ d.style.opacity=.25; d.title="Файл не найден: "+src; };
+  d.appendChild(img);
+  d.addEventListener("click", ()=> addSticker(src));
+  shelfRow.appendChild(d);
+});
 
-      function updateButtons() {
-        if (isActive) {
-          leftBtn.classList.add('active');
-          rightBtn.classList.add('active');
-        } else {
-          leftBtn.classList.remove('active');
-          rightBtn.classList.remove('active');
-        }
-      }
+function openStickerEditor(idx){
+  /* Если папка ещё не открыта анимацией — открываем её, но редактор поверх */
+  if(o<0) open(idx);
+  editorFolder = idx;
+  editing = JSON.parse(JSON.stringify(stickerStore[idx] || []));
+  selectedId = null;
+  editorTitle.textContent = "Стикеры · " + DATA[idx].t;
+  editor.classList.add("on");
+  canvas.classList.add("on");
+  document.getElementById("strip").style.display = "none"; // не мешает
+  layoutCanvas();
+  renderStickers();
+}
 
-      function startPlayback() {
-        init();
+function closeStickerEditor(save){
+  if(editorFolder<0) return;
+  if(save){
+    stickerStore[editorFolder] = editing;
+    saveStore();
+  }
+  editor.classList.remove("on");
+  canvas.classList.remove("on");
+  canvas.innerHTML = "";
+  editorFolder = -1;
+  editing = []; selectedId = null;
+}
 
-        isActive = true;
+document.getElementById("btn-cancel").addEventListener("click", ()=>closeStickerEditor(false));
+document.getElementById("btn-save").addEventListener("click", ()=>closeStickerEditor(true));
 
-        videoA.pause();
-        videoB.pause();
+/* Холст = прямоугольник открытой папки (обложки) с учётом открытого состояния.
+   Считаем в координатах окна, чтобы стикеры совпадали с папкой. */
+function layoutCanvas(){
+  /* Папка открыта (o=editorFolder, s.p ~ 1). Её итоговая позиция:
+     top = ys[idx] + (top0 - ys[idx])*1 = top0
+     height = Hb - 60u  (это .c) */
+  const idx = editorFolder;
+  if(idx<0) return;
+  const cH = Hb - 60*u;
+  canvas.style.left = ((innerWidth - W)/2) + "px";
+  canvas.style.top = top0 + "px";
+  canvas.style.width = W + "px";
+  canvas.style.height = cH + "px";
+}
 
-        videoA.currentTime = 0;
-        videoB.currentTime = 0;
+/* --- Рендер рабочих стикеров --- */
+function renderStickers(){
+  canvas.innerHTML = "";
+  editing.forEach(st=>{
+    const el = document.createElement("div");
+    el.className = "st" + (st.id===selectedId ? " sel" : "");
+    el.dataset.id = st.id;
+    el.style.width = "90px";
+    el.style.height = "90px";
+    el.style.transform = `translate(${st.x}px, ${st.y}px) rotate(${st.rot}deg) scale(${st.scale})`;
+    el.innerHTML = `
+      <img src="${st.src}" alt="">
+      <div class="grip rot" data-grip="rot"></div>
+      <div class="grip sz" data-grip="sz"></div>
+      <div class="del">Удалить</div>`;
+    canvas.appendChild(el);
+    attachStickerHandlers(el, st);
+  });
+}
 
-        videoA.className = '';
-        videoB.className = '';
+function addSticker(src){
+  /* Ставим по центру папки со случайным небольшим поворотом */
+  const cx = parseFloat(canvas.style.width)/2 - 45;
+  const cy = parseFloat(canvas.style.height)/2 - 45;
+  const st = {
+    id: uid(),
+    src,
+    x: cx + (Math.random()*40-20),
+    y: cy + (Math.random()*40-20),
+    rot: Math.random()*20-10,
+    scale: 1
+  };
+  editing.push(st);
+  selectedId = st.id;
+  renderStickers();
+  /* Автосохранение каждый раз при изменении — надёжнее */
+  stickerStore[editorFolder] = editing; saveStore();
+}
 
-        videoA.classList.add('fade-in');
-        videoB.classList.remove('fade-in', 'fade-in-active', 'visible', 'fade-out');
+/* --- Жесты на стикере --- */
+function attachStickerHandlers(el, st){
+  let mode = null;        // "move" | "rot" | "sz"
+  let start = null;
+  const rectOfCanvas = ()=>canvas.getBoundingClientRect();
 
-        activeVideo = videoA;
+  el.addEventListener("pointerdown", e=>{
+    if(e.target.classList.contains("del")){
+      e.stopPropagation();
+      editing = editing.filter(x=>x.id!==st.id);
+      stickerStore[editorFolder] = editing; saveStore();
+      renderStickers();
+      return;
+    }
+    selectedId = st.id;
+    renderStickers();  // перерисовать выделение (просто и надёжно)
+    /* Найти заново наш el после перерисовки */
+    const fresh = canvas.querySelector(`.st[data-id="${st.id}"]`);
+    if(!fresh) return;
+    const grip = e.target.closest(".grip");
+    mode = grip ? grip.dataset.grip : "move";
+    start = {
+      x: e.clientX, y: e.clientY,
+      stx: st.x, sty: st.y, srot: st.rot, sscale: st.scale
+    };
+    fresh.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
 
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            videoA.classList.add('fade-in-active');
-          });
-        });
+  el.addEventListener("pointermove", e=>{
+    if(!mode) return;
+    const cr = rectOfCanvas();
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if(mode==="move"){
+      st.x = start.stx + dx;
+      st.y = start.sty + dy;
+    } else if(mode==="rot"){
+      const box = el.getBoundingClientRect();
+      const cx = cr.left + (st.x + 45);   // центр стикера (90/2=45) в координатах страницы
+      const cy = cr.top  + (st.y + 45);
+      const ang = Math.atan2(e.clientY - cy, e.clientX - cx) * 180/Math.PI + 90;
+      st.rot = ang;
+    } else if(mode==="sz"){
+      const d = (dx - dy) / 2;
+      st.scale = clamp(start.sscale + d/70, 0.3, 4);
+    }
+    const fresh = canvas.querySelector(`.st[data-id="${st.id}"]`);
+    if(fresh) fresh.style.transform = `translate(${st.x}px, ${st.y}px) rotate(${st.rot}deg) scale(${st.scale})`;
+  });
 
-        safePlay(videoA);
+  const finish = ()=>{
+    if(!mode) return;
+    mode = null;
+    stickerStore[editorFolder] = editing; saveStore();
+  };
+  el.addEventListener("pointerup", finish);
+  el.addEventListener("pointercancel", finish);
+  el.addEventListener("pointerleave", finish);
+  el.addEventListener("dblclick", e=>{
+    e.stopPropagation();
+    editing = editing.filter(x=>x.id!==st.id);
+    stickerStore[editorFolder] = editing; saveStore();
+    renderStickers();
+  });
+}
 
-        videoB.preload = 'auto';
-        if (videoB.readyState < 3) {
-          videoB.load();
-        }
+/* Тап по пустому месту холста — снять выделение */
+canvas.addEventListener("pointerdown", e=>{
+  if(e.target===canvas){ selectedId=null; renderStickers(); }
+});
 
-        setIcon(leftIcon, ICON_PLAY, ICON_PLAY_VIEWBOX);
+/* ===== Инициализация ===== */
+layout();
 
-        updateButtons();
-      }
-
-      function onFirstEnded() {
-        if (!isActive) return;
-
-        videoB.currentTime = 0;
-        safePlay(videoB);
-
-        videoA.className = '';
-        videoA.style.visibility = 'hidden';
-        videoA.style.opacity = '0';
-
-        videoB.className = '';
-        videoB.classList.add('visible');
-
-        activeVideo = videoB;
-      }
-
-      function stopAll() {
-        if (!isActive && !activeVideo) return;
-
-        isActive = false;
-
-        const target = activeVideo;
-
-        videoA.pause();
-        videoB.pause();
-
-        if (target) {
-          target.className = '';
-          target.classList.add('fade-out');
-        }
-
-        setTimeout(() => {
-          videoA.className = '';
-          videoB.className = '';
-          videoA.style.visibility = 'hidden';
-          videoA.style.opacity = '0';
-          videoB.style.visibility = 'hidden';
-          videoB.style.opacity = '0';
-          activeVideo = null;
-        }, 500);
-
-        updateButtons();
-      }
-
-      function toggleIcon() {
-        if (!isActive) return;
-
-        const currentPath = leftIcon.querySelector('path').getAttribute('d');
-        if (currentPath === ICON_PLAY) {
-          setIcon(leftIcon, ICON_STOP, ICON_STOP_VIEWBOX);
-        } else {
-          setIcon(leftIcon, ICON_PLAY, ICON_PLAY_VIEWBOX);
-        }
-      }
-
-      document.body.addEventListener('click', function(e) {
-        if (leftBtn.contains(e.target) || rightBtn.contains(e.target)) return;
-        if (!isActive) {
-          startPlayback();
-        }
-      });
-
-      leftBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleIcon();
-      });
-
-      rightBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        stopAll();
-      });
-    })();
-  </script>
+/* На случай, если пользователь открыл редактор и повернул экран */
+window.addEventListener("resize", ()=>{ if(editorFolder>=0) layoutCanvas(); });
+</script>
 </body>
 </html>
