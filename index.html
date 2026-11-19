@@ -31,9 +31,6 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .stick{position:absolute;transform-origin:50% 50%;will-change:transform;pointer-events:auto;touch-action:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}
 .stick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .stick.sel{outline:2px dashed #ff3b30;outline-offset:4px;border-radius:6px}
-.stick .del{position:absolute;right:-14px;top:-14px;width:26px;height:26px;border-radius:50%;background:#ff3b30;color:#fff;font:600 14px/26px -apple-system,Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto}
-.stick .rot{position:absolute;right:-14px;bottom:-14px;width:26px;height:26px;border-radius:50%;background:#fff;color:#ff3b30;font:600 13px/26px -apple-system,Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto;touch-action:none}
-.stick.sel .del,.stick.sel .rot{display:block}
 
 /* ===== редактор ===== */
 #editor{position:fixed;left:0;right:0;top:0;bottom:0;z-index:80;display:none;pointer-events:none}
@@ -46,15 +43,18 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #palette .pal:active{cursor:grabbing;transform:scale(.96)}
 
 /* ===== нижняя панель ===== */
-#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:12px;pointer-events:auto}
+#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto}
 #bar.on{display:flex}
 #bar button{border:0;border-radius:22px;padding:12px 22px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22)}
 #bar button.danger{background:#ff3b30;color:#fff}
 
-/* ползунок размера */
-#sizer{display:none;align-items:center;gap:10px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:8px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif}
-#sizer.on{display:flex}
-#sizer input{width:200px;accent-color:#ff3b30;pointer-events:auto}
+/* панель управления выбранным стикером */
+#controls{display:none;flex-direction:column;gap:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif;align-items:stretch}
+#controls.on{display:flex}
+#controls .row{display:flex;align-items:center;gap:10px}
+#controls .row span{width:60px;opacity:.8}
+#controls .row input{flex:1;accent-color:#ff3b30;pointer-events:auto}
+#controls button.remove{border:0;border-radius:12px;padding:10px 14px;font:600 14px -apple-system,Helvetica,Arial,sans-serif;background:#ff3b30;color:#fff;box-shadow:0 4px 12px rgba(255,59,48,.4)}
 </style>
 </head>
 <body>
@@ -65,7 +65,11 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   <div id="palette"></div>
 </div>
 <div id="bar">
-  <div id="sizer"><span>Размер</span><input type="range" id="sizeRange" min="0.3" max="4" step="0.05" value="1"></div>
+  <div id="controls">
+    <div class="row"><span>Поворот</span><input type="range" id="rotRange" min="-180" max="180" step="1" value="0"></div>
+    <div class="row"><span>Размер</span><input type="range" id="sizeRange" min="0.3" max="4" step="0.05" value="1"></div>
+    <button class="remove" id="removeBtn">Убрать выбранную наклейку</button>
+  </div>
   <button id="done">Готово</button>
 </div>
 <div id="strip"></div>
@@ -90,7 +94,7 @@ const LS_KEY="folder-stickers-v1";
 
 const stage=document.getElementById("stage"),strip=document.getElementById("strip"),sa=document.getElementById("sa");
 const editorEl=document.getElementById("editor"),palette=document.getElementById("palette"),bar=document.getElementById("bar");
-const sizer=document.getElementById("sizer"),sizeRange=document.getElementById("sizeRange");
+const controls=document.getElementById("controls"),rotRange=document.getElementById("rotRange"),sizeRange=document.getElementById("sizeRange"),removeBtn=document.getElementById("removeBtn");
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, n=DATA.length;
 let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
 const s={p:0,v:0,t:0};
@@ -162,12 +166,10 @@ function render(){
   els.forEach((e,i)=>{
     let ty=0,z=0,rx=0,q=0,shade=0;
     if(editMode||ep>0.001){
-      /* открытая папка / текущая — на месте; остальные уезжают вниз пропорционально ep */
       if(i===editFolder){
         ty=0*(1-ep); z=40*ep;
       } else {
         const baseShift = (170 + (i<editFolder? -i : i-editFolder)*18);
-        /* остальные сдвигаются с лёгким запаздыванием — каскад */
         const local = clamp((ep - i*0.03)/(1 - i*0.03), 0, 1);
         ty = baseShift * local;
       }
@@ -206,21 +208,12 @@ function saveStickers(){try{localStorage.setItem(LS_KEY,JSON.stringify(stickers)
 function makeEl(st, idx){
   const el=document.createElement("div");el.className="stick";
   el.dataset.idx=idx;
-  el.innerHTML=`<img src="${STICKERS[st.id]}" draggable="false"><span class="del">×</span><span class="rot">↻</span>`;
+  el.innerHTML=`<img src="${STICKERS[st.id]}" draggable="false">`;
   el.addEventListener("pointerdown",ev=>{
     if(!editMode||st.folder!==editFolder)return;
     ev.stopPropagation();
     selectSticker(el, st);
     startStickManip(ev, el, st);
-  });
-  el.querySelector(".del").addEventListener("pointerdown",ev=>{
-    ev.stopPropagation();
-    const i=stickers.indexOf(st);if(i>=0)stickers.splice(i,1);
-    saveStickers();renderStickers();selected=null;bar.classList.remove("on");
-  });
-  el.querySelector(".rot").addEventListener("pointerdown",ev=>{
-    ev.stopPropagation();ev.preventDefault();
-    startRotate(ev, el, st);
   });
   return el;
 }
@@ -259,14 +252,15 @@ function selectSticker(el, st){
   document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
   selected=st; if(el)el.classList.add("sel");
   bar.classList.add("on");
-  sizer.classList.add("on");
+  controls.classList.add("on");
+  rotRange.value = st.r;
   sizeRange.value = st.s;
 }
 
 function deselect(){
   selected=null;
   document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
-  sizer.classList.remove("on");
+  controls.classList.remove("on");
 }
 
 /* ================= РЕДАКТОР: вход/выход ================= */
@@ -293,9 +287,24 @@ function exitEdit(){
   render();
 }
 document.getElementById("done").addEventListener("click",exitEdit);
+
+rotRange.addEventListener("input",e=>{
+  if(!selected)return;
+  selected.r=parseFloat(e.target.value);
+  renderStickers();
+});
 sizeRange.addEventListener("input",e=>{
   if(!selected)return;
   selected.s=parseFloat(e.target.value);
+  renderStickers();
+});
+removeBtn.addEventListener("click",()=>{
+  if(!selected)return;
+  const i=stickers.indexOf(selected);
+  if(i>=0)stickers.splice(i,1);
+  selected=null;
+  controls.classList.remove("on");
+  saveStickers();
   renderStickers();
 });
 
@@ -362,26 +371,6 @@ function startStickManip(ev, el, st){
   el.addEventListener("pointermove",move);
   el.addEventListener("pointerup",up);
   el.addEventListener("pointercancel",up);
-}
-
-/* ================= ПОВОРОТ МАРКЕРОМ ================= */
-function startRotate(ev, el, st){
-  const r=el.getBoundingClientRect();
-  const cx=r.left+r.width/2, cy=r.top+r.height/2;
-  const startAng=Math.atan2(ev.clientY-cy, ev.clientX-cx);
-  const startR=st.r;
-  const move=e2=>{
-    const ang=Math.atan2(e2.clientY-cy, e2.clientX-cx);
-    st.r=startR+(ang-startAng)*180/Math.PI;
-    el.style.transform=`rotate(${st.r}deg)`;
-  };
-  const up=()=>{
-    document.removeEventListener("pointermove",move);
-    document.removeEventListener("pointerup",up);
-    saveStickers();
-  };
-  document.addEventListener("pointermove",move);
-  document.addEventListener("pointerup",up);
 }
 
 /* ================= SPRING для открытия/закрытия ================= */
