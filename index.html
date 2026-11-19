@@ -31,8 +31,6 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .stick{position:absolute;transform-origin:50% 50%;will-change:transform;pointer-events:auto;touch-action:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}
 .stick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .stick.sel{outline:2px dashed #ff3b30;outline-offset:4px;border-radius:6px}
-
-/* появление стикера на папке: масштаб из 0 + пружина */
 @keyframes stick-pop{
   0%{transform:var(--rot,rotate(0deg)) scale(0);}
   55%{transform:var(--rot,rotate(0deg)) scale(1.18);}
@@ -44,7 +42,42 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #editor{position:fixed;left:0;right:0;top:0;bottom:0;z-index:80;display:none;pointer-events:none}
 #editor.on{display:block}
 #editor .dim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.05) 40%,transparent);pointer-events:none}
-#palette{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);height:150px;display:flex;gap:14px;padding:10px 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x;align-items:center}
+
+/* обёртка пикера: подсказка + карусель */
+#pickerWrap{
+  position:absolute;left:0;right:0;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  pointer-events:none;z-index:5;
+}
+#pickerWrap.top{top:max(env(safe-area-inset-top,0px),44px)}
+#pickerWrap.bottom{bottom:calc(env(safe-area-inset-bottom,0px) + 240px)}
+
+#hintBtn{
+  pointer-events:auto;
+  max-width:300px;
+  margin:0 16px;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  color:#fff;border:0;border-radius:14px;
+  padding:9px 14px;
+  font:500 12px/1.35 -apple-system,Helvetica,Arial,sans-serif;
+  text-align:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.28);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+#hintBtn:active{transform:scale(.96)}
+#hintBtn b{font-weight:600}
+
+#palette{
+  position:relative;width:100%;
+  height:150px;
+  display:flex;gap:14px;
+  padding:10px 16px;box-sizing:border-box;
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  pointer-events:auto;touch-action:pan-x;
+  align-items:center;
+}
 #palette::-webkit-scrollbar{display:none}
 #palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.34,1.56,.64,1);will-change:transform}
 #palette .pal img{width:70px;height:70px;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
@@ -54,18 +87,11 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 /* ===== нижняя панель ===== */
 #bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto}
 #bar.on{display:flex}
-
-/* главная кнопка (Выйти → Готово) */
 #mainBtn{border:0;border-radius:22px;padding:12px 26px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22);transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s;will-change:transform}
 #mainBtn.mode-done{background:#ff3b30;color:#fff;box-shadow:0 8px 24px rgba(255,59,48,.35)}
 #mainBtn.bounce{animation:btn-bounce .35s cubic-bezier(.34,1.56,.64,1)}
-@keyframes btn-bounce{
-  0%{transform:scale(1)}
-  40%{transform:scale(1.08)}
-  100%{transform:scale(1)}
-}
+@keyframes btn-bounce{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
 
-/* панель управления выбранным стикером */
 #controls{display:none;flex-direction:column;gap:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif;align-items:stretch;animation:ctrl-in .25s ease both}
 #controls.on{display:flex}
 @keyframes ctrl-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -73,6 +99,20 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #controls .row span{width:60px;opacity:.8}
 #controls .row input{flex:1;accent-color:#ff3b30;pointer-events:auto}
 #controls button.remove{border:0;border-radius:12px;padding:10px 14px;font:600 14px -apple-system,Helvetica,Arial,sans-serif;background:#ff3b30;color:#fff;box-shadow:0 4px 12px rgba(255,59,48,.4)}
+
+/* ===== модалка ===== */
+#modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+#modal.on{display:flex}
+#modal .modal-dim{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:fade-in .2s ease both}
+#modal .modal-card{position:relative;background:#fffefd;color:#111;border-radius:20px;padding:22px 20px 18px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:card-in .3s cubic-bezier(.34,1.4,.64,1) both}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes card-in{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:none}}
+#modal h3{margin:0 0 10px;font-size:19px;font-weight:600;letter-spacing:-.3px}
+#modal p{margin:0 0 12px;font-size:14px;line-height:1.45;color:#3a3a3c}
+#modal p:last-of-type{margin-bottom:16px}
+#modal .modal-icon{width:44px;height:44px;border-radius:12px;background:#ff3b30;color:#fff;display:flex;align-items:center;justify-content:center;font:600 22px -apple-system,Helvetica,Arial,sans-serif;margin-bottom:14px;box-shadow:0 6px 18px rgba(255,59,48,.35)}
+#modal .modal-ok{border:0;border-radius:14px;padding:12px 20px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:#111;color:#fff;width:100%;transition:transform .15s}
+#modal .modal-ok:active{transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -80,7 +120,10 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 <div id="stage"></div>
 <div id="editor">
   <div class="dim"></div>
-  <div id="palette"></div>
+  <div id="pickerWrap">
+    <button id="hintBtn">Добавляй наклейки на папки. <b>Нажми сюда</b>, чтобы узнать подробнее</button>
+    <div id="palette"></div>
+  </div>
 </div>
 <div id="bar">
   <div id="controls">
@@ -91,6 +134,18 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   <button id="mainBtn">Выйти</button>
 </div>
 <div id="strip"></div>
+
+<div id="modal">
+  <div class="modal-dim"></div>
+  <div class="modal-card">
+    <div class="modal-icon">!</div>
+    <h3>Папки накладываются друг на друга</h3>
+    <p>Видна только <b>верхняя полоса</b> каждой папки — её нижнюю часть перекрывает следующая папка.</p>
+    <p>Поэтому стикеры стоит размещать в верхней зоне. Если наклейка уйдёт ниже, её скроет соседняя папка.</p>
+    <button class="modal-ok" id="modalOk">Понятно</button>
+  </div>
+</div>
+
 <script>
 /* ================= ЗАПРЕТ ЗУМА ================= */
 document.addEventListener('gesturestart', e=>e.preventDefault(), {passive:false});
@@ -104,7 +159,7 @@ const DATA=[
  {t:"A2",b:"#A18594",f:"#AD94A1",c:"#fff"},
  {t:"B1",b:"#FF9BAA",f:"#FFA9B6",c:"#fff"},
  {t:"B2",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
- {t:"Носитель (C)",b:"#FFF0F5",f:"#FFF5F8",c:"#555"}
+ {t:"Носитель (C1-2)",b:"#FFF0F5",f:"#FFF5F8",c:"#555"}
 ];
 const LOREM="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 const STICKERS=[1,2,3,4,5,6,7,8,9,10,11].map(i=>`src/sticker${i}.png`);
@@ -114,6 +169,9 @@ const stage=document.getElementById("stage"),strip=document.getElementById("stri
 const editorEl=document.getElementById("editor"),palette=document.getElementById("palette"),bar=document.getElementById("bar");
 const controls=document.getElementById("controls"),rotRange=document.getElementById("rotRange"),sizeRange=document.getElementById("sizeRange"),removeBtn=document.getElementById("removeBtn");
 const mainBtn=document.getElementById("mainBtn");
+const pickerWrap=document.getElementById("pickerWrap");
+const hintBtn=document.getElementById("hintBtn");
+const modal=document.getElementById("modal");
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, n=DATA.length;
 let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
 const s={p:0,v:0,t:0};
@@ -224,7 +282,7 @@ function loadStickers(){
 }
 function saveStickers(){try{localStorage.setItem(LS_KEY,JSON.stringify(stickers))}catch(_){}}
 
-function makeEl(st, idx, animate){
+function makeEl(st, idx){
   const el=document.createElement("div");el.className="stick";
   el.dataset.idx=idx;
   el.style.setProperty("--rot",`rotate(${st.r}deg)`);
@@ -271,10 +329,8 @@ function buildPalette(){
     p.addEventListener("pointerdown",ev=>{
       if(!editMode)return;
       ev.preventDefault();
-      /* сам стикер — глубокий отскок */
       p.classList.remove("tapped");void p.offsetWidth;p.classList.add("tapped");
       setTimeout(()=>p.classList.remove("tapped"),280);
-      /* остальные — лёгкий отскок */
       palette.querySelectorAll(".pal").forEach(other=>{
         if(other===p)return;
         other.classList.remove("other");void other.offsetWidth;other.classList.add("other");
@@ -286,11 +342,9 @@ function buildPalette(){
   });
 }
 
-/* тап по палитре → добавление стикера */
 function addStickerToFolder(id){
   if(!editMode)return;
   const target=els[editFolder]; if(!target)return;
-  /* позиция: случайная в верхней зоне активной папки */
   const fx = 0.15 + Math.random()*0.7;
   const fy = 0.10 + Math.random()*0.28;
   const img=new Image();img.src=STICKERS[id];
@@ -299,11 +353,13 @@ function addStickerToFolder(id){
     stickers.push(st);
     saveStickers();
     renderStickers(stickers.length-1);
-    /* автоматически выбрать новый стикер, чтобы сразу можно было настроить */
     requestAnimationFrame(()=>{
       const layer=target.layer;
       const el=layer.lastElementChild;
-      if(el){selected=st;el.classList.add("sel");updateControls();}
+      if(el){
+        document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
+        selected=st;el.classList.add("sel");updateControls();
+      }
     });
   };
 }
@@ -337,6 +393,9 @@ function deselect(){
 function enterEdit(i){
   if(editMode||o>=0)return;
   editMode=true; editFolder=i; selected=null; pickedSize=1;
+  /* пикер вниз для самой верхней папки A1, иначе сверху */
+  pickerWrap.classList.remove("top","bottom");
+  pickerWrap.classList.add(i===0 ? "bottom" : "top");
   editorEl.classList.add("on");
   bar.classList.add("on");
   editSpring.t=1;
@@ -349,6 +408,7 @@ function exitEdit(){
   if(!editMode)return;
   editMode=false; editFolder=-1; selected=null;
   deselect();
+  pickerWrap.classList.remove("top","bottom");
   editorEl.classList.remove("on");
   bar.classList.remove("on");
   editSpring.t=0;
@@ -358,15 +418,11 @@ function exitEdit(){
   render();
 }
 
-/* главная кнопка: Выйти / Готово (с микроанимацией) */
+/* главная кнопка: Выйти / Готово */
 mainBtn.addEventListener("click",()=>{
   mainBtn.classList.remove("bounce");void mainBtn.offsetWidth;mainBtn.classList.add("bounce");
-  if(selected){
-    deselect();
-    saveStickers();
-  }else{
-    exitEdit();
-  }
+  if(selected){ deselect(); saveStickers(); }
+  else { exitEdit(); }
 });
 
 /* ползунки */
@@ -398,6 +454,14 @@ removeBtn.addEventListener("click",()=>{
   saveStickers();
   renderStickers();
 });
+
+/* ================= МОДАЛКА ================= */
+hintBtn.addEventListener("click",e=>{
+  e.stopPropagation();
+  modal.classList.add("on");
+});
+modal.querySelector(".modal-dim").addEventListener("click",()=>modal.classList.remove("on"));
+document.getElementById("modalOk").addEventListener("click",()=>modal.classList.remove("on"));
 
 /* ================= МАНИПУЛЯЦИЯ (перемещение) ================= */
 function startStickManip(ev, el, st){
