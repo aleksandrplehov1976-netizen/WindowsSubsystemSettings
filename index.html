@@ -31,8 +31,6 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .stick{position:absolute;transform-origin:50% 50%;will-change:transform;pointer-events:auto;touch-action:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}
 .stick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .stick.sel{outline:2px dashed #ff3b30;outline-offset:4px;border-radius:6px}
-
-/* появление стикера на папке: масштаб из 0 + пружина */
 @keyframes stick-pop{
   0%{transform:var(--rot,rotate(0deg)) scale(0);}
   55%{transform:var(--rot,rotate(0deg)) scale(1.18);}
@@ -44,28 +42,40 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #editor{position:fixed;left:0;right:0;top:0;bottom:0;z-index:80;display:none;pointer-events:none}
 #editor.on{display:block}
 #editor .dim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.05) 40%,transparent);pointer-events:none}
-#palette{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);height:150px;display:flex;gap:14px;padding:10px 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x;align-items:center}
+
+/* контейнер для верхнего пикера (по умолчанию) */
+#pickerTop{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);display:flex;flex-direction:column;gap:8px;pointer-events:auto}
+
+/* контейнер для нижнего пикера (для A1) */
+#pickerBottom{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;gap:8px;pointer-events:auto}
+#editor.bottom #pickerTop{display:none}
+#editor.bottom #pickerBottom{display:flex}
+
+/* подсказка над каруселью */
+#hintBar{margin:0 16px;padding:8px 14px;border-radius:12px;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font:500 12.5px -apple-system,Helvetica,Arial,sans-serif;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);transition:transform .2s ease,background .2s}
+#hintBar:active{transform:scale(.97)}
+#hintBar .ico{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+#hintBar .txt{flex:1;line-height:1.35;opacity:.95}
+
+/* карусель */
+#palette{display:flex;gap:14px;padding:6px 16px 10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x;align-items:center;min-height:104px}
 #palette::-webkit-scrollbar{display:none}
-#palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.34,1.56,.64,1);will-change:transform}
+#palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.34,1.56,.64,1);will-change:transform;touch-action:none}
 #palette .pal img{width:70px;height:70px;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 #palette .pal.tapped{transform:scale(.86)}
 #palette .pal.other{transform:scale(.96)}
 
 /* ===== нижняя панель ===== */
-#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto}
+#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto;z-index:2}
 #bar.on{display:flex}
+#editor.bottom #bar{top:auto;bottom:auto;display:none}
+#editor.bottom #bar.on{display:flex}
 
-/* главная кнопка (Выйти → Готово) */
 #mainBtn{border:0;border-radius:22px;padding:12px 26px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22);transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s;will-change:transform}
 #mainBtn.mode-done{background:#ff3b30;color:#fff;box-shadow:0 8px 24px rgba(255,59,48,.35)}
 #mainBtn.bounce{animation:btn-bounce .35s cubic-bezier(.34,1.56,.64,1)}
-@keyframes btn-bounce{
-  0%{transform:scale(1)}
-  40%{transform:scale(1.08)}
-  100%{transform:scale(1)}
-}
+@keyframes btn-bounce{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
 
-/* панель управления выбранным стикером */
 #controls{display:none;flex-direction:column;gap:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif;align-items:stretch;animation:ctrl-in .25s ease both}
 #controls.on{display:flex}
 @keyframes ctrl-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -73,15 +83,37 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #controls .row span{width:60px;opacity:.8}
 #controls .row input{flex:1;accent-color:#ff3b30;pointer-events:auto}
 #controls button.remove{border:0;border-radius:12px;padding:10px 14px;font:600 14px -apple-system,Helvetica,Arial,sans-serif;background:#ff3b30;color:#fff;box-shadow:0 4px 12px rgba(255,59,48,.4)}
+
+/* ===== модалка ===== */
+#modal{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;pointer-events:none}
+#modal.on{display:flex;pointer-events:auto}
+#modal .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:modal-bg .25s ease both}
+@keyframes modal-bg{from{opacity:0}to{opacity:1}}
+#modal .sheet2{position:relative;width:100%;max-width:520px;margin:0 12px max(env(safe-area-inset-bottom,0px),12px);background:#fffefd;color:#1c1c1e;border-radius:22px 22px 18px 18px;padding:22px 22px 18px;box-shadow:0 -8px 40px rgba(0,0,0,.35);animation:modal-up .3s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes modal-up{from{transform:translateY(120%)}to{transform:translateY(0)}}
+#modal h3{margin:0 0 10px;font-size:19px;font-weight:600;letter-spacing:-.3px}
+#modal p{margin:0 0 12px;font-size:15px;line-height:1.45;color:#3a3a3c}
+#modal .tip{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:14px;background:#f2f2f7;font-size:14px;line-height:1.4;color:#3a3a3c}
+#modal .tip b{color:#111}
+#modal .ok{width:100%;margin-top:12px;border:0;border-radius:14px;padding:14px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:#111;color:#fff}
 </style>
 </head>
 <body>
 <div id="sa"></div>
 <div id="stage"></div>
+
 <div id="editor">
   <div class="dim"></div>
-  <div id="palette"></div>
+  <div id="pickerTop">
+    <div id="hintBarTop"></div>
+    <div id="paletteTop"></div>
+  </div>
+  <div id="pickerBottom">
+    <div id="hintBarBottom"></div>
+    <div id="paletteBottom"></div>
+  </div>
 </div>
+
 <div id="bar">
   <div id="controls">
     <div class="row"><span>Поворот</span><input type="range" id="rotRange" min="-180" max="180" step="1" value="0"></div>
@@ -90,7 +122,23 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   </div>
   <button id="mainBtn">Выйти</button>
 </div>
+
 <div id="strip"></div>
+
+<!-- МОДАЛКА -->
+<div id="modal">
+  <div class="backdrop"></div>
+  <div class="sheet2">
+    <h3>Как это работает</h3>
+    <p>Папки лежат стопкой и накладываются друг на друга. Поэтому у каждой папки видна только <b>верхняя полоса</b> — именно туда и можно ставить наклейки.</p>
+    <div class="tip">
+      <span>💡</span>
+      <div>Если положить наклейку ниже, её закроет следующая папка. Выбирай верхнюю зону — и всё будет видно.</div>
+    </div>
+    <button class="ok" id="modalOk">Понятно</button>
+  </div>
+</div>
+
 <script>
 /* ================= ЗАПРЕТ ЗУМА ================= */
 document.addEventListener('gesturestart', e=>e.preventDefault(), {passive:false});
@@ -111,17 +159,16 @@ const STICKERS=[1,2,3,4,5,6,7,8,9,10,11].map(i=>`src/sticker${i}.png`);
 const LS_KEY="folder-stickers-v1";
 
 const stage=document.getElementById("stage"),strip=document.getElementById("strip"),sa=document.getElementById("sa");
-const editorEl=document.getElementById("editor"),palette=document.getElementById("palette"),bar=document.getElementById("bar");
+const editorEl=document.getElementById("editor"),bar=document.getElementById("bar");
 const controls=document.getElementById("controls"),rotRange=document.getElementById("rotRange"),sizeRange=document.getElementById("sizeRange"),removeBtn=document.getElementById("removeBtn");
 const mainBtn=document.getElementById("mainBtn");
+const modal=document.getElementById("modal");
+
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, n=DATA.length;
 let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
 const s={p:0,v:0,t:0};
-
-/* ==== spring-переменная editMode ==== */
 const editSpring={p:0,v:0,t:0};
 
-/* ================= СОСТОЯНИЕ ================= */
 const stickers=[];
 let editMode=false, editFolder=-1;
 let selected=null;
@@ -224,7 +271,7 @@ function loadStickers(){
 }
 function saveStickers(){try{localStorage.setItem(LS_KEY,JSON.stringify(stickers))}catch(_){}}
 
-function makeEl(st, idx, animate){
+function makeEl(st, idx){
   const el=document.createElement("div");el.className="stick";
   el.dataset.idx=idx;
   el.style.setProperty("--rot",`rotate(${st.r}deg)`);
@@ -259,11 +306,26 @@ function renderStickers(animateIdx){
       el._w=bw; el._h=bh; el._st=st;
     });
   });
-  if(!palette.childElementCount)buildPalette();
   render();
 }
 
-function buildPalette(){
+/* ================= ПИКЕР ================= */
+const pickerTop=document.getElementById("pickerTop");
+const pickerBottom=document.getElementById("pickerBottom");
+const hintBarTop=document.getElementById("hintBarTop");
+const hintBarBottom=document.getElementById("hintBarBottom");
+const paletteTop=document.getElementById("paletteTop");
+const paletteBottom=document.getElementById("paletteBottom");
+
+function makeHintBar(){
+  const d=document.createElement("div");
+  d.className="hint-inner";
+  d.innerHTML=`<div id="hintBar" style="margin:0;"><div class="ico">?</div><div class="txt">Добавляй наклейки на папки. Нажми сюда, чтобы узнать подробнее</div></div>`;
+  return d;
+}
+
+function buildPalette(target){
+  target.innerHTML="";
   STICKERS.forEach((src,id)=>{
     const p=document.createElement("div");p.className="pal";
     p.dataset.id=id;
@@ -271,18 +333,16 @@ function buildPalette(){
     p.addEventListener("pointerdown",ev=>{
       if(!editMode)return;
       ev.preventDefault();
-      /* сам стикер — глубокий отскок */
       p.classList.remove("tapped");void p.offsetWidth;p.classList.add("tapped");
       setTimeout(()=>p.classList.remove("tapped"),280);
-      /* остальные — лёгкий отскок */
-      palette.querySelectorAll(".pal").forEach(other=>{
+      target.querySelectorAll(".pal").forEach(other=>{
         if(other===p)return;
         other.classList.remove("other");void other.offsetWidth;other.classList.add("other");
         setTimeout(()=>other.classList.remove("other"),280);
       });
       addStickerToFolder(id);
     });
-    palette.appendChild(p);
+    target.appendChild(p);
   });
 }
 
@@ -290,7 +350,6 @@ function buildPalette(){
 function addStickerToFolder(id){
   if(!editMode)return;
   const target=els[editFolder]; if(!target)return;
-  /* позиция: случайная в верхней зоне активной папки */
   const fx = 0.15 + Math.random()*0.7;
   const fy = 0.10 + Math.random()*0.28;
   const img=new Image();img.src=STICKERS[id];
@@ -299,10 +358,8 @@ function addStickerToFolder(id){
     stickers.push(st);
     saveStickers();
     renderStickers(stickers.length-1);
-    /* автоматически выбрать новый стикер, чтобы сразу можно было настроить */
     requestAnimationFrame(()=>{
-      const layer=target.layer;
-      const el=layer.lastElementChild;
+      const el=target.layer.lastElementChild;
       if(el){selected=st;el.classList.add("sel");updateControls();}
     });
   };
@@ -337,19 +394,30 @@ function deselect(){
 function enterEdit(i){
   if(editMode||o>=0)return;
   editMode=true; editFolder=i; selected=null; pickedSize=1;
+  /* A1 — пикер снизу, остальные — сверху */
+  editorEl.classList.toggle("bottom", i===0);
   editorEl.classList.add("on");
   bar.classList.add("on");
+  buildPalette(i===0?paletteBottom:paletteTop);
+  attachHint(i===0?hintBarBottom:hintBarTop);
   editSpring.t=1;
   goEdit();
   renderStickers();
   render();
   updateControls();
 }
+
+/* привязка подсказки + её клик */
+function attachHint(container){
+  container.innerHTML=`<div id="hintBar"><div class="ico">?</div><div class="txt">Добавляй наклейки на папки. Нажми сюда, чтобы узнать подробнее</div></div>`;
+  container.querySelector("#hintBar").addEventListener("click",()=>openModal());
+}
+
 function exitEdit(){
   if(!editMode)return;
   editMode=false; editFolder=-1; selected=null;
   deselect();
-  editorEl.classList.remove("on");
+  editorEl.classList.remove("on","bottom");
   bar.classList.remove("on");
   editSpring.t=0;
   goEdit();
@@ -358,15 +426,11 @@ function exitEdit(){
   render();
 }
 
-/* главная кнопка: Выйти / Готово (с микроанимацией) */
+/* главная кнопка */
 mainBtn.addEventListener("click",()=>{
   mainBtn.classList.remove("bounce");void mainBtn.offsetWidth;mainBtn.classList.add("bounce");
-  if(selected){
-    deselect();
-    saveStickers();
-  }else{
-    exitEdit();
-  }
+  if(selected){ deselect(); saveStickers(); }
+  else { exitEdit(); }
 });
 
 /* ползунки */
@@ -460,6 +524,12 @@ strip.addEventListener("pointerdown",e=>{strip.setPointerCapture(e.pointerId);sy
 strip.addEventListener("pointermove",e=>{if(!done&&sy-e.clientY>14){done=true;close()}});
 strip.addEventListener("pointerup",()=>{if(!done){done=true;close()}});
 addEventListener("resize",layout);
+
+/* ================= МОДАЛКА ================= */
+function openModal(){modal.classList.add("on")}
+function closeModal(){modal.classList.remove("on")}
+document.getElementById("modalOk").addEventListener("click",closeModal);
+modal.querySelector(".backdrop").addEventListener("click",closeModal);
 
 /* ================= INIT ================= */
 loadStickers();
