@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Папки</title>
 <style>
 :root{--bg1:#fbfbfd;--bg2:#e8e8ee}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2b2b30;--bg2:#111113}}
 :root[data-theme="dark"]{--bg1:#2b2b30;--bg2:#111113}
-html,body{height:100%;margin:0;overflow:hidden;background:var(--bg2);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg2);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none}
 body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-family:-apple-system,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif}
 #sa{position:fixed;visibility:hidden;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
 #stage{position:fixed;inset:0;perspective-origin:50% 38%}
@@ -26,23 +26,29 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .sh{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to bottom,rgba(0,0,0,.5),rgba(0,0,0,.05));opacity:0;pointer-events:none}
 #strip{position:fixed;left:0;right:0;bottom:0;height:150px;z-index:99;display:none;touch-action:none}
 
-/* ===== NEW: стикеры на закрытой папке ===== */
+/* ===== стикеры ===== */
 .stick-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
 .stick{position:absolute;transform-origin:50% 50%;will-change:transform;pointer-events:auto;touch-action:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))}
 .stick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .stick.sel{outline:2px dashed #ff3b30;outline-offset:4px;border-radius:6px}
 .stick .del{position:absolute;right:-14px;top:-14px;width:26px;height:26px;border-radius:50%;background:#ff3b30;color:#fff;font:600 14px/26px -apple-system,Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto}
-.stick.sel .del{display:block}
+.stick .rot{position:absolute;right:-14px;bottom:-14px;width:26px;height:26px;border-radius:50%;background:#fff;color:#ff3b30;font:600 13px/26px -apple-system,Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto;touch-action:none}
+.stick.sel .del,.stick.sel .rot{display:block}
+.stick .size{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);height:20px;width:80px;border-radius:10px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto;touch-action:none}
+.stick.sel .size{display:block}
 
-/* ===== NEW: редактор (палитра) ===== */
+/* ===== редактор ===== */
 #editor{position:fixed;left:0;right:0;top:0;bottom:0;z-index:80;display:none;pointer-events:none}
 #editor.on{display:block}
 #editor .dim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.05) 40%,transparent);pointer-events:none}
 #palette{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);height:170px;display:flex;gap:14px;padding:10px 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x}
 #palette::-webkit-scrollbar{display:none}
-#palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);touch-action:none;cursor:grab}
+#palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);touch-action:none;cursor:grab;position:relative}
 #palette .pal img{width:70px;height:70px;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 #palette .pal:active{cursor:grabbing;transform:scale(.96)}
+#palette .pal .pal-size{position:absolute;left:0;right:0;bottom:-26px;height:20px;display:none;background:rgba(0,0,0,.4);border-radius:10px;padding:0 6px;box-sizing:border-box}
+#palette .pal .pal-size input{width:100%;height:20px;margin:0;accent-color:#fff;pointer-events:auto}
+#palette .pal.picked .pal-size{display:block}
 #bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;justify-content:center;gap:12px;pointer-events:auto}
 #bar.on{display:flex}
 #bar button{border:0;border-radius:22px;padding:12px 22px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22)}
@@ -60,11 +66,16 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   <div id="hint">Зажми стикер и перетащи на папку · Двумя пальцами — размер и поворот</div>
 </div>
 <div id="bar">
-  <button id="rot">↻ Повернуть</button>
   <button id="done">Готово</button>
 </div>
 <div id="strip"></div>
 <script>
+/* ================= ЗАПРЕТ ЗУМА ================= */
+document.addEventListener('gesturestart', e=>e.preventDefault(), {passive:false});
+document.addEventListener('gesturechange', e=>e.preventDefault(), {passive:false});
+document.addEventListener('gestureend', e=>e.preventDefault(), {passive:false});
+document.addEventListener('wheel', e=>{ if(e.ctrlKey)e.preventDefault(); }, {passive:false});
+
 /* ================= ДАННЫЕ ================= */
 const DATA=[
  {t:"A1",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
@@ -84,10 +95,10 @@ let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
 const s={p:0,v:0,t:0};
 
 /* ================= СОСТОЯНИЕ РЕДАКТОРА ================= */
-const stickers=[];                     // {folder, x, y, s, r} — x,y в долях обложки
-let editMode=false, editFolder=-1;     // какая папка в редакторе
-let selected=null;                     // ссылка на объект стикера
-let drag=null;                         // {type:'pal'|'stick', ...}
+const stickers=[];
+let editMode=false, editFolder=-1;
+let selected=null;
+let pickedSize=1;               // размер, выбранный в палитре перед drop
 
 /* ================= ПОСТРОЕНИЕ ПАПОК ================= */
 const els=DATA.map((d,i)=>{
@@ -102,7 +113,7 @@ const els=DATA.map((d,i)=>{
   c.addEventListener("click",tap);
   e.tab.addEventListener("click",()=>{if(!editMode){o<0?open(i):(o===i&&s.p>.9&&close())}});
 
-  /* === NEW: долгое нажатие → редактор === */
+  /* долгое нажатие → редактор */
   let holdT=0, holdMoved=false, holdX=0, holdY=0;
   const longPress=e2=>{
     if(o>=0||editMode)return;
@@ -120,7 +131,7 @@ const els=DATA.map((d,i)=>{
   return e;
 });
 
-/* ================= LAYOUT (без изменений логики) ================= */
+/* ================= LAYOUT ================= */
 function layout(){
   H=innerHeight;const cs=getComputedStyle(sa);
   top0=(parseFloat(cs.paddingTop)||0)+20;sab=parseFloat(cs.paddingBottom)||0;
@@ -142,13 +153,12 @@ function layout(){
   render();
 }
 
-/* ================= RENDER (анимации как в оригинале + editMode) ================= */
+/* ================= RENDER ================= */
 function render(){
   const p=s.p;
   els.forEach((e,i)=>{
     let ty=0,z=0,rx=0,q=0,shade=0;
     if(editMode){
-      /* Режим редактирования: выбранная папка на месте, остальные вниз */
       if(i===editFolder){ ty=0; z=40; }
       else { ty=170+ (i<editFolder? -i : i-editFolder)*18; }
     } else if(o>=0){
@@ -176,7 +186,7 @@ function render(){
   strip.style.display=(!editMode&&o>=0&&p>.6)?"block":"none";
 }
 
-/* ================= СТИКЕРЫ: рендер + сохранение ================= */
+/* ================= СТИКЕРЫ ================= */
 function loadStickers(){
   try{const raw=localStorage.getItem(LS_KEY);if(raw){const arr=JSON.parse(raw);if(Array.isArray(arr))stickers.push(...arr)}}catch(_){}
 }
@@ -185,8 +195,9 @@ function saveStickers(){try{localStorage.setItem(LS_KEY,JSON.stringify(stickers)
 function makeEl(st, idx){
   const el=document.createElement("div");el.className="stick";
   el.dataset.idx=idx;
-  el.innerHTML=`<img src="${STICKERS[st.id]}" draggable="false"><span class="del">×</span>`;
-  /* двумерная манипуляция: один палец — двигать, два — масштаб/поворот */
+  el.innerHTML=`<img src="${STICKERS[st.id]}" draggable="false">
+    <span class="del">×</span>
+    <span class="rot">↻</span>`;
   el.addEventListener("pointerdown",ev=>{
     if(!editMode||st.folder!==editFolder)return;
     ev.stopPropagation();
@@ -198,6 +209,10 @@ function makeEl(st, idx){
     const i=stickers.indexOf(st);if(i>=0)stickers.splice(i,1);
     saveStickers();renderStickers();selected=null;bar.classList.remove("on");
   });
+  el.querySelector(".rot").addEventListener("pointerdown",ev=>{
+    ev.stopPropagation();ev.preventDefault();
+    startRotate(ev, el, st);
+  });
   return el;
 }
 
@@ -207,9 +222,8 @@ function renderStickers(){
     const list=stickers.map((st,idx)=>({st,idx})).filter(o=>o.st.folder===i);
     list.forEach(({st,idx})=>{
       const el=makeEl(st, idx);
-      /* размеры: базовый = 18% ширины обложки, умножаем на st.s */
       const bw = e.c.clientWidth * 0.18;
-      const nat = st.natural||1;                 // natural ratio = w/h
+      const nat = st.natural||1;
       const bh = bw/nat;
       el.style.width=(bw*st.s)+"px";
       el.style.height=(bh*st.s)+"px";
@@ -218,16 +232,21 @@ function renderStickers(){
       el.style.transform=`rotate(${st.r}deg)`;
       if(selected===st)el.classList.add("sel");
       e.layer.appendChild(el);
-      /* store для дальнейшей манипуляции */
       el._w=bw; el._h=bh; el._st=st;
     });
   });
-  /* отрисовать палитру один раз */
   if(!palette.childElementCount){
     STICKERS.forEach((src,id)=>{
       const p=document.createElement("div");p.className="pal";
-      p.innerHTML=`<img src="${src}" draggable="false">`;
+      p.innerHTML=`<img src="${src}" draggable="false">
+        <div class="pal-size"><input type="range" min="0.5" max="2" step="0.1" value="1"></div>`;
       p.addEventListener("pointerdown",ev=>startPaletteDrag(ev,id,p));
+      const sl=p.querySelector("input");
+      sl.addEventListener("input",e=>{
+        pickedSize=parseFloat(sl.value);
+        document.querySelectorAll(".pal.picked").forEach(x=>{if(x!==p)x.classList.remove("picked")});
+        p.classList.add("picked");
+      });
       palette.appendChild(p);
     });
   }
@@ -243,7 +262,7 @@ function selectSticker(el, st){
 /* ================= РЕДАКТОР: вход/выход ================= */
 function enterEdit(i){
   if(editMode||o>=0)return;
-  editMode=true; editFolder=i;
+  editMode=true; editFolder=i; selected=null; pickedSize=1;
   hint.classList.remove("hide");
   editorEl.classList.add("on");
   renderStickers();
@@ -252,17 +271,15 @@ function enterEdit(i){
 function exitEdit(){
   if(!editMode)return;
   editMode=false; editFolder=-1; selected=null;
+  document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
+  document.querySelectorAll(".pal.picked").forEach(x=>x.classList.remove("picked"));
   editorEl.classList.remove("on");
   bar.classList.remove("on");
   saveStickers();
   render();
+  renderStickers();
 }
 document.getElementById("done").addEventListener("click",exitEdit);
-document.getElementById("rot").addEventListener("click",()=>{
-  if(!selected)return;
-  selected.r=(selected.r+15)%360;
-  saveStickers();renderStickers();
-});
 
 /* ================= DRAG ИЗ ПАЛИТРЫ ================= */
 function startPaletteDrag(ev,id,palEl){
@@ -270,7 +287,8 @@ function startPaletteDrag(ev,id,palEl){
   ev.preventDefault();
   const ghost=document.createElement("img");
   ghost.src=STICKERS[id];
-  ghost.style.cssText="position:fixed;width:86px;height:86px;object-fit:contain;pointer-events:none;z-index:200;opacity:.9;transform:translate(-50%,-50%);filter:drop-shadow(0 8px 20px rgba(0,0,0,.35))";
+  const gs=86*pickedSize;
+  ghost.style.cssText=`position:fixed;width:${gs}px;height:${gs}px;object-fit:contain;pointer-events:none;z-index:200;opacity:.9;transform:translate(-50%,-50%);filter:drop-shadow(0 8px 20px rgba(0,0,0,.35))`;
   document.body.appendChild(ghost);
   ghost.style.left=ev.clientX+"px";
   ghost.style.top=ev.clientY+"px";
@@ -286,44 +304,38 @@ function startPaletteDrag(ev,id,palEl){
 }
 
 function dropStickerOnFolder(cx, cy, id){
-  /* ищем, попали ли в обложку активной папки */
   const target=els[editFolder]; if(!target)return;
   const r=target.c.getBoundingClientRect();
   if(cx<r.left||cx>r.right||cy<r.top||cy>r.bottom)return;
-  /* доля внутри обложки */
   const fx=(cx-r.left)/r.width, fy=(cy-r.top)/r.height;
-  /* ЗАПРЕТ: только верхняя видимая часть (чтобы следующая папка не перекрыла) */
-  const maxY = 0.42;                     // ~ язычок + 40% обложки
+  const maxY = 0.42;
   if(fy>maxY){ hint.textContent="Стикер можно положить только в верхнюю часть папки"; hint.classList.remove("hide"); setTimeout(()=>hint.classList.add("hide"),1600); return; }
-  /* natural ratio */
   const img=new Image();img.src=STICKERS[id];
   img.onload=()=>{
-    const st={folder:editFolder, id, x:clamp(fx,0.12,0.88), y:clamp(fy,0.08,maxY), s:1, r:0, natural:img.naturalWidth/img.naturalHeight};
+    const st={folder:editFolder, id, x:clamp(fx,0.12,0.88), y:clamp(fy,0.08,maxY), s:pickedSize, r:0, natural:img.naturalWidth/img.naturalHeight};
     stickers.push(st);
     saveStickers();renderStickers();
     hint.classList.add("hide");
   };
 }
 
-/* ================= МАНИПУЛЯЦИЯ СТИКЕРОМ НА ПАПКЕ ================= */
+/* ================= МАНИПУЛЯЦИЯ ================= */
 function startStickManip(ev, el, st){
   el.setPointerCapture(ev.pointerId);
   const startX=ev.clientX, startY=ev.clientY;
-  const r=el.getBoundingClientRect();
   const parent=els[st.folder].c;
   const pw=parent.clientWidth, ph=parent.clientHeight;
   const baseW=el._w*st.s, baseH=el._h*st.s;
   const startS=st.s, startR=st.r, startL=st.x, startT=st.y;
 
-  /* два пальца */
   let pinch=null;
   const onDown=e2=>{ if(e2.pointerId!==ev.pointerId)pinch={id:e2.pointerId,x:e2.clientX,y:e2.clientY}; };
   const onMove=e2=>{
     if(pinch && e2.pointerId===pinch.id){
       const dx=e2.clientX-pinch.x, dy=e2.clientY-pinch.y;
       const dist=Math.hypot(dx,dy);
-      if(!el._pinchStart){el._pinchStart={dist, s:st.s, r:st.r, angle:Math.atan2(dy,dx)};
-      } else {
+      if(!el._pinchStart){el._pinchStart={dist, s:st.s, r:st.r, angle:Math.atan2(dy,dx)};}
+      else {
         const k=dist/el._pinchStart.dist;
         st.s=clamp(el._pinchStart.s*k,0.3,4);
         const ang=Math.atan2(dy,dx);
@@ -335,7 +347,7 @@ function startStickManip(ev, el, st){
     if(e2.pointerId!==ev.pointerId)return;
     const dx=e2.clientX-startX, dy=e2.clientY-startY;
     st.x=clamp(startL+dx/pw, 0, 1);
-    st.y=clamp(startT+dy/ph, 0, 0.55);     // верхняя зона
+    st.y=clamp(startT+dy/ph, 0, 0.55);
     applyStick();
   };
   const applyStick=()=>{
@@ -359,7 +371,27 @@ function startStickManip(ev, el, st){
   el.addEventListener("pointercancel",onUp);
 }
 
-/* ================= SPRING / ЖЕСТ ЗАКРЫТИЯ (как в оригинале) ================= */
+/* ================= ПОВОРОТ МАРКЕРОМ ================= */
+function startRotate(ev, el, st){
+  const r=el.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  const startAng=Math.atan2(ev.clientY-cy, ev.clientX-cx);
+  const startR=st.r;
+  const move=e2=>{
+    const ang=Math.atan2(e2.clientY-cy, e2.clientX-cx);
+    st.r=startR+(ang-startAng)*180/Math.PI;
+    el.style.transform=`rotate(${st.r}deg)`;
+  };
+  const up=()=>{
+    document.removeEventListener("pointermove",move);
+    document.removeEventListener("pointerup",up);
+    saveStickers();
+  };
+  document.addEventListener("pointermove",move);
+  document.addEventListener("pointerup",up);
+}
+
+/* ================= SPRING / ЖЕСТ ЗАКРЫТИЯ ================= */
 let last=0,raf=0;
 function loop(t){
   let dt=Math.min(.033,((t-last)/1000)||.016);last=t;
