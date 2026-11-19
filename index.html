@@ -34,27 +34,27 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .stick .del{position:absolute;right:-14px;top:-14px;width:26px;height:26px;border-radius:50%;background:#ff3b30;color:#fff;font:600 14px/26px -apple-system,Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto}
 .stick .rot{position:absolute;right:-14px;bottom:-14px;width:26px;height:26px;border-radius:50%;background:#fff;color:#ff3b30;font:600 13px/26px -apple-system,Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto;touch-action:none}
 .stick.sel .del,.stick.sel .rot{display:block}
-.stick .size{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);height:20px;width:80px;border-radius:10px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;pointer-events:auto;touch-action:none}
-.stick.sel .size{display:block}
 
 /* ===== редактор ===== */
 #editor{position:fixed;left:0;right:0;top:0;bottom:0;z-index:80;display:none;pointer-events:none}
 #editor.on{display:block}
 #editor .dim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.05) 40%,transparent);pointer-events:none}
-#palette{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);height:170px;display:flex;gap:14px;padding:10px 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x}
+#palette{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);height:150px;display:flex;gap:14px;padding:10px 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x}
 #palette::-webkit-scrollbar{display:none}
 #palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);touch-action:none;cursor:grab;position:relative}
 #palette .pal img{width:70px;height:70px;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 #palette .pal:active{cursor:grabbing;transform:scale(.96)}
-#palette .pal .pal-size{position:absolute;left:0;right:0;bottom:-26px;height:20px;display:none;background:rgba(0,0,0,.4);border-radius:10px;padding:0 6px;box-sizing:border-box}
-#palette .pal .pal-size input{width:100%;height:20px;margin:0;accent-color:#fff;pointer-events:auto}
-#palette .pal.picked .pal-size{display:block}
-#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;justify-content:center;gap:12px;pointer-events:auto}
+
+/* ===== нижняя панель ===== */
+#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:12px;pointer-events:auto}
 #bar.on{display:flex}
 #bar button{border:0;border-radius:22px;padding:12px 22px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22)}
 #bar button.danger{background:#ff3b30;color:#fff}
-#hint{position:absolute;left:0;right:0;top:calc(max(env(safe-area-inset-top,0px),44px) + 180px);text-align:center;color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif;text-shadow:0 1px 4px rgba(0,0,0,.5);opacity:.9;pointer-events:none;transition:opacity .3s}
-#hint.hide{opacity:0}
+
+/* ползунок размера */
+#sizer{display:none;align-items:center;gap:10px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:8px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif}
+#sizer.on{display:flex}
+#sizer input{width:200px;accent-color:#ff3b30;pointer-events:auto}
 </style>
 </head>
 <body>
@@ -63,9 +63,9 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 <div id="editor">
   <div class="dim"></div>
   <div id="palette"></div>
-  <div id="hint">Зажми стикер и перетащи на папку · Двумя пальцами — размер и поворот</div>
 </div>
 <div id="bar">
+  <div id="sizer"><span>Размер</span><input type="range" id="sizeRange" min="0.3" max="4" step="0.05" value="1"></div>
   <button id="done">Готово</button>
 </div>
 <div id="strip"></div>
@@ -89,16 +89,20 @@ const STICKERS=[1,2,3,4,5,6,7,8,9,10,11].map(i=>`src/sticker${i}.png`);
 const LS_KEY="folder-stickers-v1";
 
 const stage=document.getElementById("stage"),strip=document.getElementById("strip"),sa=document.getElementById("sa");
-const editorEl=document.getElementById("editor"),palette=document.getElementById("palette"),bar=document.getElementById("bar"),hint=document.getElementById("hint");
+const editorEl=document.getElementById("editor"),palette=document.getElementById("palette"),bar=document.getElementById("bar");
+const sizer=document.getElementById("sizer"),sizeRange=document.getElementById("sizeRange");
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, n=DATA.length;
 let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
 const s={p:0,v:0,t:0};
 
-/* ================= СОСТОЯНИЕ РЕДАКТОРА ================= */
+/* ==== отдельная spring-переменная для editMode ==== */
+const editSpring={p:0,v:0,t:0};
+
+/* ================= СОСТОЯНИЕ ================= */
 const stickers=[];
 let editMode=false, editFolder=-1;
 let selected=null;
-let pickedSize=1;               // размер, выбранный в палитре перед drop
+let pickedSize=1;
 
 /* ================= ПОСТРОЕНИЕ ПАПОК ================= */
 const els=DATA.map((d,i)=>{
@@ -113,8 +117,7 @@ const els=DATA.map((d,i)=>{
   c.addEventListener("click",tap);
   e.tab.addEventListener("click",()=>{if(!editMode){o<0?open(i):(o===i&&s.p>.9&&close())}});
 
-  /* долгое нажатие → редактор */
-  let holdT=0, holdMoved=false, holdX=0, holdY=0;
+  let holdT=0,holdMoved=false,holdX=0,holdY=0;
   const longPress=e2=>{
     if(o>=0||editMode)return;
     if(e2.pointerType==="mouse"&&e2.button!==0)return;
@@ -155,13 +158,21 @@ function layout(){
 
 /* ================= RENDER ================= */
 function render(){
-  const p=s.p;
+  const p=s.p, ep=editSpring.p;
   els.forEach((e,i)=>{
     let ty=0,z=0,rx=0,q=0,shade=0;
-    if(editMode){
-      if(i===editFolder){ ty=0; z=40; }
-      else { ty=170+ (i<editFolder? -i : i-editFolder)*18; }
-    } else if(o>=0){
+    if(editMode||ep>0.001){
+      /* открытая папка / текущая — на месте; остальные уезжают вниз пропорционально ep */
+      if(i===editFolder){
+        ty=0*(1-ep); z=40*ep;
+      } else {
+        const baseShift = (170 + (i<editFolder? -i : i-editFolder)*18);
+        /* остальные сдвигаются с лёгким запаздыванием — каскад */
+        const local = clamp((ep - i*0.03)/(1 - i*0.03), 0, 1);
+        ty = baseShift * local;
+      }
+    }
+    if(o>=0 && !editMode){
       if(i===o){
         ty=(top0-ys[i])*p;
         z=56*clamp(p,0,1);
@@ -195,9 +206,7 @@ function saveStickers(){try{localStorage.setItem(LS_KEY,JSON.stringify(stickers)
 function makeEl(st, idx){
   const el=document.createElement("div");el.className="stick";
   el.dataset.idx=idx;
-  el.innerHTML=`<img src="${STICKERS[st.id]}" draggable="false">
-    <span class="del">×</span>
-    <span class="rot">↻</span>`;
+  el.innerHTML=`<img src="${STICKERS[st.id]}" draggable="false"><span class="del">×</span><span class="rot">↻</span>`;
   el.addEventListener("pointerdown",ev=>{
     if(!editMode||st.folder!==editFolder)return;
     ev.stopPropagation();
@@ -238,15 +247,8 @@ function renderStickers(){
   if(!palette.childElementCount){
     STICKERS.forEach((src,id)=>{
       const p=document.createElement("div");p.className="pal";
-      p.innerHTML=`<img src="${src}" draggable="false">
-        <div class="pal-size"><input type="range" min="0.5" max="2" step="0.1" value="1"></div>`;
+      p.innerHTML=`<img src="${src}" draggable="false">`;
       p.addEventListener("pointerdown",ev=>startPaletteDrag(ev,id,p));
-      const sl=p.querySelector("input");
-      sl.addEventListener("input",e=>{
-        pickedSize=parseFloat(sl.value);
-        document.querySelectorAll(".pal.picked").forEach(x=>{if(x!==p)x.classList.remove("picked")});
-        p.classList.add("picked");
-      });
       palette.appendChild(p);
     });
   }
@@ -257,29 +259,45 @@ function selectSticker(el, st){
   document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
   selected=st; if(el)el.classList.add("sel");
   bar.classList.add("on");
+  sizer.classList.add("on");
+  sizeRange.value = st.s;
+}
+
+function deselect(){
+  selected=null;
+  document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
+  sizer.classList.remove("on");
 }
 
 /* ================= РЕДАКТОР: вход/выход ================= */
 function enterEdit(i){
   if(editMode||o>=0)return;
   editMode=true; editFolder=i; selected=null; pickedSize=1;
-  hint.classList.remove("hide");
   editorEl.classList.add("on");
+  editSpring.t=1;
+  goEdit();
   renderStickers();
   render();
 }
 function exitEdit(){
   if(!editMode)return;
   editMode=false; editFolder=-1; selected=null;
-  document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
-  document.querySelectorAll(".pal.picked").forEach(x=>x.classList.remove("picked"));
+  deselect();
+  document.querySelectorAll(".pal").forEach(x=>x.classList.remove("picked"));
   editorEl.classList.remove("on");
   bar.classList.remove("on");
+  editSpring.t=0;
+  goEdit();
   saveStickers();
-  render();
   renderStickers();
+  render();
 }
 document.getElementById("done").addEventListener("click",exitEdit);
+sizeRange.addEventListener("input",e=>{
+  if(!selected)return;
+  selected.s=parseFloat(e.target.value);
+  renderStickers();
+});
 
 /* ================= DRAG ИЗ ПАЛИТРЫ ================= */
 function startPaletteDrag(ev,id,palEl){
@@ -308,67 +326,42 @@ function dropStickerOnFolder(cx, cy, id){
   const r=target.c.getBoundingClientRect();
   if(cx<r.left||cx>r.right||cy<r.top||cy>r.bottom)return;
   const fx=(cx-r.left)/r.width, fy=(cy-r.top)/r.height;
-  const maxY = 0.42;
-  if(fy>maxY){ hint.textContent="Стикер можно положить только в верхнюю часть папки"; hint.classList.remove("hide"); setTimeout(()=>hint.classList.add("hide"),1600); return; }
+  const maxY=0.42;
+  if(fy>maxY)return;
   const img=new Image();img.src=STICKERS[id];
   img.onload=()=>{
-    const st={folder:editFolder, id, x:clamp(fx,0.12,0.88), y:clamp(fy,0.08,maxY), s:pickedSize, r:0, natural:img.naturalWidth/img.naturalHeight};
+    const st={folder:editFolder,id,x:clamp(fx,0.12,0.88),y:clamp(fy,0.08,maxY),s:pickedSize,r:0,natural:img.naturalWidth/img.naturalHeight};
     stickers.push(st);
     saveStickers();renderStickers();
-    hint.classList.add("hide");
   };
 }
 
-/* ================= МАНИПУЛЯЦИЯ ================= */
+/* ================= МАНИПУЛЯЦИЯ (только перемещение) ================= */
 function startStickManip(ev, el, st){
   el.setPointerCapture(ev.pointerId);
   const startX=ev.clientX, startY=ev.clientY;
   const parent=els[st.folder].c;
   const pw=parent.clientWidth, ph=parent.clientHeight;
-  const baseW=el._w*st.s, baseH=el._h*st.s;
-  const startS=st.s, startR=st.r, startL=st.x, startT=st.y;
-
-  let pinch=null;
-  const onDown=e2=>{ if(e2.pointerId!==ev.pointerId)pinch={id:e2.pointerId,x:e2.clientX,y:e2.clientY}; };
-  const onMove=e2=>{
-    if(pinch && e2.pointerId===pinch.id){
-      const dx=e2.clientX-pinch.x, dy=e2.clientY-pinch.y;
-      const dist=Math.hypot(dx,dy);
-      if(!el._pinchStart){el._pinchStart={dist, s:st.s, r:st.r, angle:Math.atan2(dy,dx)};}
-      else {
-        const k=dist/el._pinchStart.dist;
-        st.s=clamp(el._pinchStart.s*k,0.3,4);
-        const ang=Math.atan2(dy,dx);
-        st.r=el._pinchStart.r + (ang-el._pinchStart.angle)*180/Math.PI;
-        applyStick();
-      }
-      return;
-    }
+  const startL=st.x, startT=st.y;
+  const move=e2=>{
     if(e2.pointerId!==ev.pointerId)return;
     const dx=e2.clientX-startX, dy=e2.clientY-startY;
     st.x=clamp(startL+dx/pw, 0, 1);
     st.y=clamp(startT+dy/ph, 0, 0.55);
-    applyStick();
-  };
-  const applyStick=()=>{
-    const w=baseW*st.s, h=baseH*st.s;
-    el.style.width=w+"px"; el.style.height=h+"px";
+    const w=el._w*st.s, h=el._h*st.s;
     el.style.left=(st.x*pw - w/2)+"px";
     el.style.top =(st.y*ph - h/2)+"px";
-    el.style.transform=`rotate(${st.r}deg)`;
   };
-  const onUp=e2=>{
-    el.removeEventListener("pointermove",onMove);
-    el.removeEventListener("pointerup",onUp);
-    el.removeEventListener("pointercancel",onUp);
-    el._pinchStart=null;pinch=null;
+  const up=e2=>{
+    el.removeEventListener("pointermove",move);
+    el.removeEventListener("pointerup",up);
+    el.removeEventListener("pointercancel",up);
     saveStickers();
     if(e2.pointerId===ev.pointerId)el.releasePointerCapture(ev.pointerId);
   };
-  el.addEventListener("pointerdown",onDown);
-  el.addEventListener("pointermove",onMove);
-  el.addEventListener("pointerup",onUp);
-  el.addEventListener("pointercancel",onUp);
+  el.addEventListener("pointermove",move);
+  el.addEventListener("pointerup",up);
+  el.addEventListener("pointercancel",up);
 }
 
 /* ================= ПОВОРОТ МАРКЕРОМ ================= */
@@ -391,7 +384,7 @@ function startRotate(ev, el, st){
   document.addEventListener("pointerup",up);
 }
 
-/* ================= SPRING / ЖЕСТ ЗАКРЫТИЯ ================= */
+/* ================= SPRING для открытия/закрытия ================= */
 let last=0,raf=0;
 function loop(t){
   let dt=Math.min(.033,((t-last)/1000)||.016);last=t;
@@ -401,6 +394,21 @@ function loop(t){
   render();raf=requestAnimationFrame(loop);
 }
 function go(){if(!raf){last=performance.now();raf=requestAnimationFrame(loop)}}
+
+/* ================= SPRING для editMode ================= */
+let lastE=0,rafE=0;
+function editLoop(t){
+  let dt=Math.min(.033,((t-lastE)/1000)||.016);lastE=t;
+  const k=120,c=20;
+  editSpring.v+=(k*(editSpring.t-editSpring.p)-c*editSpring.v)*dt;
+  editSpring.p+=editSpring.v*dt;
+  if(Math.abs(editSpring.v)<0.002&&Math.abs(editSpring.t-editSpring.p)<0.0008){
+    editSpring.p=editSpring.t;editSpring.v=0;render();rafE=0;return;
+  }
+  render();rafE=requestAnimationFrame(editLoop);
+}
+function goEdit(){if(!rafE){lastE=performance.now();rafE=requestAnimationFrame(editLoop)}}
+
 function open(i){if(o>=0||editMode)return;o=i;s.t=1;go()}
 function close(){if(o<0)return;s.t=0;go()}
 
