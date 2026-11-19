@@ -32,25 +32,43 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .stick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .stick.sel{outline:2px dashed #ff3b30;outline-offset:4px;border-radius:6px}
 
+/* появление стикера на папке: масштаб из 0 + пружина */
+@keyframes stick-pop{
+  0%{transform:var(--rot,rotate(0deg)) scale(0);}
+  55%{transform:var(--rot,rotate(0deg)) scale(1.18);}
+  100%{transform:var(--rot,rotate(0deg)) scale(1);}
+}
+.stick.pop{animation:stick-pop .42s cubic-bezier(.34,1.56,.64,1) both}
+
 /* ===== редактор ===== */
 #editor{position:fixed;left:0;right:0;top:0;bottom:0;z-index:80;display:none;pointer-events:none}
 #editor.on{display:block}
 #editor .dim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.05) 40%,transparent);pointer-events:none}
-#palette{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);height:150px;display:flex;gap:14px;padding:10px 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x}
+#palette{position:absolute;left:0;right:0;top:max(env(safe-area-inset-top,0px),44px);height:150px;display:flex;gap:14px;padding:10px 16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x;align-items:center}
 #palette::-webkit-scrollbar{display:none}
-#palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);touch-action:none;cursor:grab;position:relative}
+#palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.34,1.56,.64,1);will-change:transform}
 #palette .pal img{width:70px;height:70px;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
-#palette .pal:active{cursor:grabbing;transform:scale(.96)}
+#palette .pal.tapped{transform:scale(.86)}
+#palette .pal.other{transform:scale(.96)}
 
 /* ===== нижняя панель ===== */
 #bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto}
 #bar.on{display:flex}
-#bar button{border:0;border-radius:22px;padding:12px 22px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22)}
-#bar button.danger{background:#ff3b30;color:#fff}
+
+/* главная кнопка (Выйти → Готово) */
+#mainBtn{border:0;border-radius:22px;padding:12px 26px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22);transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s;will-change:transform}
+#mainBtn.mode-done{background:#ff3b30;color:#fff;box-shadow:0 8px 24px rgba(255,59,48,.35)}
+#mainBtn.bounce{animation:btn-bounce .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes btn-bounce{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
 
 /* панель управления выбранным стикером */
-#controls{display:none;flex-direction:column;gap:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif;align-items:stretch}
+#controls{display:none;flex-direction:column;gap:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif;align-items:stretch;animation:ctrl-in .25s ease both}
 #controls.on{display:flex}
+@keyframes ctrl-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 #controls .row{display:flex;align-items:center;gap:10px}
 #controls .row span{width:60px;opacity:.8}
 #controls .row input{flex:1;accent-color:#ff3b30;pointer-events:auto}
@@ -70,7 +88,7 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
     <div class="row"><span>Размер</span><input type="range" id="sizeRange" min="0.3" max="4" step="0.05" value="1"></div>
     <button class="remove" id="removeBtn">Убрать выбранную наклейку</button>
   </div>
-  <button id="done">Готово</button>
+  <button id="mainBtn">Выйти</button>
 </div>
 <div id="strip"></div>
 <script>
@@ -95,11 +113,12 @@ const LS_KEY="folder-stickers-v1";
 const stage=document.getElementById("stage"),strip=document.getElementById("strip"),sa=document.getElementById("sa");
 const editorEl=document.getElementById("editor"),palette=document.getElementById("palette"),bar=document.getElementById("bar");
 const controls=document.getElementById("controls"),rotRange=document.getElementById("rotRange"),sizeRange=document.getElementById("sizeRange"),removeBtn=document.getElementById("removeBtn");
+const mainBtn=document.getElementById("mainBtn");
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, n=DATA.length;
 let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
 const s={p:0,v:0,t:0};
 
-/* ==== отдельная spring-переменная для editMode ==== */
+/* ==== spring-переменная editMode ==== */
 const editSpring={p:0,v:0,t:0};
 
 /* ================= СОСТОЯНИЕ ================= */
@@ -205,9 +224,10 @@ function loadStickers(){
 }
 function saveStickers(){try{localStorage.setItem(LS_KEY,JSON.stringify(stickers))}catch(_){}}
 
-function makeEl(st, idx){
+function makeEl(st, idx, animate){
   const el=document.createElement("div");el.className="stick";
   el.dataset.idx=idx;
+  el.style.setProperty("--rot",`rotate(${st.r}deg)`);
   el.innerHTML=`<img src="${STICKERS[st.id]}" draggable="false">`;
   el.addEventListener("pointerdown",ev=>{
     if(!editMode||st.folder!==editFolder)return;
@@ -218,7 +238,7 @@ function makeEl(st, idx){
   return el;
 }
 
-function renderStickers(){
+function renderStickers(animateIdx){
   els.forEach((e,i)=>{
     e.layer.innerHTML="";
     const list=stickers.map((st,idx)=>({st,idx})).filter(o=>o.st.folder===i);
@@ -232,35 +252,85 @@ function renderStickers(){
       el.style.left = (st.x * e.c.clientWidth - (bw*st.s)/2)+"px";
       el.style.top  = (st.y * e.c.clientHeight - (bh*st.s)/2)+"px";
       el.style.transform=`rotate(${st.r}deg)`;
+      el.style.setProperty("--rot",`rotate(${st.r}deg)`);
       if(selected===st)el.classList.add("sel");
+      if(animateIdx===stickers.indexOf(st))el.classList.add("pop");
       e.layer.appendChild(el);
       el._w=bw; el._h=bh; el._st=st;
     });
   });
-  if(!palette.childElementCount){
-    STICKERS.forEach((src,id)=>{
-      const p=document.createElement("div");p.className="pal";
-      p.innerHTML=`<img src="${src}" draggable="false">`;
-      p.addEventListener("pointerdown",ev=>startPaletteDrag(ev,id,p));
-      palette.appendChild(p);
-    });
-  }
+  if(!palette.childElementCount)buildPalette();
   render();
 }
 
+function buildPalette(){
+  STICKERS.forEach((src,id)=>{
+    const p=document.createElement("div");p.className="pal";
+    p.dataset.id=id;
+    p.innerHTML=`<img src="${src}" draggable="false">`;
+    p.addEventListener("pointerdown",ev=>{
+      if(!editMode)return;
+      ev.preventDefault();
+      /* сам стикер — глубокий отскок */
+      p.classList.remove("tapped");void p.offsetWidth;p.classList.add("tapped");
+      setTimeout(()=>p.classList.remove("tapped"),280);
+      /* остальные — лёгкий отскок */
+      palette.querySelectorAll(".pal").forEach(other=>{
+        if(other===p)return;
+        other.classList.remove("other");void other.offsetWidth;other.classList.add("other");
+        setTimeout(()=>other.classList.remove("other"),280);
+      });
+      addStickerToFolder(id);
+    });
+    palette.appendChild(p);
+  });
+}
+
+/* тап по палитре → добавление стикера */
+function addStickerToFolder(id){
+  if(!editMode)return;
+  const target=els[editFolder]; if(!target)return;
+  /* позиция: случайная в верхней зоне активной папки */
+  const fx = 0.15 + Math.random()*0.7;
+  const fy = 0.10 + Math.random()*0.28;
+  const img=new Image();img.src=STICKERS[id];
+  img.onload=()=>{
+    const st={folder:editFolder,id,x:fx,y:fy,s:pickedSize,r:0,natural:img.naturalWidth/img.naturalHeight};
+    stickers.push(st);
+    saveStickers();
+    renderStickers(stickers.length-1);
+    /* автоматически выбрать новый стикер, чтобы сразу можно было настроить */
+    requestAnimationFrame(()=>{
+      const layer=target.layer;
+      const el=layer.lastElementChild;
+      if(el){selected=st;el.classList.add("sel");updateControls();}
+    });
+  };
+}
+
+/* ================= ВЫБОР / КОНТРОЛЫ ================= */
 function selectSticker(el, st){
   document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
   selected=st; if(el)el.classList.add("sel");
-  bar.classList.add("on");
-  controls.classList.add("on");
-  rotRange.value = st.r;
-  sizeRange.value = st.s;
+  updateControls();
 }
-
+function updateControls(){
+  if(selected){
+    controls.classList.add("on");
+    rotRange.value = selected.r;
+    sizeRange.value = selected.s;
+    mainBtn.textContent="Готово";
+    mainBtn.classList.add("mode-done");
+  }else{
+    controls.classList.remove("on");
+    mainBtn.textContent="Выйти";
+    mainBtn.classList.remove("mode-done");
+  }
+}
 function deselect(){
   selected=null;
   document.querySelectorAll(".stick.sel").forEach(x=>x.classList.remove("sel"));
-  controls.classList.remove("on");
+  updateControls();
 }
 
 /* ================= РЕДАКТОР: вход/выход ================= */
@@ -268,16 +338,17 @@ function enterEdit(i){
   if(editMode||o>=0)return;
   editMode=true; editFolder=i; selected=null; pickedSize=1;
   editorEl.classList.add("on");
+  bar.classList.add("on");
   editSpring.t=1;
   goEdit();
   renderStickers();
   render();
+  updateControls();
 }
 function exitEdit(){
   if(!editMode)return;
   editMode=false; editFolder=-1; selected=null;
   deselect();
-  document.querySelectorAll(".pal").forEach(x=>x.classList.remove("picked"));
   editorEl.classList.remove("on");
   bar.classList.remove("on");
   editSpring.t=0;
@@ -286,66 +357,49 @@ function exitEdit(){
   renderStickers();
   render();
 }
-document.getElementById("done").addEventListener("click",exitEdit);
 
+/* главная кнопка: Выйти / Готово (с микроанимацией) */
+mainBtn.addEventListener("click",()=>{
+  mainBtn.classList.remove("bounce");void mainBtn.offsetWidth;mainBtn.classList.add("bounce");
+  if(selected){
+    deselect();
+    saveStickers();
+  }else{
+    exitEdit();
+  }
+});
+
+/* ползунки */
 rotRange.addEventListener("input",e=>{
   if(!selected)return;
   selected.r=parseFloat(e.target.value);
-  renderStickers();
+  const el=document.querySelector(".stick.sel");
+  if(el){el.style.transform=`rotate(${selected.r}deg)`;el.style.setProperty("--rot",`rotate(${selected.r}deg)`);}
+  saveStickers();
 });
 sizeRange.addEventListener("input",e=>{
   if(!selected)return;
   selected.s=parseFloat(e.target.value);
-  renderStickers();
+  const el=document.querySelector(".stick.sel");
+  if(el){
+    el.style.width=(el._w*selected.s)+"px";
+    el.style.height=(el._h*selected.s)+"px";
+    const parent=els[selected.folder].c;
+    el.style.left=(selected.x*parent.clientWidth-(el._w*selected.s)/2)+"px";
+    el.style.top =(selected.y*parent.clientHeight-(el._h*selected.s)/2)+"px";
+  }
+  saveStickers();
 });
 removeBtn.addEventListener("click",()=>{
   if(!selected)return;
   const i=stickers.indexOf(selected);
   if(i>=0)stickers.splice(i,1);
-  selected=null;
-  controls.classList.remove("on");
+  deselect();
   saveStickers();
   renderStickers();
 });
 
-/* ================= DRAG ИЗ ПАЛИТРЫ ================= */
-function startPaletteDrag(ev,id,palEl){
-  if(!editMode)return;
-  ev.preventDefault();
-  const ghost=document.createElement("img");
-  ghost.src=STICKERS[id];
-  const gs=86*pickedSize;
-  ghost.style.cssText=`position:fixed;width:${gs}px;height:${gs}px;object-fit:contain;pointer-events:none;z-index:200;opacity:.9;transform:translate(-50%,-50%);filter:drop-shadow(0 8px 20px rgba(0,0,0,.35))`;
-  document.body.appendChild(ghost);
-  ghost.style.left=ev.clientX+"px";
-  ghost.style.top=ev.clientY+"px";
-  const move=e2=>{ghost.style.left=e2.clientX+"px";ghost.style.top=e2.clientY+"px"};
-  const up=e2=>{
-    document.removeEventListener("pointermove",move);
-    document.removeEventListener("pointerup",up);
-    ghost.remove();
-    dropStickerOnFolder(e2.clientX, e2.clientY, id);
-  };
-  document.addEventListener("pointermove",move);
-  document.addEventListener("pointerup",up);
-}
-
-function dropStickerOnFolder(cx, cy, id){
-  const target=els[editFolder]; if(!target)return;
-  const r=target.c.getBoundingClientRect();
-  if(cx<r.left||cx>r.right||cy<r.top||cy>r.bottom)return;
-  const fx=(cx-r.left)/r.width, fy=(cy-r.top)/r.height;
-  const maxY=0.42;
-  if(fy>maxY)return;
-  const img=new Image();img.src=STICKERS[id];
-  img.onload=()=>{
-    const st={folder:editFolder,id,x:clamp(fx,0.12,0.88),y:clamp(fy,0.08,maxY),s:pickedSize,r:0,natural:img.naturalWidth/img.naturalHeight};
-    stickers.push(st);
-    saveStickers();renderStickers();
-  };
-}
-
-/* ================= МАНИПУЛЯЦИЯ (только перемещение) ================= */
+/* ================= МАНИПУЛЯЦИЯ (перемещение) ================= */
 function startStickManip(ev, el, st){
   el.setPointerCapture(ev.pointerId);
   const startX=ev.clientX, startY=ev.clientY;
@@ -373,7 +427,7 @@ function startStickManip(ev, el, st){
   el.addEventListener("pointercancel",up);
 }
 
-/* ================= SPRING для открытия/закрытия ================= */
+/* ================= SPRING открытия/закрытия ================= */
 let last=0,raf=0;
 function loop(t){
   let dt=Math.min(.033,((t-last)/1000)||.016);last=t;
@@ -384,7 +438,7 @@ function loop(t){
 }
 function go(){if(!raf){last=performance.now();raf=requestAnimationFrame(loop)}}
 
-/* ================= SPRING для editMode ================= */
+/* ================= SPRING editMode ================= */
 let lastE=0,rafE=0;
 function editLoop(t){
   let dt=Math.min(.033,((t-lastE)/1000)||.016);lastE=t;
