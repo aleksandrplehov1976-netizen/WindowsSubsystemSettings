@@ -20,6 +20,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);-webkit-font-
 /* placeholders instead of icons */
 .ph{display:inline-block;width:1em;height:1em;border:1.5px dashed currentColor;border-radius:.3em;opacity:.7;flex:none;vertical-align:middle}
 .ic{display:inline-flex;width:1em;height:1em;flex:none}.ic svg{width:100%;height:100%;fill:currentColor}
+.ic.st svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
 /* glass */
 .glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));-webkit-backdrop-filter:blur(10px) saturate(1.8);backdrop-filter:blur(10px) saturate(1.8);
@@ -30,6 +31,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);-webkit-font-
 .gbtn{--lit:0;display:inline-flex;align-items:center;justify-content:center;border:0;padding:0;margin:0;color:#000;font:inherit;cursor:pointer;touch-action:none;will-change:transform;outline:0}
 .gbtn::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.95),rgba(255,255,255,.8) 60%,rgba(255,255,255,.5));opacity:var(--lit)}
 .gbtn>*{position:relative;opacity:calc(1 - var(--lit)*.85)}
+/* кнопка-источник меню: подпись гаснет, потом кнопку подменяет морфящееся стекло */
+.gbtn.mo>*{opacity:0!important;transition:opacity .09s linear}
+.gbtn.gone{visibility:hidden}
 
 .gbtn:focus-visible{outline:2px solid var(--blue)}
 
@@ -68,12 +72,24 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);-webkit-font-
 .tl{font-size:10px;font-weight:500;line-height:1;letter-spacing:.01em;opacity:.8;transition:color .3s,opacity .3s,filter .3s}
 .tab.on{color:var(--blue)}.tab.on .ti{transform:scale(1.1)}.tab.on .tl{opacity:1}
 .tab:focus-visible{pointer-events:auto;outline:2px solid var(--blue);border-radius:26px}
+
+/* ===== menu: стекло, которое морфится из кнопки ===== */
+.scrim{position:fixed;inset:0;z-index:40;display:none;touch-action:none}
+.menu{position:fixed;left:0;top:0;z-index:41;display:none;overflow:hidden;--gfill:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);will-change:transform,width,height;touch-action:none;cursor:grab}
+.menu .mc{position:absolute;top:0;padding:6px;will-change:opacity,filter}
+.menu:not(.r) .mc{left:0}.menu.r .mc{right:0}
+.menu .ghost{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;pointer-events:none;font-weight:500;color:#000;white-space:nowrap}
+.menu .ghost>*{position:relative;opacity:1}
+.mi{display:flex;align-items:center;gap:12px;min-height:46px;padding:8px 14px;border-radius:22px;font-size:17px;line-height:1.2;cursor:pointer;color:#000}
+.mi .ic{font-size:21px}
+.mi.on{background:rgba(120,120,128,.16)}
+.sep{height:1px;margin:2px 14px;background:rgba(60,60,67,.16)}
 @media (prefers-reduced-motion:reduce){.ti,.tl,#view>div{transition:none}}
 </style>
 </head><body>
 <header class="top">
-  <button class="gbtn glass lens pill" id="bSettings" aria-label="Настройки"><span>Настройки</span></button>
-  <button class="gbtn glass lens round" id="bProfile" aria-label="Ещё"><span data-i="more"></span></button>
+  <button class="gbtn glass lens pill" id="bSettings" aria-label="Настройки" aria-haspopup="menu"><span>Настройки</span></button>
+  <button class="gbtn glass lens round" id="bProfile" aria-label="Ещё" aria-haspopup="menu"><span data-i="more"></span></button>
 </header>
 
 <main id="view"><div id="vc"><h1 id="vt"></h1><p>Здесь пока пусто</p></div></main>
@@ -93,9 +109,13 @@ const ICONS={
   home:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="255 -1774 2388 2103"><path d="M341 -706C369 -706 392 -721 413 -738L1414 -1579C1425 -1588 1438 -1593 1449 -1593C1461 -1593 1473 -1588 1484 -1579L2486 -738C2506 -721 2529 -706 2557 -706C2611 -706 2643 -745 2643 -786C2643 -809 2634 -833 2611 -851L2351 -1070V-1476C2351 -1520 2323 -1548 2279 -1548H2172C2129 -1548 2100 -1520 2100 -1476V-1281L1569 -1726C1531 -1758 1490 -1774 1449 -1774C1408 -1774 1367 -1758 1329 -1726L287 -851C265 -833 255 -809 255 -786C255 -745 287 -706 341 -706ZM567 109C567 248 651 329 792 329H2107C2248 329 2331 248 2331 109V-685L1509 -1374C1471 -1406 1426 -1405 1389 -1374L567 -685ZM1179 168V-420C1179 -466 1210 -496 1256 -496H1643C1690 -496 1719 -466 1719 -420V168Z"/></svg>',
   history:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="179 -1742 2040 2040"><path d="M1199 298C1762 298 2219 -160 2219 -722C2219 -1285 1762 -1742 1199 -1742C637 -1742 179 -1285 179 -722C179 -160 637 298 1199 298ZM676 -614C636 -614 606 -644 606 -684C606 -723 636 -753 676 -753H1129V-1358C1129 -1397 1159 -1427 1198 -1427C1237 -1427 1268 -1397 1268 -1358V-684C1268 -644 1237 -614 1198 -614Z"/></svg>',
   exchange:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="255 -1610 2134 1779"><path d="M339 -685C387 -685 424 -722 424 -770V-865C424 -1036 542 -1149 723 -1149H1503V-914C1503 -874 1526 -851 1567 -851C1586 -851 1604 -858 1619 -870L1997 -1183C2029 -1209 2031 -1250 1997 -1278L1619 -1592C1604 -1604 1586 -1610 1567 -1610C1526 -1610 1503 -1588 1503 -1547V-1315H739C442 -1315 255 -1147 255 -877V-770C255 -722 292 -685 339 -685ZM1141 106V-126H1905C2203 -126 2389 -295 2389 -564V-671C2389 -719 2353 -756 2305 -756C2257 -756 2221 -719 2221 -671V-576C2221 -405 2102 -293 1921 -293H1141V-527C1141 -568 1118 -590 1077 -590C1058 -590 1040 -584 1025 -572L647 -259C616 -232 614 -191 647 -164L1025 150C1040 162 1058 169 1077 169C1118 169 1141 146 1141 106Z"/></svg>',
-  more:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="179 -912 1866 379"><path d="M369 -533C474 -533 558 -617 558 -722C558 -827 474 -912 369 -912C264 -912 179 -827 179 -722C179 -617 264 -533 369 -533ZM1112 -533C1217 -533 1301 -617 1301 -722C1301 -827 1217 -912 1112 -912C1007 -912 922 -827 922 -722C922 -617 1007 -533 1112 -533ZM1855 -533C1960 -533 2045 -617 2045 -722C2045 -827 1960 -912 1855 -912C1750 -912 1665 -827 1665 -722C1665 -617 1750 -533 1855 -533Z"/></svg>'
+  more:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="179 -912 1866 379"><path d="M369 -533C474 -533 558 -617 558 -722C558 -827 474 -912 369 -912C264 -912 179 -827 179 -722C179 -617 264 -533 369 -533ZM1112 -533C1217 -533 1301 -617 1301 -722C1301 -827 1217 -912 1112 -912C1007 -912 922 -827 922 -722C922 -617 1007 -533 1112 -533ZM1855 -533C1960 -533 2045 -617 2045 -722C2045 -827 1960 -912 1855 -912C1750 -912 1665 -827 1665 -722C1665 -617 1750 -533 1855 -533Z"/></svg>',
+  /* временные контурные иконки для пунктов меню (st = stroke) */
+  person:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><circle cx="12" cy="9.6" r="3"/><path d="M5.9 18.5c1.5-2.4 3.6-3.5 6.1-3.5s4.6 1.1 6.1 3.5"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><path d="M7.9 12.3l2.9 2.9 5.4-6"/></svg>'
 };
-const icon=(n,cls='')=>ICONS[n]?`<span class="ic ${cls}" data-icon="${n}">${ICONS[n]}</span>`:`<i class="ph ${cls}" data-icon="${n}" title="иконка: ${n}"></i>`;
+const STROKE={person:1,check:1};
+const icon=(n,cls='')=>ICONS[n]?`<span class="ic ${STROKE[n]?'st ':''}${cls}" data-icon="${n}">${ICONS[n]}</span>`:`<i class="ph ${cls}" data-icon="${n}" title="иконка: ${n}"></i>`;
 
 /* ===== springs + one animation loop ===== */
 class Sp{constructor(x=0,k=220,c=24){this.x=x;this.v=0;this.t=x;this.k=k;this.c=c}
@@ -124,7 +144,7 @@ function lens(el,o={}){
     if(w<6||h<6||(w===W&&h===H))return;W=w;H=h;
     let r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;r=Math.min(r,w/2,h/2);
     const bez=Math.min(o.bezel||Math.max(r*1.1,6),Math.min(w,h)/2),Me=Math.min(o.mag||bez*.45,15),K=Math.min(o.zoom||Math.min(w,h)*.07,7),M=Me+K;
-    const sc=Math.min(1,300/Math.max(w,h)),cw=Math.max(4,Math.round(w*sc)),ch=Math.max(4,Math.round(h*sc));
+    const sc=Math.min(1,(o.res||300)/Math.max(w,h)),cw=Math.max(4,Math.round(w*sc)),ch=Math.max(4,Math.round(h*sc));
     const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
     const ctx=cv.getContext('2d'),im=ctx.createImageData(cw,ch),d=im.data;
     const hx=cw/2,hy=ch/2,rr=r*sc,bb=bez*sc;
@@ -146,7 +166,14 @@ function lens(el,o={}){
     const v=`blur(${o.blur??.6}px) url(#${id}) saturate(${o.sat||1.7}) brightness(1.07)`;
     el.style.webkitBackdropFilter=v;el.style.backdropFilter=v;
   };
-  new ResizeObserver(build).observe(el);build();
+  /* o.every — троттлинг пересборки карты, когда элемент меняет размер каждый кадр (меню) */
+  let last=0,pend=0;const every=o.every||0;
+  new ResizeObserver(()=>{
+    if(!every){build();return}
+    const n=performance.now();
+    if(n-last>=every){last=n;build()}
+    else if(!pend){pend=1;setTimeout(()=>{pend=0;last=performance.now();build()},every)}
+  }).observe(el);build();
 }
 
 /* ===== jelly: hold lifts + lights the glass, finger drags it elastically, release springs back ===== */
@@ -199,6 +226,159 @@ addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){con
 
 tabs[active].classList.add('on');vt.textContent=TABS[active][0];
 jelly(bar,{press:1.006,follow:.025,lim:.1,stretch:.008,damp:6});enhance(document);addEventListener('resize',measure);measure();
+
+/* =====================================================================
+   MENU — кнопка морфится в список, как нативный UIMenu в iOS 26.
+   Тайминги сняты с референса (30 fps), кадр = 33 мс:
+     к0–к2   (0–90 мс)   кнопка подсвечена, подпись гаснет
+     к3      (90 мс)     кнопку подменяет «капля»: уже кнопки по ширине (~0.62), чуть выше
+     к3–к7   (90–230 мс) капля пружинит к размеру меню, верхний край остаётся на месте
+     к4–к8               содержимое проявляется из размытия (blur ~10px → 0), стекло прозрачное
+     к8–к10              перелёт размера ~2% и возврат (лёгкая недодемпфированная пружина)
+   Закрытие — зеркально, но быстрее (~230 мс): контент размывается и гаснет первым,
+   форма схлопывается обратно в кнопку, «Изменить» проступает из размытия, затем подмена на настоящую кнопку.
+   ===================================================================== */
+const MENUS={
+  bSettings:{side:'l',items:[{t:'Настройка имени и фото',i:'person'},{t:'Выбрать',i:'check'}]},
+  bProfile:{side:'r',items:[{t:'Настройка имени и фото',i:'person'},{t:'Выбрать',i:'check'}]}
+};
+const Menu=(()=>{
+  const shell=document.createElement('div');shell.className='menu glass';shell.setAttribute('role','menu');
+  shell.innerHTML='<div class="ghost"></div><div class="mc"></div>';
+  const scrim=document.createElement('div');scrim.className='scrim';
+  document.body.append(scrim,shell);
+  const mc=$('.mc',shell),gh=$('.ghost',shell);
+  const MW=236,MR=26,PREPARE=55;           /* ширина меню, радиус, задержка до подмены (мс) */
+  const K=520,C=22;                         /* ζ≈0.48 → перелёт ≈17%, колебание ~0.35 с */
+  const OPEN=[K,C],CLOSE=[780,44];
+  const X=new Sp(0,K,C),Y=new Sp(0,K,C),W=new Sp(0,K,C),H=new Sp(0,K,C),R=new Sp(MR,K,C);
+  const P=new Sp(0,520,36);                 /* прогресс содержимого: 0 — размыто/скрыто, 1 — чётко */
+  const S=[X,Y,W,H,R,P];
+  /* желе: перетаскивание всего меню, тянется и пружинит */
+  const DX=new Sp(0,200,11),DY=new Sp(0,200,11),SX=new Sp(1,260,12),SY=new Sp(1,260,12);
+  const J=[DX,DY,SX,SY];let drag=null,moved=false,jv={x:0,y:0,lx:0,ly:0,lt:0};
+  const setK=(a)=>{[X,Y,W,H,R].forEach(s=>{s.k=a[0];s.c=a[1]})};
+  const near=s=>Math.abs(s.v)<.6&&Math.abs(s.t-s.x)<.2;
+  let st='closed',btn=null,cfg=null,from=null,to=null,timer=0;
+
+  const paint=()=>{
+    const p=clamp(P.x,0,1.2);
+    shell.style.transform=`translate3d(${(X.x+DX.x).toFixed(2)}px,${(Y.x+DY.x).toFixed(2)}px,0) scale(${SX.x.toFixed(4)},${SY.x.toFixed(4)})`;
+    shell.style.width=Math.max(0,W.x).toFixed(2)+'px';
+    shell.style.height=Math.max(0,H.x).toFixed(2)+'px';
+    shell.style.borderRadius=Math.max(0,R.x).toFixed(2)+'px';
+    mc.style.opacity=clamp(p*1.7-.2,0,1).toFixed(3);
+    mc.style.filter=p>=.87?'none':`blur(${((1-p/.87)*10).toFixed(2)}px)`;
+    gh.style.opacity=clamp(1-p*4,0,1).toFixed(3);
+    gh.style.filter=p<=.02?'none':`blur(${(p*6).toFixed(2)}px)`;
+  };
+  const api={tick(dt){
+    for(let n=0;n<2;n++){S.forEach(s=>s.step(dt/2));J.forEach(s=>s.step(dt/2))}
+    if(drag){jv.x*=.9;jv.y*=.9;aim()}
+    paint();
+    if(st==='closing'&&P.x<.04&&Math.abs(W.x-from.w)<3&&Math.abs(H.x-from.h)<3){finish();return false}
+    if(st==='opening'&&S.every(s=>s===P?s.rest:near(s))){st='open'}
+    return st==='opening'||st==='closing'||!!drag||!J.every(s=>s.rest||near(s));
+  }};
+
+  function build(c,side){
+    mc.className='mc';shell.classList.toggle('r',side==='r');
+    mc.style.width=MW+'px';
+    mc.innerHTML=c.items.map((it,k)=>(k?'<div class="sep"></div>':'')+`<div class="mi" role="menuitem" data-k="${k}">${icon(it.i)}<span>${it.t}</span></div>`).join('');
+  }
+
+  function open(b,c){
+    if(st!=='closed')return;
+    st='opening';btn=b;cfg=c;
+    const r=b.getBoundingClientRect(),vw=innerWidth,vh=innerHeight,w=Math.min(MW,vw-24);
+    build(c,c.side);mc.style.width=w+'px';
+    gh.innerHTML=b.innerHTML;gh.style.fontSize=getComputedStyle(b).fontSize;
+    /* измеряем высоту содержимого */
+    shell.style.display='block';shell.style.visibility='hidden';shell.style.width=w+'px';shell.style.height='auto';
+    const h=mc.offsetHeight;
+    shell.style.height='';
+    from={x:r.left,y:r.top,w:r.width,h:r.height,r:r.height/2};
+    /* меню «прорастает» из верхнего угла кнопки: верхний край совпадает, ширина выравнивается по стороне */
+    const tx=clamp(c.side==='r'?r.right-w:r.left,12,vw-12-w),ty=clamp(r.top,8,vh-12-h);
+    to={x:tx,y:ty,w,h,r:MR};
+    /* стартовая «капля»: уже кнопки (~.62), чуть выше, смещена к центру */
+    const bw=from.w*.62,bh=from.h*1.08;
+    X.x=from.x+(from.w-bw)/2+from.w*.04;Y.x=from.y+(from.h-bh)/2;W.x=bw;H.x=bh;R.x=Math.min(bw,bh)/2;
+    X.v=Y.v=W.v=H.v=R.v=0;P.x=0;P.v=0;
+    X.t=to.x;Y.t=to.y;W.t=to.w;H.t=to.h;R.t=to.r;P.t=1;
+    setK(OPEN);P.k=520;P.c=36;
+    DX.x=DY.x=0;DX.t=DY.t=0;DX.v=DY.v=0;SX.x=SY.x=SX.t=SY.t=1;SX.v=SY.v=0;
+    shell.style.transformOrigin=c.side==='r'?'100% 0':'0 0';
+    paint();
+    scrim.style.display='block';
+    b.classList.add('mo');b.setAttribute('aria-expanded','true');
+    clearTimeout(timer);
+    timer=setTimeout(()=>{            /* к3: подмена кнопки каплей */
+      b.classList.add('gone');
+      shell.style.visibility='visible';
+      run(api);
+    },PREPARE);
+  }
+
+  function close(){
+    if(st!=='open'&&st!=='opening')return;
+    clearTimeout(timer);
+    if(shell.style.visibility!=='visible'){finish();return}     /* закрыли раньше подмены */
+    st='closing';
+    const r=btn.getBoundingClientRect();
+    from={x:r.left,y:r.top,w:r.width,h:r.height,r:r.height/2};
+    X.t=from.x;Y.t=from.y;W.t=from.w;H.t=from.h;R.t=from.r;P.t=0;
+    setK(CLOSE);P.k=760;P.c=44;        /* закрытие быстрее, контент уходит первым */
+    drag=null;DX.t=DY.t=0;SX.t=SY.t=1;
+    run(api);
+  }
+
+  function finish(){
+    clearTimeout(timer);
+    shell.style.display='none';shell.style.visibility='hidden';scrim.style.display='none';
+    if(btn){btn.classList.remove('mo','gone');btn.removeAttribute('aria-expanded')}
+    st='closed';
+  }
+
+  /* желейное перетаскивание: палец тянет меню, оно растягивается по скорости и пружинит назад */
+  function aim(){const sp=clamp(Math.hypot(jv.x,jv.y)/2600,0,.12),ax=Math.abs(jv.x),ay=Math.abs(jv.y),k=ax+ay+1e-6;
+    SX.t=1.035*(1+sp*ax/k-sp*.5*ay/k)+Math.abs(DX.t)/(W.x||1)*.5;
+    SY.t=1.035*(1+sp*ay/k-sp*.5*ax/k)+Math.abs(DY.t)/(H.x||1)*.5}
+  shell.addEventListener('pointerdown',e=>{
+    if(st!=='open'||e.button>0)return;
+    drag={x:e.clientX,y:e.clientY};moved=false;jv={x:0,y:0,lx:e.clientX,ly:e.clientY,lt:performance.now()};
+    SX.t=SY.t=1.035;
+    const mv=ev=>{if(!drag)return;
+      const n=performance.now(),dt=Math.max(1,n-jv.lt)/1000;
+      jv.x=jv.x*.55+((ev.clientX-jv.lx)/dt)*.45;jv.y=jv.y*.55+((ev.clientY-jv.ly)/dt)*.45;jv.lx=ev.clientX;jv.ly=ev.clientY;jv.lt=n;
+      const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;
+      if(Math.hypot(dx,dy)>6){moved=true;off()}
+      /* резиновое сопротивление: чем дальше, тем туже */
+      const rb=v=>Math.sign(v)*Math.min(Math.abs(v)*.45,34*(1-Math.exp(-Math.abs(v)/90)));
+      DX.t=rb(dx);DY.t=rb(dy);run(api)};
+    const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);
+      drag=null;DX.t=DY.t=0;SX.t=SY.t=1;run(api)};
+    addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up);
+    run(api)});
+
+  /* взаимодействие */
+  scrim.addEventListener('pointerdown',e=>{e.preventDefault();close()});
+  mc.addEventListener('pointerdown',e=>{const it=e.target.closest('.mi');if(it)it.classList.add('on')});
+  const off=()=>$$('.mi.on',mc).forEach(i=>i.classList.remove('on'));
+  mc.addEventListener('pointerup',off);mc.addEventListener('pointerleave',off);mc.addEventListener('pointercancel',off);
+  mc.addEventListener('click',e=>{const it=e.target.closest('.mi');if(!it||moved)return;
+    const item=cfg.items[+it.dataset.k];close();if(item&&item.fn)item.fn()});
+  addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  addEventListener('resize',()=>{if(st!=='closed')finish()});
+
+  /* стекло для меню; карту рефракции пересобираем не чаще раза в 40 мс */
+  lens(shell,{bezel:16,every:40,res:130,blur:16});
+
+  return{toggle(b,c){st==='open'||st==='opening'?close():open(b,c)},close,get state(){return st}};
+})();
+$('#bSettings').addEventListener('click',e=>Menu.toggle(e.currentTarget,MENUS.bSettings));
+$('#bProfile').addEventListener('click',e=>Menu.toggle(e.currentTarget,MENUS.bProfile));
+
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 </script>
