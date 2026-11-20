@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>ЛИнТехGPT — отключен</title>
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ЛИнТехGPT">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    :root{--bg:#fff;--ink:#000;--ink2:rgba(60,60,67,.6);--blue:#0a84ff;--f-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;color-scheme:light}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;margin:0}
+    body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);-webkit-font-smoothing:antialiased;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+
+    /* placeholders & icons */
+    .ph{display:inline-block;width:1em;height:1em;border:1.5px dashed currentColor;border-radius:.3em;opacity:.7;flex:none;vertical-align:middle}
+    .ic{display:inline-flex;width:1em;height:1em;flex:none}.ic svg{width:100%;height:100%;fill:currentColor}
+
+    /* glass base */
+    .glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));-webkit-backdrop-filter:blur(10px) saturate(1.8);backdrop-filter:blur(10px) saturate(1.8);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),inset 0 -3px 8px rgba(0,0,0,.035),0 6px 20px rgba(0,0,0,.09)}
+    .glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;
+      background:linear-gradient(180deg,rgba(60,60,67,.26) 0%,rgba(60,60,67,.12) 45%,rgba(60,60,67,.2) 100%);
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+    .gbtn{--lit:0;display:inline-flex;align-items:center;justify-content:center;border:0;padding:0;margin:0;color:#000;font:inherit;cursor:pointer;touch-action:none;will-change:transform;outline:0}
+    .gbtn::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.95),rgba(255,255,255,.8) 60%,rgba(255,255,255,.5));opacity:var(--lit)}
+    .gbtn>*{position:relative;opacity:calc(1 - var(--lit)*.85)}
+    .gbtn:focus-visible{outline:2px solid var(--blue)}
+
+    /* top buttons */
+    .top{position:fixed;left:0;right:0;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;pointer-events:none;
+      padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+    .top>*{pointer-events:auto}
+    .pill{height:44px;padding:0 18px;border-radius:22px;gap:8px;font-size:17px;font-weight:500}
+    .pill .ph,.pill .ic{font-size:18px}
+    .round{width:44px;height:44px;border-radius:50%;font-size:20px}
+
+    /* main view */
+    #view{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+      padding:calc(env(safe-area-inset-top,0px) + 76px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 100px) max(20px,env(safe-area-inset-left,0px));
+      text-align:center;pointer-events:none}
+    #view>div{pointer-events:auto;transition:opacity .25s ease,transform .35s cubic-bezier(.2,.9,.3,1),filter .25s;display:flex;flex-direction:column;align-items:center;gap:0;max-width:440px}
+    #view>div.out{opacity:0;transform:translateY(8px);filter:blur(4px)}
+    .oops-img{width:min(200px,50vw);height:auto;display:block;margin:0 auto 12px;border-radius:0;box-shadow:none;border:none}
+    .main-title{font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-.01em;margin:0 0 4px}
+    .sub-text{font-size:17px;line-height:1.4;color:var(--ink2);margin:0;max-width:360px}
+
+    /* tab bar */
+    #tabbar{--lit:0;will-change:transform;position:fixed;z-index:30;left:0;right:0;margin:0 auto;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);
+      width:min(calc(100% - 24px),440px);height:64px;padding:4px;border-radius:32px;display:flex;touch-action:none;cursor:pointer}
+    #tabbar::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.9),rgba(255,255,255,0) 55%);opacity:calc(var(--lit)*.45)}
+    .bub{position:fixed;left:0;top:0;height:56px;border-radius:28px;pointer-events:none;will-change:transform;z-index:31;--lit:0;--rest:1;background:rgba(120,120,128,calc(.2*var(--rest,1)))}
+    .bub .lb{position:absolute;inset:0;border-radius:inherit;opacity:var(--lit);
+      -webkit-backdrop-filter:blur(3px) saturate(1.4);backdrop-filter:blur(3px) saturate(1.4);
+      -webkit-mask-image:radial-gradient(closest-side,transparent 58%,#000 100%);mask-image:radial-gradient(closest-side,transparent 58%,#000 100%);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.65),inset 0 7px 9px -5px rgba(255,255,255,.95),inset 0 -8px 10px -6px rgba(0,0,0,.14),
+        inset 9px 0 9px -8px rgba(60,170,255,.4),inset -9px 0 9px -8px rgba(255,80,170,.32),0 4px 14px rgba(0,0,0,.14)}
+    .bub .lb::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(180deg,rgba(60,60,67,.3),rgba(60,60,67,.1) 50%,rgba(60,60,67,.24));
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+    .cl2{position:absolute;inset:0;pointer-events:none;z-index:2;background:rgba(255,255,255,.97)}
+    .cl2 .ct{position:absolute;left:4px;top:4px;height:56px;display:flex}
+    .cl2 .ct .tab{flex:none;color:var(--blue)}.cl2 .ct .ti{transform:scale(1.1)}.cl2 .ct .tl{opacity:1}
+    .tab{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:#000;font:inherit;padding:0;outline:0;pointer-events:none}
+    .ti{font-size:24px;line-height:1;transition:transform .45s cubic-bezier(.3,1.7,.5,1),color .3s}
+    .tl{font-size:10px;font-weight:500;line-height:1;letter-spacing:.01em;opacity:.8;transition:color .3s,opacity .3s,filter .3s}
+    .tab.on{color:var(--blue)}.tab.on .ti{transform:scale(1.1)}.tab.on .tl{opacity:1}
+    .tab:focus-visible{pointer-events:auto;outline:2px solid var(--blue);border-radius:26px}
+
+    /* floating left button */
+    .float-left{position:fixed;z-index:25;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 90px);
+      height:44px;padding:0 20px;border-radius:22px;font-size:15px;font-weight:500;gap:8px;display:inline-flex;align-items:center;justify-content:center}
+
+    @media (prefers-reduced-motion:reduce){.ti,.tl,#view>div{transition:none}}
+  </style>
+</head>
+<body>
+
+<!-- top: only the floating profile (gear-like) icon in the right corner -->
+<header class="top" style="justify-content:flex-end">
+  <button class="gbtn glass lens round" id="bProfile" aria-label="Профиль">
+    <span data-i="profile"></span>
+  </button>
+</header>
+
+<!-- main content: same for all tabs -->
+<main id="view">
+  <div id="vc">
+    <img class="oops-img" src="oops.png" alt="oops" draggable="false">
+    <h1 class="main-title">ЛИнТехGPT отключен 15.04.2026</h1>
+    <p class="sub-text">Спасибо, что был с нами! Ты создал 7 презентаций и отправил 93 сообщения в ЛИнТехGPT. Будем помнить этот необычный опыт как любопытный эксперимент.</p>
+  </div>
+</main>
+
+<!-- tab bar (3 tabs: Спросить, Презы, Доки) -->
+<nav id="tabbar" class="glass lens" aria-label="Вкладки"></nav>
+
+<!-- floating left button "О ЛИнТехGPT" -->
+<button class="gbtn glass lens float-left" id="aboutBtn">О ЛИнТехGPT</button>
+
+<!-- floating bubble for tab effect -->
+<div class="bub"><div class="lb lens"></div></div>
+
+<svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
+
+<script>
+'use strict';
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+
+/* ===== ICONS (exact SVGs provided) ===== */
+const ICONS = {
+  'ask': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="179 -1769 2326 1947" width="96" height="96" fill="#0a0a0a"><path d="M1342 178C2014 178 2505 -232 2505 -796C2505 -1362 2013 -1769 1342 -1769C670 -1769 179 -1362 179 -796C179 -609 234 -435 330 -294C377 -224 394 -175 394 -134C394 -81 378 -38 332 2C253 69 294 178 398 178C523 178 662 135 765 64C934 138 1131 178 1342 178ZM1342 17C1151 17 980 -19 835 -84C771 -112 725 -104 664 -68C621 -41 571 -18 520 -7C541 -42 555 -82 555 -134C555 -208 528 -289 464 -385C384 -501 340 -642 340 -796C340 -1265 754 -1608 1342 -1608C1930 -1608 2344 -1265 2344 -796C2344 -327 1930 17 1342 17ZM875 -652C955 -652 1020 -717 1020 -797C1020 -877 954 -942 875 -942C795 -942 730 -877 730 -797C730 -717 795 -652 875 -652ZM1342 -652C1421 -652 1486 -717 1486 -797C1486 -877 1421 -942 1342 -942C1262 -942 1197 -877 1197 -797C1197 -717 1262 -652 1342 -652ZM1808 -652C1888 -652 1953 -717 1953 -797C1953 -877 1888 -942 1808 -942C1728 -942 1663 -877 1663 -797C1663 -717 1728 -652 1808 -652Z"/></svg>`,
+  'pres': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="179 -1742 2040 2040" width="96" height="96" fill="#0a0a0a"><path d="M1199 298C1762 298 2219 -159 2219 -722C2219 -1285 1762 -1742 1199 -1742C636 -1742 179 -1285 179 -722C179 -159 636 298 1199 298ZM1199 128C729 128 349 -252 349 -722C349 -1192 729 -1572 1199 -1572C1669 -1572 2049 -1192 2049 -722C2049 -252 1669 128 1199 128ZM719 -282H1234C1228 -295 1226 -311 1226 -327C1226 -339 1227 -352 1230 -365H721C675 -365 647 -389 647 -439V-1006C647 -1055 675 -1081 721 -1081H1537C1581 -1081 1610 -1055 1610 -1006V-959C1638 -955 1666 -946 1690 -930V-1009C1690 -1111 1637 -1163 1538 -1163H719C619 -1163 565 -1111 565 -1009V-435C565 -333 619 -282 719 -282ZM757 -432H1256C1291 -497 1356 -552 1443 -583C1403 -622 1375 -680 1375 -745C1375 -855 1448 -936 1542 -956V-975C1541 -998 1524 -1013 1500 -1013H756C732 -1013 715 -997 715 -973V-472C715 -447 732 -432 757 -432ZM1583 -596C1656 -596 1718 -661 1718 -746C1718 -830 1656 -891 1583 -891C1510 -891 1446 -829 1446 -745C1446 -661 1510 -596 1583 -596ZM1354 -282H1810C1847 -282 1868 -300 1868 -327C1868 -413 1758 -536 1583 -536C1407 -536 1297 -413 1297 -327C1297 -300 1320 -282 1354 -282Z"/></svg>`,
+  'docs': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="255 -1981 2045 2516" width="96" height="96" fill="#0a0a0a"><path d="M255 221C255 430 358 535 565 535H1505C1712 535 1815 429 1815 221V36H1990C2196 36 2300 -70 2300 -278V-1090C2300 -1213 2275 -1291 2200 -1368L1695 -1881C1624 -1954 1540 -1981 1433 -1981H1050C844 -1981 740 -1875 740 -1667V-1482H565C359 -1482 255 -1377 255 -1168ZM1720 -826 1169 -1387C1093 -1465 1030 -1482 918 -1482H901V-1664C901 -1763 954 -1820 1058 -1820H1500V-1307C1500 -1191 1556 -1136 1671 -1136H2139V-281C2139 -181 2085 -125 1981 -125H1815V-560C1815 -688 1800 -744 1720 -826ZM1645 -1331V-1741L2097 -1281H1694C1659 -1281 1645 -1296 1645 -1331ZM416 218V-1166C416 -1264 469 -1321 573 -1321H901V-741C901 -615 965 -552 1089 -552H1654V218C1654 318 1600 374 1497 374H572C469 374 416 318 416 218ZM1108 -703C1068 -703 1052 -719 1052 -759V-1284L1623 -703Z"/></svg>`,
+  'profile': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="179 -1870 2300 2298" width="96" height="96" fill="#0a0a0a"><path d="M1329 428C1355 428 1376 414 1383 366L1393 284C1399 250 1419 232 1455 228C1490 222 1513 237 1526 267L1557 343C1577 388 1601 396 1626 389C1651 381 1668 363 1661 314L1650 234C1645 199 1662 178 1697 162C1727 149 1755 153 1776 181L1826 246C1857 287 1880 288 1904 273C1928 260 1938 239 1919 193L1888 118C1874 84 1883 58 1913 37C1941 17 1967 13 1995 35L2060 85C2099 115 2124 111 2143 92C2161 72 2166 48 2135 10L2085 -55C2065 -82 2067 -111 2089 -140C2109 -166 2135 -176 2168 -162L2244 -131C2290 -112 2311 -122 2324 -147C2338 -170 2337 -193 2297 -224L2233 -274C2206 -296 2201 -324 2214 -355C2226 -387 2248 -402 2284 -399L2366 -388C2414 -382 2434 -398 2440 -424C2446 -449 2439 -473 2393 -492L2318 -523C2287 -535 2274 -559 2278 -598C2283 -631 2300 -652 2336 -657L2416 -667C2464 -674 2479 -695 2479 -721C2479 -748 2464 -768 2416 -775L2336 -785C2299 -791 2284 -812 2278 -847C2274 -881 2286 -905 2318 -919L2394 -949C2439 -969 2447 -993 2440 -1018C2433 -1043 2414 -1060 2365 -1054L2285 -1043C2250 -1038 2224 -1056 2213 -1087C2200 -1122 2204 -1146 2233 -1168L2297 -1218C2337 -1249 2338 -1272 2325 -1295C2310 -1321 2288 -1329 2244 -1312L2168 -1279C2135 -1265 2108 -1277 2088 -1304C2068 -1331 2065 -1358 2086 -1387L2136 -1451C2166 -1490 2162 -1515 2143 -1534C2124 -1552 2099 -1557 2061 -1527L1996 -1476C1969 -1454 1939 -1459 1912 -1480C1883 -1504 1874 -1526 1888 -1560L1919 -1636C1938 -1682 1928 -1702 1904 -1716C1878 -1731 1854 -1725 1826 -1689L1776 -1624C1754 -1597 1727 -1592 1694 -1606C1663 -1618 1646 -1640 1651 -1676L1663 -1757C1668 -1805 1655 -1824 1626 -1831C1598 -1838 1575 -1826 1558 -1785L1528 -1709C1515 -1677 1489 -1663 1453 -1669C1417 -1675 1398 -1692 1394 -1727L1383 -1808C1376 -1856 1355 -1870 1330 -1870C1302 -1870 1281 -1856 1275 -1809L1265 -1726C1259 -1693 1240 -1673 1203 -1670C1168 -1666 1144 -1679 1132 -1709L1101 -1785C1083 -1825 1061 -1839 1032 -1831C1001 -1823 990 -1800 996 -1756L1007 -1676C1012 -1640 995 -1617 962 -1605C928 -1592 904 -1597 882 -1624L832 -1689C803 -1726 780 -1730 755 -1716C730 -1701 720 -1682 739 -1636L770 -1560C783 -1528 775 -1501 747 -1480C719 -1459 691 -1456 662 -1477L598 -1528C562 -1555 536 -1555 515 -1534C494 -1512 495 -1487 522 -1452L573 -1388C595 -1360 590 -1329 569 -1303C545 -1276 524 -1266 489 -1280L414 -1311C372 -1328 348 -1322 334 -1296C317 -1269 325 -1245 361 -1218L425 -1168C452 -1146 457 -1117 444 -1087C429 -1055 408 -1040 373 -1044L292 -1055C244 -1060 224 -1044 218 -1018C212 -993 219 -969 265 -950L340 -920C372 -905 386 -881 379 -846C373 -811 359 -791 322 -785L242 -775C193 -768 179 -748 179 -721C179 -695 193 -674 242 -667L322 -657C359 -651 374 -631 379 -597C384 -563 372 -537 340 -524L264 -493C219 -473 211 -449 218 -424C225 -399 244 -382 293 -389L372 -400C407 -404 429 -388 445 -354C457 -324 452 -295 425 -274L361 -224C320 -193 319 -170 334 -146C347 -122 368 -112 414 -130L489 -163C522 -177 549 -164 570 -138C590 -113 593 -84 572 -56L521 9C492 48 496 72 515 92C534 110 559 115 597 84L661 34C689 13 716 17 747 38C775 59 784 85 770 118L739 193C720 239 730 260 755 273C778 288 801 287 832 246L882 182C905 153 931 149 961 162C993 175 1011 198 1006 234L994 315C990 363 1005 382 1032 389C1057 395 1081 388 1100 343L1130 267C1142 237 1166 223 1205 227C1241 231 1260 250 1264 285L1275 365C1281 414 1302 428 1329 428ZM1471 -792C1396 -792 1349 -820 1314 -882L1043 -1349C1000 -1425 1020 -1489 1105 -1512C1175 -1532 1249 -1543 1324 -1543C1706 -1543 2026 -1283 2115 -927C2139 -842 2095 -792 2007 -792ZM749 -137C596 -286 502 -492 502 -721C502 -951 596 -1157 749 -1306C810 -1368 876 -1354 920 -1278L1191 -811C1227 -747 1227 -694 1190 -629L921 -165C877 -88 811 -75 749 -137ZM1321 -662C1289 -662 1264 -688 1264 -719C1264 -751 1289 -777 1321 -777C1353 -777 1378 -751 1378 -719C1378 -688 1353 -662 1321 -662ZM1324 100C1249 100 1175 89 1105 69C1020 46 999 -18 1044 -95L1312 -559C1349 -623 1396 -650 1471 -650H2006C2095 -650 2139 -600 2115 -515C2024 -161 1706 100 1324 100Z"/></svg>`
+};
+
+/* helper to render icon from ICONS */
+const icon=(name,cls='')=>{
+  if(ICONS[name]) return `<span class="ic ${cls}" data-icon="${name}">${ICONS[name]}</span>`;
+  return `<i class="ph ${cls}" data-icon="${name}" title="иконка: ${name}"></i>`;
+};
+
+/* ===== springs + animation loop ===== */
+class Sp{constructor(x=0,k=220,c=24){this.x=x;this.v=0;this.t=x;this.k=k;this.c=c}
+  step(dt){this.v+=(this.k*(this.t-this.x)-this.c*this.v)*dt;this.x+=this.v*dt}
+  get rest(){return Math.abs(this.v)<.02&&Math.abs(this.t-this.x)<.0015}}
+const anims=new Set();let raf=0,lastT=0;
+function run(a){anims.add(a);if(!raf){lastT=performance.now();raf=requestAnimationFrame(loop)}}
+function loop(now){const dt=Math.min(.033,(now-lastT)/1000);lastT=now;
+  for(const a of [...anims]){if(a.tick(dt)===false)anims.delete(a)}
+  raf=anims.size?requestAnimationFrame(loop):0}
+
+/* ===== liquid glass refraction (Chromium only) ===== */
+const LENS_OK=(()=>{const ua=navigator.userAgent;if(/iPhone|iPad|iPod|Firefox/.test(ua))return false;
+  const b=navigator.userAgentData&&navigator.userAgentData.brands;return !!(b&&b.some(x=>/Chromium/.test(x.brand)))||/Chrome\//.test(ua)})();
+const NS='http://www.w3.org/2000/svg';
+function lens(el,o={}){
+  if(!LENS_OK||el._lens)return;el._lens=1;
+  const id='lg'+(lens.n=(lens.n||0)+1);
+  const f=document.createElementNS(NS,'filter');f.id=id;
+  f.setAttribute('color-interpolation-filters','sRGB');
+  ['x','y'].forEach(a=>f.setAttribute(a,'0'));f.setAttribute('width','100%');f.setAttribute('height','100%');
+  $('#defs').appendChild(f);
+  let W=0,H=0;
+  const build=()=>{
+    const w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);
+    if(w<6||h<6||(w===W&&h===H))return;W=w;H=h;
+    let r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;r=Math.min(r,w/2,h/2);
+    const bez=Math.min(o.bezel||Math.max(r*1.1,6),Math.min(w,h)/2),Me=Math.min(o.mag||bez*.45,15),K=Math.min(o.zoom||Math.min(w,h)*.07,7),M=Me+K;
+    const sc=Math.min(1,300/Math.max(w,h)),cw=Math.max(4,Math.round(w*sc)),ch=Math.max(4,Math.round(h*sc));
+    const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
+    const ctx=cv.getContext('2d'),im=ctx.createImageData(cw,ch),d=im.data;
+    const hx=cw/2,hy=ch/2,rr=r*sc,bb=bez*sc;
+    for(let y=0;y<ch;y++)for(let x=0;x<cw;x++){
+      const px=x+.5-hx,py=y+.5-hy,qx=Math.abs(px)-(hx-rr),qy=Math.abs(py)-(hy-rr);
+      const ox=Math.max(qx,0),oy=Math.max(qy,0),depth=-(Math.hypot(ox,oy)+Math.min(Math.max(qx,qy),0)-rr);
+      let nx=0,ny=0;
+      if(ox>0||oy>0){const l=Math.hypot(ox,oy);nx=ox/l*Math.sign(px);ny=oy/l*Math.sign(py)}
+      else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
+      const t=clamp(depth/bb,0,1),m=depth<0?0:Math.pow(1-t,2.4),i=(y*cw+x)*4;
+      const ex=-nx*m*(Me/M)-(px/hx)*(K/M),ey=-ny*m*(Me/M)-(py/hy)*(K/M);
+      d[i]=Math.round(255*clamp(.5+.5*ex,0,1));d[i+1]=Math.round(255*clamp(.5+.5*ey,0,1));d[i+2]=128;d[i+3]=255;
+    }
+    ctx.putImageData(im,0,0);
+    const S=2*M,url=cv.toDataURL(),ch3=(s,k)=>`<feDisplacementMap in="SourceGraphic" in2="m" scale="${(S*s).toFixed(2)}" xChannelSelector="R" yChannelSelector="G" result="d${k}"/><feColorMatrix in="d${k}" type="matrix" values="${k==='r'?'1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0':k==='g'?'0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0':'0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0'}" result="c${k}"/>`;
+    f.innerHTML=`<feImage href="${url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="m"/>`+
+      ch3(1,'r')+ch3(.975,'g')+ch3(.95,'b')+
+      `<feBlend in="cr" in2="cg" mode="screen" result="rg"/><feBlend in="rg" in2="cb" mode="screen"/>`;
+    const v=`blur(${o.blur??.6}px) url(#${id}) saturate(${o.sat||1.7}) brightness(1.07)`;
+    el.style.webkitBackdropFilter=v;el.style.backdropFilter=v;
+  };
+  new ResizeObserver(build).observe(el);build();
+}
+
+/* ===== jelly effect ===== */
+function jelly(el,o={}){
+  if(el._jelly)return;el._jelly=1;
+  const pr=o.press||1.06,sx=new Sp(1,300,o.damp||17),sy=new Sp(1,300,o.damp||17),tx=new Sp(0,230,o.damp||15),ty=new Sp(0,230,o.damp||15),lit=new Sp(0,180,22);
+  const all=[sx,sy,tx,ty,lit];let down=false,r0=null,vx=0,vy=0,lx=0,ly=0,lt=0;
+  const apply=()=>{el.style.transform=`translate3d(${tx.x.toFixed(2)}px,${ty.x.toFixed(2)}px,0) scale(${sx.x.toFixed(4)},${sy.x.toFixed(4)})`;el.style.setProperty('--lit',clamp(lit.x,0,1.15).toFixed(3))};
+  const api={tick(dt){for(let n=0;n<2;n++)all.forEach(s=>s.step(dt/2));
+    if(down){vx*=.9;vy*=.9;aim()}apply();return down||!all.every(s=>s.rest)}};
+  function aim(){const sp=clamp(Math.hypot(vx,vy)/3500,0,o.stretch??.09),ax=Math.abs(vx),ay=Math.abs(vy),k=ax+ay+1e-6;
+    sx.t=pr*(1+sp*ax/k-sp*.55*ay/k);sy.t=pr*(1+sp*ay/k-sp*.55*ax/k)}
+  el.addEventListener('pointerdown',e=>{if(e.button>0)return;down=true;try{el.setPointerCapture(e.pointerId)}catch(_){}
+    r0=el.getBoundingClientRect();lx=e.clientX;ly=e.clientY;lt=performance.now();vx=vy=0;
+    sx.t=sy.t=pr;lit.t=1;tx.t=ty.t=0;mark(e);run(api)});
+  el.addEventListener('pointermove',e=>{if(!down)return;const now=performance.now(),dt=Math.max(1,now-lt)/1000;
+    vx=vx*.55+((e.clientX-lx)/dt)*.45;vy=vy*.55+((e.clientY-ly)/dt)*.45;lx=e.clientX;ly=e.clientY;lt=now;
+    const cx=r0.left+r0.width/2,cy=r0.top+r0.height/2,lim=Math.min(r0.width,r0.height)*(o.lim??.17),fl=o.follow??.25;
+    tx.t=clamp((e.clientX-cx)*fl,-lim,lim);ty.t=clamp((e.clientY-cy)*fl,-lim,lim);mark(e)});
+  const up=()=>{if(!down)return;down=false;sx.t=sy.t=1;tx.t=ty.t=0;lit.t=0;run(api)};
+  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  function mark(e){if(!r0)return;el.style.setProperty('--mx',clamp((e.clientX-r0.left)/r0.width*100,0,100)+'%');el.style.setProperty('--my',clamp((e.clientY-r0.top)/r0.height*100,0,100)+'%')}
+}
+function enhance(root){$$('.gbtn',root).forEach(b=>jelly(b,{press:parseFloat(b.dataset.press)||1.06}));$$('.lens',root).forEach(e=>lens(e))}
+
+/* ===== app shell ===== */
+// inject profile icon into button
+const profileSpan = document.querySelector('[data-i="profile"]');
+if(profileSpan) profileSpan.outerHTML = icon('profile');
+
+// 3 tabs definition
+const TABS = [
+  { name: 'Спросить', icon: 'ask' },
+  { name: 'Презы', icon: 'pres' },
+  { name: 'Доки', icon: 'docs' }
+];
+
+const bar = $('#tabbar'), bub = $('.bub'), vc = $('#vc');
+let active = 0; // default tab (Спросить)
+let tw = 1, bx = 0, by = 0;
+const PAD = 4;
+const pos = new Sp(active, 260, 22), lit = new Sp(0, 200, 22);
+let down = false;
+
+// build tab bar
+TABS.forEach((tab, i) => {
+  bar.insertAdjacentHTML('beforeend',
+    `<button class="tab" data-i="${i}" tabindex="0" aria-label="${tab.name}">
+      <span class="ti">${icon(tab.icon)}</span>
+      <span class="tl">${tab.name}</span>
+    </button>`
+  );
+});
+const tabs = $$('.tab', bar);
+
+// create clip layer (cl2) for active tab highlight
+const cl2 = document.createElement('div');
+cl2.className = 'cl2';
+cl2.innerHTML = '<div class="ct"></div>';
+bar.appendChild(cl2);
+const ct = $('.ct', cl2);
+ct.innerHTML = tabs.map(t => t.outerHTML).join('');
+
+// sync active class
+const syncOn = () => tabs.forEach((t, k) => t.classList.toggle('on', !down && k === active));
+
+function measure() {
+  tw = (bar.clientWidth - PAD * 2) / TABS.length;
+  bub.style.width = tw + 'px';
+  $$('.tab', ct).forEach(t => t.style.width = tw + 'px');
+  paint();
+}
+
+function paint() {
+  const r = bar.getBoundingClientRect(), k = r.width / bar.offsetWidth;
+  bx = r.left + PAD * k; by = r.top + PAD * k;
+
+  const sx0 = 1 + clamp(Math.abs(pos.v) * .1, 0, .5) + lit.x * .16;
+  const sy0 = 1 - clamp(Math.abs(pos.v) * .03, 0, .1) + lit.x * .16;
+  const cw = tw * sx0, chh = 56 * sy0;
+  const l = PAD + pos.x * tw + tw / 2 - cw / 2;
+  const t = PAD + 28 - chh / 2;
+
+  cl2.style.clipPath = `inset(${t}px ${bar.clientWidth - l - cw}px ${bar.clientHeight - t - chh}px ${l}px round ${chh/2}px)`;
+  cl2.style.opacity = clamp(lit.x, 0, 1);
+  ct.style.transformOrigin = `${pos.x * tw + tw / 2}px 28px`;
+  ct.style.transform = `scale(${(1 + lit.x * .09).toFixed(3)})`;
+
+  const sv = Math.abs(pos.v);
+  const sx = 1 + clamp(sv * .1, 0, .5) + lit.x * .16;
+  const sy = 1 - clamp(sv * .03, 0, .1) + lit.x * .16;
+  bub.style.transform = `translate3d(${(bx + pos.x * tw * k).toFixed(2)}px,${by.toFixed(2)}px,0) scale(${(sx * k).toFixed(3)},${(sy * k).toFixed(3)})`;
+  bub.style.setProperty('--lit', clamp(lit.x, 0, 1).toFixed(3));
+  bub.style.setProperty('--rest', clamp(1 - lit.x * 5, 0, 1).toFixed(3));
+}
+
+let until = 0;
+const anim = {
+  tick(dt) {
+    for (let n = 0; n < 2; n++) { pos.step(dt / 2); lit.step(dt / 2); }
+    paint();
+    return down || performance.now() < until || !(pos.rest && lit.rest);
+  }
+};
+
+const idxAt = x => {
+  const r = bar.getBoundingClientRect();
+  return clamp((x - r.left - PAD) / tw - .5, 0, TABS.length - 1);
+};
+
+function setActive(i) {
+  if (i === active) return;
+  active = i;
+  syncOn();
+  // content change (same for all tabs, but we still keep the fade for effect)
+  vc.classList.add('out');
+  setTimeout(() => { vc.classList.remove('out'); }, 180);
+  if (navigator.vibrate) try { navigator.vibrate(8); } catch (_) {}
+}
+
+bar.addEventListener('pointerdown', e => {
+  if (e.button > 0) return;
+  down = true;
+  until = performance.now() + 1200;
+  syncOn();
+  try { bar.setPointerCapture(e.pointerId); } catch (_) {}
+  lit.t = 1;
+  pos.t = idxAt(e.clientX);
+  setActive(Math.round(pos.t));
+  run(anim);
+});
+bar.addEventListener('pointermove', e => {
+  if (!down) return;
+  pos.t = idxAt(e.clientX);
+  setActive(Math.round(pos.t));
+  run(anim);
+});
+const end = () => {
+  if (!down) return;
+  down = false;
+  syncOn();
+  lit.t = 0;
+  pos.t = active;
+  until = performance.now() + 1200;
+  run(anim);
+};
+bar.addEventListener('pointerup', end);
+bar.addEventListener('pointercancel', end);
+
+tabs.forEach((t, i) => t.addEventListener('click', e => {
+  if (e.detail === 0) { // keyboard
+    pos.t = i;
+    setActive(i);
+    run(anim);
+  }
+}));
+
+addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    const i = clamp(active + (e.key === 'ArrowRight' ? 1 : -1), 0, TABS.length - 1);
+    pos.t = i;
+    setActive(i);
+    run(anim);
+  }
+});
+
+// init active tab
+tabs[active].classList.add('on');
+
+// jelly on the tab bar itself (slight)
+jelly(bar, { press: 1.006, follow: .025, lim: .1, stretch: .008, damp: 6 });
+
+// jelly + lens on all gbtn and lens elements
+enhance(document);
+
+// also make the floating left button jelly & lens
+const aboutBtn = document.getElementById('aboutBtn');
+if (aboutBtn) { jelly(aboutBtn, { press: 1.08 }); lens(aboutBtn); }
+
+addEventListener('resize', measure);
+measure();
+
+// service worker (optional)
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
