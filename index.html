@@ -13,9 +13,13 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #sa{position:fixed;visibility:hidden;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
 #stage{position:fixed;inset:0;perspective-origin:50% 38%;transition:opacity .25s ease}
 #stage.dimmed{opacity:0;pointer-events:none}
+
+/* Экран "My" - просто белый фон */
 #myScreen{position:fixed;inset:0;background:#fff;z-index:25;opacity:0;pointer-events:none;transition:opacity .25s ease}
-#myScreen.on{opacity:1}
+#myScreen.on{opacity:1;pointer-events:auto}
+
 .b,.c{position:absolute;left:50%;top:0;will-change:transform}
+/* ВНИМАНИЕ: .tab и .tl здесь для ПАПОК */
 .tab,.bb,.sheet,.c{position:absolute}
 .tab{left:calc(var(--u)*9);top:0;width:calc(var(--u)*362);height:calc(var(--u)*74);border-radius:calc(var(--u)*40) calc(var(--u)*37) 0 0}
 .bb{left:calc(var(--u)*9);right:calc(var(--u)*9);top:calc(var(--u)*37);border-radius:0 calc(var(--u)*32) calc(var(--u)*26) calc(var(--u)*26)}
@@ -45,41 +49,13 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #editor{position:fixed;left:0;right:0;top:0;bottom:0;z-index:80;display:none;pointer-events:none}
 #editor.on{display:block}
 #editor .dim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.05) 40%,transparent);pointer-events:none}
-
-#pickerWrap{
-  position:absolute;left:0;right:0;
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  pointer-events:none;z-index:5;
-}
+#pickerWrap{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:5}
 #pickerWrap.top{top:max(env(safe-area-inset-top,0px),44px)}
 #pickerWrap.bottom{bottom:calc(env(safe-area-inset-bottom,0px) + 240px)}
-
-#hintBtn{
-  pointer-events:auto;
-  max-width:300px;
-  margin:0 16px;
-  background:rgba(0,0,0,.6);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  color:#fff;border:0;border-radius:14px;
-  padding:9px 14px;
-  font:500 12px/1.35 -apple-system,Helvetica,Arial,sans-serif;
-  text-align:center;
-  box-shadow:0 6px 16px rgba(0,0,0,.28);
-  transition:transform .2s cubic-bezier(.34,1.56,.64,1);
-}
+#hintBtn{pointer-events:auto;max-width:300px;margin:0 16px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;border:0;border-radius:14px;padding:9px 14px;font:500 12px/1.35 -apple-system,Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.28);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
 #hintBtn:active{transform:scale(.96)}
 #hintBtn b{font-weight:600}
-
-#palette{
-  position:relative;width:100%;
-  height:150px;
-  display:flex;gap:14px;
-  padding:10px 16px;box-sizing:border-box;
-  overflow-x:auto;overflow-y:hidden;
-  scrollbar-width:none;-webkit-overflow-scrolling:touch;
-  pointer-events:auto;touch-action:pan-x;
-  align-items:center;
-}
+#palette{position:relative;width:100%;height:150px;display:flex;gap:14px;padding:10px 16px;box-sizing:border-box;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-x;align-items:center}
 #palette::-webkit-scrollbar{display:none}
 #palette .pal{flex:0 0 auto;width:86px;height:86px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.34,1.56,.64,1);will-change:transform}
 #palette .pal img{width:70px;height:70px;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
@@ -87,13 +63,12 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #palette .pal.other{transform:scale(.96)}
 
 /* ===== нижняя панель ===== */
-#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto}
+#bar{position:absolute;left:0;right:0;bottom:max(env(safe-area-inset-bottom,0px),16px);display:none;flex-direction:column;align-items:center;gap:10px;pointer-events:auto;z-index:100}
 #bar.on{display:flex}
 #mainBtn{border:0;border-radius:22px;padding:12px 26px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:rgba(255,255,255,.92);color:#111;box-shadow:0 8px 24px rgba(0,0,0,.22);transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s;will-change:transform}
 #mainBtn.mode-done{background:#ff3b30;color:#fff;box-shadow:0 8px 24px rgba(255,59,48,.35)}
 #mainBtn.bounce{animation:btn-bounce .35s cubic-bezier(.34,1.56,.64,1)}
 @keyframes btn-bounce{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
-
 #controls{display:none;flex-direction:column;gap:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);color:#fff;font:500 13px -apple-system,Helvetica,Arial,sans-serif;align-items:stretch;animation:ctrl-in .25s ease both}
 #controls.on{display:flex}
 @keyframes ctrl-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -107,6 +82,7 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #modal.on{display:flex}
 #modal .modal-dim{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:fade-in .2s ease both}
 #modal .modal-card{position:relative;background:#fffefd;color:#111;border-radius:20px;padding:22px 20px 18px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:card-in .3s cubic-bezier(.34,1.4,.64,1) both}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
 @keyframes card-in{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:none}}
 #modal h3{margin:0 0 10px;font-size:19px;font-weight:600;letter-spacing:-.3px}
 #modal p{margin:0 0 12px;font-size:14px;line-height:1.45;color:#3a3a3c}
@@ -115,31 +91,33 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #modal .modal-ok{border:0;border-radius:14px;padding:12px 20px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:#111;color:#fff;width:100%;transition:transform .15s}
 #modal .modal-ok:active{transform:scale(.97)}
 
-/* ===== ТАББАР ===== */
+/* ============================================================
+   ТАББАР (ИЗОЛИРОВАННЫЕ КЛАССЫ tb-*)
+   ============================================================ */
 #tabbarWrap{
   position:fixed;
-  left:50%;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 10px);
-  width:min(calc(100vw - 24px),440px);
-  height:64px;
-  transform:translateX(-50%) translateY(0);
-  transition:transform .55s cubic-bezier(.32,.72,0,1),opacity .4s ease,filter .5s ease;
-  will-change:transform,opacity,filter;
+  left:0;right:0;
+  margin:0 auto;
+  bottom:calc(env(safe-area-inset-bottom,0px) + var(--tb-bottom,10px));
+  width:min(calc(100% - 24px), var(--tb-max-width,440px));
+  height:var(--tb-height,64px);
   z-index:30;
   pointer-events:none;
+  transition:transform .55s cubic-bezier(.32,.72,0,1),opacity .4s ease,filter .5s ease;
+  will-change:transform,opacity,filter;
 }
 #tabbarWrap.down{
-  transform:translateX(-50%) translateY(calc(100% + 30px));
+  transform:translateY(calc(100% + 40px));
   opacity:0;
   filter:blur(6px);
 }
 #tabbarWrap > *{pointer-events:auto}
 
 #tabbar{
+  --lit:0;will-change:transform;
   position:absolute;inset:0;
-  height:64px;padding:4px;border-radius:32px;
+  height:100%;padding:var(--tb-pad,4px);border-radius:calc(var(--tb-height,64px)/2);
   display:flex;touch-action:none;cursor:pointer;
-  will-change:transform;
 }
 #tabbar::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
   background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.9),rgba(255,255,255,0) 55%);
@@ -157,15 +135,17 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;mask-composite:exclude}
 
-.bub{
+/* пузырь-подсветка (аналог .bub) */
+.tb-bubble{
   position:absolute;left:0;top:0;
-  height:56px;border-radius:28px;
+  height:calc(var(--tb-height,64px) - 2*var(--tb-pad,4px));
+  border-radius:calc((var(--tb-height,64px) - 2*var(--tb-pad,4px))/2);
   pointer-events:none;will-change:transform;
   z-index:31;
   --lit:0;--rest:1;
   background:rgba(120,120,128,calc(.2*var(--rest,1)));
 }
-.bub .lb{
+.tb-bubble .tb-lens{
   position:absolute;inset:0;border-radius:inherit;opacity:var(--lit);
   -webkit-backdrop-filter:blur(3px) saturate(1.4);
   backdrop-filter:blur(3px) saturate(1.4);
@@ -174,29 +154,31 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.65),inset 0 7px 9px -5px rgba(255,255,255,.95),inset 0 -8px 10px -6px rgba(0,0,0,.14),
     inset 9px 0 9px -8px rgba(60,170,255,.4),inset -9px 0 9px -8px rgba(255,80,170,.32),0 4px 14px rgba(0,0,0,.14);
 }
-.bub .lb::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+.tb-bubble .tb-lens::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
   background:linear-gradient(180deg,rgba(60,60,67,.3),rgba(60,60,67,.1) 50%,rgba(60,60,67,.24));
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;mask-composite:exclude}
 
-.cl2{position:absolute;inset:0;pointer-events:none;z-index:2;background:rgba(255,255,255,.97)}
-.cl2 .ct{position:absolute;left:4px;top:4px;height:56px;display:flex}
-.cl2 .ct .tab{flex:none;color:#0a84ff}
-.cl2 .ct .ti{transform:scale(1.1)}
-.cl2 .ct .tl{opacity:1}
+/* слой «активная вкладка» (аналог .cl2) */
+.tb-active-layer{position:absolute;inset:0;pointer-events:none;z-index:2;background:rgba(255,255,255,.97);border-radius:inherit}
+.tb-active-inner{position:absolute;left:var(--tb-pad,4px);top:var(--tb-pad,4px);height:calc(var(--tb-height,64px) - 2*var(--tb-pad,4px));display:flex}
+.tb-active-inner .tb{flex:none;color:#0a84ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;font:inherit;padding:0;pointer-events:none}
+.tb-active-inner .tb-icon{transform:scale(1.1)}
+.tb-active-inner .tb-label{opacity:1}
 
-.tab{
+/* базовые табы */
+.tb{
   position:relative;z-index:1;flex:1;min-width:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
   border:0;background:none;color:#000;font:inherit;padding:0;outline:0;
   pointer-events:none;
 }
-.ti{font-size:24px;line-height:1;transition:transform .45s cubic-bezier(.3,1.7,.5,1),color .3s;display:inline-flex;width:1em;height:1em}
-.ti svg{width:100%;height:100%;fill:currentColor;display:block}
-.tl{font-size:10px;font-weight:500;line-height:1;letter-spacing:.01em;opacity:.8;transition:color .3s,opacity .3s}
-.tab.on{color:#0a84ff}
-.tab.on .ti{transform:scale(1.1)}
-.tab.on .tl{opacity:1}
+.tb-icon{font-size:26px;line-height:1;transition:transform .45s cubic-bezier(.3,1.7,.5,1),color .3s;display:inline-flex;width:1em;height:1em}
+.tb-icon svg{width:100%;height:100%;fill:currentColor;display:block}
+.tb-label{font-size:11px;font-weight:500;line-height:1;letter-spacing:.01em;opacity:.8;transition:color .3s,opacity .3s}
+.tb.on{color:#0a84ff}
+.tb.on .tb-icon{transform:scale(1.1)}
+.tb.on .tb-label{opacity:1}
 </style>
 </head>
 <body>
@@ -226,7 +208,7 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 <!-- ТАББАР -->
 <div id="tabbarWrap">
   <nav id="tabbar" class="glass lens" aria-label="Вкладки"></nav>
-  <div class="bub"><div class="lb lens"></div></div>
+  <div class="tb-bubble"><div class="tb-lens lens"></div></div>
 </div>
 
 <svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
@@ -518,14 +500,12 @@ function exitEdit(){
   render();
 }
 
-/* главная кнопка: Выйти / Готово */
 mainBtn.addEventListener("click",()=>{
   mainBtn.classList.remove("bounce");void mainBtn.offsetWidth;mainBtn.classList.add("bounce");
   if(selected){ deselect(); saveStickers(); }
   else { exitEdit(); }
 });
 
-/* ползунки */
 rotRange.addEventListener("input",e=>{
   if(!selected)return;
   selected.r=parseFloat(e.target.value);
@@ -563,7 +543,7 @@ hintBtn.addEventListener("click",e=>{
 modal.querySelector(".modal-dim").addEventListener("click",()=>modal.classList.remove("on"));
 document.getElementById("modalOk").addEventListener("click",()=>modal.classList.remove("on"));
 
-/* ================= МАНИПУЛЯЦИЯ (перемещение) ================= */
+/* ================= МАНИПУЛЯЦИЯ ================= */
 function startStickManip(ev, el, st){
   el.setPointerCapture(ev.pointerId);
   const startX=ev.clientX, startY=ev.clientY;
@@ -625,18 +605,40 @@ strip.addEventListener("pointermove",e=>{if(!done&&sy-e.clientY>14){done=true;cl
 strip.addEventListener("pointerup",()=>{if(!done){done=true;close()}});
 addEventListener("resize",layout);
 
-/* ================= INIT ================= */
-loadStickers();
-layout();
-
 /* =====================================================================
-   ТАББАР (jelly + glass + lens)
+   ТАББАР (jelly + glass + lens) — С ИЗОЛИРОВАННЫМИ КЛАССАМИ
    ===================================================================== */
+
+/* КОНСТАНТЫ ТАББАРА — МЕНЯЙ ЗДЕСЬ */
+const TB_CFG = {
+  width:      440,   // макс. ширина навбара (px)
+  height:     64,    // высота навбара (px)
+  bottom:     10,    // отступ снизу (px), поверх safe-area
+  pad:        4,     // внутренний паддинг (px)
+  sideMargin: 24,    // суммарный боковой отступ (px)
+
+  springPos:   {k:260, c:22},   // движение активной вкладки
+  springLit:   {k:200, c:22},   // подсветка при нажатии
+  jellyPress:  1.006,           
+  jellyFollow: 0.025,           
+  jellyLim:    0.1,             
+  jellyStretch:0.008,           
+  jellyDamp:   6,               
+
+  lensBar:  {bezel:16, blur:12, sat:1.7},
+  lensBub:  {bezel:12, blur:8,  sat:1.4, every:60},
+};
+
+/* прокидываем размеры в CSS-переменные */
+document.documentElement.style.setProperty('--tb-height',     TB_CFG.height+'px');
+document.documentElement.style.setProperty('--tb-bottom',     TB_CFG.bottom+'px');
+document.documentElement.style.setProperty('--tb-pad',        TB_CFG.pad+'px');
+document.documentElement.style.setProperty('--tb-max-width',  TB_CFG.width+'px');
+
 (function(){
   const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
   const cl=(v,a,b)=>v<a?a:v>b?b:v;
 
-  /* ---- Spring ---- */
   class Sp{
     constructor(x=0,k=220,c=24){this.x=x;this.v=0;this.t=x;this.k=k;this.c=c}
     step(dt){this.v+=(this.k*(this.t-this.x)-this.c*this.v)*dt;this.x+=this.v*dt}
@@ -770,28 +772,29 @@ layout();
   /* ---- Элементы ---- */
   const wrap=document.getElementById('tabbarWrap');
   const bar=document.getElementById('tabbar');
-  const bub=wrap.querySelector('.bub');
+  const bub=wrap.querySelector('.tb-bubble');
   const myScreen=document.getElementById('myScreen');
 
   const TABS=[['study','study'],['my','my']];
   TABS.forEach(([n,ic],i)=>{
     bar.insertAdjacentHTML('beforeend',
-      `<button class="tab" data-i="${i}" tabindex="0" aria-label="${n}"><span class="ti">${TB_ICONS[ic]}</span><span class="tl">${n}</span></button>`);
+      `<button class="tb" data-i="${i}" tabindex="0" aria-label="${n}"><span class="tb-icon">${TB_ICONS[ic]}</span><span class="tb-label">${n}</span></button>`);
   });
-  const tabs=$$('.tab',bar);
+  const tabs=$$('.tb',bar);
 
-  /* cl2 — слой «активной вкладки» с clip-path */
+  /* клонируем в слой активной вкладки */
   const cl2=document.createElement('div');
-  cl2.className='cl2';
-  cl2.innerHTML='<div class="ct"></div>';
+  cl2.className='tb-active-layer';
+  cl2.innerHTML='<div class="tb-active-inner"></div>';
   bar.appendChild(cl2);
-  const ct=$('.ct',cl2);
+  const ct=$('.tb-active-inner',cl2);
   ct.innerHTML=tabs.map(t=>t.outerHTML).join('');
 
-  let active=0,tw=1,bx=0,by=0;
-  const PAD=4;
-  const pos=new Sp(active,260,22);
-  const lit=new Sp(0,200,22);
+  let active=0;
+  let tw=1,bx=0,by=0;
+  const PAD=TB_CFG.pad;
+  const pos=new Sp(active, TB_CFG.springPos.k, TB_CFG.springPos.c);
+  const lit=new Sp(0,      TB_CFG.springLit.k, TB_CFG.springLit.c);
   let down=false;
 
   const syncOn=()=>tabs.forEach((t,k)=>t.classList.toggle('on',!down&&k===active));
@@ -799,7 +802,7 @@ layout();
   function measure(){
     tw=(bar.clientWidth-PAD*2)/TABS.length;
     bub.style.width=tw+'px';
-    $$('.tab',ct).forEach(t=>t.style.width=tw+'px');
+    $$('.tb',ct).forEach(t=>t.style.width=tw+'px');
     paint();
   }
   function paint(){
@@ -812,10 +815,10 @@ layout();
       const sy0=1-cl(Math.abs(pos.v)*.03,0,.1)+lit.x*.16;
       const cw=tw*sx0,chh=56*sy0;
       const l=PAD+pos.x*tw+tw/2-cw/2;
-      const t=PAD+28-chh/2;
+      const t=PAD+(bar.clientHeight/2)-chh/2;
       cl2.style.clipPath=`inset(${t}px ${bar.clientWidth-l-cw}px ${bar.clientHeight-t-chh}px ${l}px round ${chh/2}px)`;
       cl2.style.opacity=cl(lit.x,0,1);
-      ct.style.transformOrigin=`${pos.x*tw+tw/2}px 28px`;
+      ct.style.transformOrigin=`${pos.x*tw+tw/2}px ${bar.clientHeight/2}px`;
       ct.style.transform=`scale(${(1+lit.x*.09).toFixed(3)})`;
     }
     const sv=Math.abs(pos.v);
@@ -842,11 +845,10 @@ layout();
     active=i;
     syncOn();
     if(i===1){
-      /* my: белый экран */
       stage.classList.add('dimmed');
       myScreen.classList.add('on');
+      tabbarSetHidden(false);
     }else{
-      /* study: папки */
       stage.classList.remove('dimmed');
       myScreen.classList.remove('on');
       try{layout()}catch(_){}
@@ -880,19 +882,28 @@ layout();
 
   tabs[active].classList.add('on');
 
-  jelly(bar,{press:1.006,follow:.025,lim:.1,stretch:.008,damp:6});
-  lens(bar,{bezel:16,blur:12,sat:1.7});
-  lens(bub.querySelector('.lb'),{bezel:12,blur:8,sat:1.4,every:60});
+  jelly(bar,{
+    press: TB_CFG.jellyPress,
+    follow:TB_CFG.jellyFollow,
+    lim:   TB_CFG.jellyLim,
+    stretch:TB_CFG.jellyStretch,
+    damp:  TB_CFG.jellyDamp
+  });
+  lens(bar, TB_CFG.lensBar);
+  lens(bub.querySelector('.tb-lens'), TB_CFG.lensBub);
 
-  /* Начальный layout таббара */
-  requestAnimationFrame(()=>{measure()});
+  requestAnimationFrame(()=>measure());
   addEventListener('resize',measure);
 
-  /* Экспорт: управление видимостью таббара из основного скрипта */
+  /* Экспорт управления видимостью */
   tabbarSetHidden=function(v){
     wrap.classList.toggle('down', !!v);
   };
 })();
+
+/* ================= INIT ================= */
+loadStickers();
+layout();
 </script>
 </body>
 </html>
