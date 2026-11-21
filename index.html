@@ -86,11 +86,19 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 /* ============================================================
    ОБЩИЙ МАТЕРИАЛ: glass + jelly
    ============================================================ */
+:root{
+  /* ===== НАСТРОЙКА СТЕКЛА (меняй здесь) ===== */
+  --g-blur:3px;        /* базовый блюр по всей площади стекла */
+  --g-edge-blur:8px;   /* блюр у кромки (Safari/iOS и Chromium) */
+  --g-edge-w:14px;     /* ширина кромки, где блюр усиливается */
+  --g-lens-blur:1.5;   /* блюр слоя с преломлением, Chromium (число, px) */
+  --g-sat:1.8;         /* насыщенность фона под стеклом */
+}
 .glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
 /* слои стекла: базовый блюр + кромка (блюр сильнее и преломление у краёв) + внутренний глоу */
 .gb,.gf{position:absolute;inset:0;border-radius:inherit;pointer-events:none}
-.gb1{-webkit-backdrop-filter:blur(7px) saturate(1.8);backdrop-filter:blur(7px) saturate(1.8)}
-.gb2{--gm:15px;-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);
+.gb1{-webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat))}
+.gb2{--gm:var(--g-edge-w);-webkit-backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);
   -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
   mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
 .gf{z-index:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 6px 8px -3px #fff,inset 0 -6px 8px -3px #fff,inset 0 0 16px rgba(255,255,255,.5)}
@@ -204,7 +212,7 @@ const DATA=[
  {t:"A1",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
  {t:"A2",b:"#A18594",f:"#AD94A1",c:"#fff"},
  {t:"B1",b:"#FF9BAA",f:"#FFA9B6",c:"#fff"},
- {t:"B2",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
+ {t:"B22",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
  {t:"Носитель (C)",b:"#FFF0F5",f:"#FFF5F8",c:"#555"}
 ];
 const LOREM="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
@@ -661,7 +669,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
     el.insertAdjacentHTML('afterbegin','<i class="gb gb1"></i><i class="gb gb2"></i>');
     el.insertAdjacentHTML('beforeend','<i class="gf"></i>');
     const g=el.querySelector('.gb2');
-    lens(g,{bezel:20,mag:9,zoom:.001,blur:2.5,sat:1.5});
+    lens(g,{bezel:20,mag:9,zoom:.001,blur:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--g-lens-blur'))||1.5,sat:1.5});
   }
   window.glassify=glassify;
 
