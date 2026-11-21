@@ -88,10 +88,12 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
    ============================================================ */
 :root{
   /* ===== НАСТРОЙКА СТЕКЛА (меняй здесь) ===== */
-  --g-blur:3px;        /* базовый блюр по всей площади стекла */
-  --g-edge-blur:8px;   /* блюр у кромки (Safari/iOS и Chromium) */
-  --g-edge-w:14px;     /* ширина кромки, где блюр усиливается */
-  --g-lens-blur:1.5;   /* блюр слоя с преломлением, Chromium (число, px) */
+  --g-blur:.6px;        /* базовый блюр по всей площади стекла */
+  --g-edge-blur:2px;   /* блюр у кромки (Safari/iOS и Chromium) */
+  --g-edge-w:16px;     /* ширина кромки, где блюр усиливается */
+  --g-lens-blur:.4;    /* блюр слоя с преломлением, Chromium (число, px) */
+  --g-lens-mag:16;     /* сила преломления у кромки, Chromium (число, px) */
+  --g-lens-bezel:28;   /* ширина зоны преломления, Chromium (число, px) */
   --g-sat:1.8;         /* насыщенность фона под стеклом */
 }
 .glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
@@ -212,7 +214,7 @@ const DATA=[
  {t:"A1",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
  {t:"A2",b:"#A18594",f:"#AD94A1",c:"#fff"},
  {t:"B1",b:"#FF9BAA",f:"#FFA9B6",c:"#fff"},
- {t:"B22",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
+ {t:"B2",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
  {t:"Носитель (C)",b:"#FFF0F5",f:"#FFF5F8",c:"#555"}
 ];
 const LOREM="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
@@ -669,7 +671,8 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
     el.insertAdjacentHTML('afterbegin','<i class="gb gb1"></i><i class="gb gb2"></i>');
     el.insertAdjacentHTML('beforeend','<i class="gf"></i>');
     const g=el.querySelector('.gb2');
-    lens(g,{bezel:20,mag:9,zoom:.001,blur:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--g-lens-blur'))||1.5,sat:1.5});
+    const cs=getComputedStyle(document.documentElement),v=(n,d)=>{const x=parseFloat(cs.getPropertyValue(n));return isNaN(x)?d:x};
+    lens(g,{bezel:v('--g-lens-bezel',28),mag:v('--g-lens-mag',16),zoom:.001,blur:v('--g-lens-blur',.4),sat:1.5});
   }
   window.glassify=glassify;
 
