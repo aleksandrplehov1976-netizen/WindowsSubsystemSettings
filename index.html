@@ -86,20 +86,26 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 /* ============================================================
    ОБЩИЙ МАТЕРИАЛ: glass + jelly
    ============================================================ */
-.glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));-webkit-backdrop-filter:blur(10px) saturate(1.8);backdrop-filter:blur(10px) saturate(1.8);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 6px 8px -3px #fff,inset 0 -6px 8px -3px #fff,inset 0 0 16px rgba(255,255,255,.5),0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
+.glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
+/* слои стекла: базовый блюр + кромка (блюр сильнее и преломление у краёв) + внутренний глоу */
+.gb,.gf{position:absolute;inset:0;border-radius:inherit;pointer-events:none}
+.gb1{-webkit-backdrop-filter:blur(7px) saturate(1.8);backdrop-filter:blur(7px) saturate(1.8)}
+.gb2{--gm:15px;-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);
+  -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
+  mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
+.gf{z-index:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 6px 8px -3px #fff,inset 0 -6px 8px -3px #fff,inset 0 0 16px rgba(255,255,255,.5)}
 .glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;
   background:linear-gradient(180deg,rgba(255,255,255,.9) 0%,rgba(60,60,67,.32) 36%,rgba(60,60,67,.32) 64%,rgba(255,255,255,.9) 100%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 .jl{position:relative;--lit:0;will-change:transform;touch-action:manipulation}
-.jl>*{position:relative}
+.jl>*:not(.gb):not(.gf){position:relative}
 .jl::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.9),rgba(255,255,255,0) 70%);opacity:calc(var(--lit,0)*.3)}
 .pal.jl::before{opacity:calc(var(--lit,0)*.6)}
 
 /* ============================================================
    ТАББАР (tb-*)
    ============================================================ */
-#tabbarWrap{position:fixed;left:0;right:0;margin:0 auto;bottom:calc(env(safe-area-inset-bottom,0px) + var(--tb-bottom,10px));
+#tabbarWrap{position:fixed;left:0;right:0;margin:0 auto;bottom:max(var(--tb-bottom,8px),calc(env(safe-area-inset-bottom,0px) - 13px));
   width:min(calc(100% - 24px),var(--tb-max-width,440px));height:var(--tb-height,64px);z-index:30;pointer-events:none;box-sizing:border-box;
   transition:transform .55s cubic-bezier(.32,.72,0,1),opacity .4s ease,filter .5s ease}
 #tabbarWrap.down{transform:translateY(calc(100% + 40px));opacity:0;filter:blur(6px);pointer-events:none}
@@ -172,6 +178,8 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   <nav id="tabbar" class="glass" aria-label="Вкладки"></nav>
   <div class="tb-bubble"><div class="tb-ring"><div class="tb-ct"></div></div><div class="tb-lens"></div></div>
 </div>
+
+<svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
 
 <div id="modal">
   <div class="modal-dim"></div>
@@ -365,7 +373,7 @@ function renderStickers(animateIdx){
 function buildPalette(){
   STICKERS.forEach((s0,id)=>{
     const p=document.createElement("div");p.className="pal glass jl";
-    p.dataset.id=id;
+    p.dataset.id=id;if(window.glassify)glassify(p);
     p.innerHTML=`<img src="${s0}" draggable="false">`;
     p.addEventListener("click",()=>{ if(editMode)addStickerToFolder(id); });
     if(window.jelly)jelly(p,{press:1.08,follow:.2,lim:.12});
@@ -558,7 +566,7 @@ addEventListener("resize",layout);
    ТАББАР (jelly + glass + линза)
    ===================================================================== */
 const TB_CFG = {
-  width:440, tabW:90, height:64, bottom:10, pad:4,
+  width:440, tabW:90, height:64, bottom:8, pad:4,
   springPos:{k:260,c:22}, springLit:{k:380,c:24},
   jellyPress:1.006, jellyFollow:.025, jellyLim:.1, jellyStretch:.008, jellyDamp:6
 };
@@ -605,6 +613,57 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   }
   
   window.jelly=jelly;
+  /* --- преломление кромки (Chromium) + размытие; в Safari/iOS — усиленный блюр у краёв --- */
+  const LENS_OK=(()=>{const ua=navigator.userAgent;if(/iPhone|iPad|iPod|Firefox/.test(ua))return false;
+    const b=navigator.userAgentData&&navigator.userAgentData.brands;return !!(b&&b.some(x=>/Chromium/.test(x.brand)))||/Chrome\//.test(ua)})();
+  const NS='http://www.w3.org/2000/svg';
+  function lens(el,o={}){
+    if(!LENS_OK||el._lens)return;el._lens=1;
+    const id='lg'+(lens.n=(lens.n||0)+1);
+    const f=document.createElementNS(NS,'filter');f.id=id;
+    f.setAttribute('color-interpolation-filters','sRGB');
+    ['x','y'].forEach(a=>f.setAttribute(a,'0'));f.setAttribute('width','100%');f.setAttribute('height','100%');
+    $('#defs').appendChild(f);
+    let W=0,H=0;
+    const build=()=>{
+      const w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);
+      if(w<6||h<6||(w===W&&h===H))return;W=w;H=h;
+      let r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;r=Math.min(r,w/2,h/2);
+      const bez=Math.min(o.bezel||Math.max(r*1.1,6),Math.min(w,h)/2),Me=Math.min(o.mag||bez*.45,15),K=Math.min(o.zoom||Math.min(w,h)*.07,7),M=Me+K;
+      const sc=Math.min(1,300/Math.max(w,h)),cw=Math.max(4,Math.round(w*sc)),ch=Math.max(4,Math.round(h*sc));
+      const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
+      const ctx=cv.getContext('2d'),im=ctx.createImageData(cw,ch),d=im.data;
+      const hx=cw/2,hy=ch/2,rr=r*sc,bb=bez*sc;
+      for(let y=0;y<ch;y++)for(let x=0;x<cw;x++){
+        const px=x+.5-hx,py=y+.5-hy,qx=Math.abs(px)-(hx-rr),qy=Math.abs(py)-(hy-rr);
+        const ox=Math.max(qx,0),oy=Math.max(qy,0),depth=-(Math.hypot(ox,oy)+Math.min(Math.max(qx,qy),0)-rr);
+        let nx=0,ny=0;
+        if(ox>0||oy>0){const l=Math.hypot(ox,oy);nx=ox/l*Math.sign(px);ny=oy/l*Math.sign(py)}
+        else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
+        const t=clamp(depth/bb,0,1),m=depth<0?0:Math.pow(1-t,2.4),i=(y*cw+x)*4;
+        const ex=-nx*m*(Me/M)-(px/hx)*(K/M),ey=-ny*m*(Me/M)-(py/hy)*(K/M);
+        d[i]=Math.round(255*clamp(.5+.5*ex,0,1));d[i+1]=Math.round(255*clamp(.5+.5*ey,0,1));d[i+2]=128;d[i+3]=255;
+      }
+      ctx.putImageData(im,0,0);
+      const S=2*M,url=cv.toDataURL(),ch3=(s,k)=>`<feDisplacementMap in="SourceGraphic" in2="m" scale="${(S*s).toFixed(2)}" xChannelSelector="R" yChannelSelector="G" result="d${k}"/><feColorMatrix in="d${k}" type="matrix" values="${k==='r'?'1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0':k==='g'?'0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0':'0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0'}" result="c${k}"/>`;
+      f.innerHTML=`<feImage href="${url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="m"/>`+
+        ch3(1,'r')+ch3(.975,'g')+ch3(.95,'b')+
+        `<feBlend in="cr" in2="cg" mode="screen" result="rg"/><feBlend in="rg" in2="cb" mode="screen"/>`;
+      const v=`blur(${o.blur??.6}px) url(#${id}) saturate(${o.sat||1.7}) brightness(1.07)`;
+      el.style.webkitBackdropFilter=v;el.style.backdropFilter=v;
+    };
+    new ResizeObserver(build).observe(el);build();
+  }
+  
+  
+  function glassify(el){
+    if(el._gl)return;el._gl=1;
+    el.insertAdjacentHTML('afterbegin','<i class="gb gb1"></i><i class="gb gb2"></i>');
+    el.insertAdjacentHTML('beforeend','<i class="gf"></i>');
+    const g=el.querySelector('.gb2');
+    lens(g,{bezel:20,mag:9,zoom:.001,blur:2.5,sat:1.5});
+  }
+  window.glassify=glassify;
 
   /* --- иконки --- */
   const TB_ICONS={
@@ -613,6 +672,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   };
 
   const wrap=$('#tabbarWrap'),bar=$('#tabbar'),bub=$('.tb-bubble',wrap),myScreen=$('#myScreen');
+  glassify(bar);
   const TABS=[['study','study'],['my','my']];
   /* ширина таббара подстраивается под число вкладок, как в iOS (≈90px на вкладку) */
   document.documentElement.style.setProperty('--tb-max-width',Math.min(TABS.length*TB_CFG.tabW+2*TB_CFG.pad,TB_CFG.width)+'px');
