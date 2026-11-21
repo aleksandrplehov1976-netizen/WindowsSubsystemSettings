@@ -94,7 +94,9 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   --g-lens-blur:.4;    /* блюр слоя с преломлением, Chromium (число, px) */
   --g-lens-mag:16;     /* сила преломления у кромки, Chromium (число, px) */
   --g-lens-bezel:28;   /* ширина зоны преломления, Chromium (число, px) */
-  --g-mirror-w:22px; /* ширина зоны преломления на таббаре (зеркало контента, работает и в Safari) */
+  /* преломление таббара (зеркало контента, работает в Safari): два кольца, внутреннее слабее, внешнее сильнее */
+  --g-ref-w1:28px; --g-ref-s1:.94;   /* ширина и масштаб (<1 = сжатие, сильнее изгиб) внутреннего кольца */
+  --g-ref-w2:11px; --g-ref-s2:.85;   /* то же для внешнего кольца у самой кромки */
   --g-sat:1.8;         /* насыщенность фона под стеклом */
 }
 .glass{position:relative;background:transparent;box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
@@ -104,10 +106,12 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .gb2{--gm:var(--g-edge-w);-webkit-backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);
   -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
   mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
-.gm{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;--gm:var(--g-mirror-w);transition:opacity .25s;
+.gm{position:absolute;inset:0;border-radius:inherit;pointer-events:none;transition:opacity .25s}
+.gm-lay{position:absolute;inset:0;border-radius:inherit;overflow:hidden;
   -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
   mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
-.gm::after{content:"";position:absolute;inset:0;background:var(--gfill,rgba(255,255,255,.62))}
+.gm-lay.a{--gm:var(--g-ref-w1)}.gm-lay.b{--gm:var(--g-ref-w2)}
+.gm-lay::after{content:"";position:absolute;inset:0;background:var(--gfill,rgba(255,255,255,.62))}
 .gm.off{opacity:0}
 .gm-in{position:absolute;left:0;top:0;width:0;height:0}
 .mstage{position:absolute;left:0;top:0;perspective-origin:50% 38%;pointer-events:none}
@@ -219,7 +223,7 @@ document.addEventListener('wheel', e=>{ if(e.ctrlKey)e.preventDefault(); }, {pas
 
 /* ================= ДАННЫЕ ================= */
 const DATA=[
- {t:"A11",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
+ {t:"A1",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
  {t:"A2",b:"#A18594",f:"#AD94A1",c:"#fff"},
  {t:"B1",b:"#FF9BAA",f:"#FFA9B6",c:"#fff"},
  {t:"B2",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
@@ -679,11 +683,11 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   
   function glassify(el,opt={}){
     if(el._gl)return;el._gl=1;
-    el.insertAdjacentHTML('afterbegin',opt.mirror?'<i class="gb gb1"></i><div class="gm"><div class="gm-in"></div></div>':'<i class="gb gb1"></i><i class="gb gb2"></i>');
+    el.insertAdjacentHTML('afterbegin',opt.mirror?'<i class="gb gb1"></i><div class="gm"><div class="gm-lay a"><div class="gm-in"></div></div><div class="gm-lay b"><div class="gm-in"></div></div></div>':'<i class="gb gb1"></i><i class="gb gb2"></i>');
     el.insertAdjacentHTML('beforeend','<i class="gf"></i>');
     const g=el.querySelector(opt.mirror?'.gm':'.gb2');
     const cs=getComputedStyle(document.documentElement),v=(n,d)=>{const x=parseFloat(cs.getPropertyValue(n));return isNaN(x)?d:x};
-    lens(g,{filter:!!opt.mirror,bezel:v('--g-lens-bezel',28),mag:v('--g-lens-mag',16),zoom:.001,blur:v('--g-lens-blur',.4),sat:1.5});
+    if(!opt.mirror)lens(g,{filter:false,bezel:v('--g-lens-bezel',28),mag:v('--g-lens-mag',16),zoom:.001,blur:v('--g-lens-blur',.4),sat:1.5});
   }
   window.glassify=glassify;
 
@@ -695,19 +699,27 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
 
   const wrap=$('#tabbarWrap'),bar=$('#tabbar'),bub=$('.tb-bubble',wrap),myScreen=$('#myScreen');
   glassify(bar,{mirror:true});
-  const gm=$('.gm',bar),gmIn=$('.gm-in',bar);let pairs=[];
-  /* зеркало контента: копия #stage внутри таббара, искажается SVG-фильтром — так преломление работает и в Safari */
+  const gm=$('.gm',bar),gmIns=$$('.gm-in',bar);let pairs=[];
+  const cssv=(n,d)=>{const x=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n));return isNaN(x)?d:x};
+  /* зеркало контента: копии #stage внутри таббара, у кромки чуть сжаты — получается изгиб стекла, работает и в Safari */
   function mirrorRebuild(){
-    const c=stage.cloneNode(true);c.removeAttribute('id');c.className='mstage';c.setAttribute('aria-hidden','true');
-    c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
-    const r=stage.getBoundingClientRect();c.style.width=r.width+'px';c.style.height=r.height+'px';
-    gmIn.replaceChildren(c);
-    const A=[stage,...stage.querySelectorAll('*')],B=[c,...c.querySelectorAll('*')];
-    pairs=A.map((a,i)=>({a,b:B[i],t:null})).slice(1).filter(p=>p.b);
+    pairs=[];
+    const r=stage.getBoundingClientRect();
+    gmIns.forEach(g=>{
+      const c=stage.cloneNode(true);c.removeAttribute('id');c.className='mstage';c.setAttribute('aria-hidden','true');
+      c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
+      c.style.width=r.width+'px';c.style.height=r.height+'px';
+      g.replaceChildren(c);
+      const A=[stage,...stage.querySelectorAll('*')],B=[c,...c.querySelectorAll('*')];
+      A.forEach((a,i)=>{if(i&&B[i])pairs.push({a,b:B[i],t:null})});
+    });
     mirrorSync();mirrorAlign();
   }
   function mirrorSync(){for(const p of pairs){const t=p.a.style.cssText;if(p.t!==t){p.t=t;p.b.style.cssText=t}}}
-  function mirrorAlign(){gmIn.style.transform=`translate3d(${-wrap.offsetLeft}px,${-wrap.offsetTop}px,0)`}
+  function mirrorAlign(){
+    const L=wrap.offsetLeft,T=wrap.offsetTop,Cx=L+wrap.offsetWidth/2,Cy=T+wrap.offsetHeight/2,sc=[cssv('--g-ref-s1',.94),cssv('--g-ref-s2',.85)];
+    gmIns.forEach((g,i)=>{g.style.transform=`translate3d(${-L}px,${-T}px,0) translate(${Cx}px,${Cy}px) scale(${sc[i]}) translate(${-Cx}px,${-Cy}px)`});
+  }
   window.mirrorRebuild=mirrorRebuild;window.mirrorSync=mirrorSync;
   const TABS=[['study','study'],['my','my']];
   /* ширина таббара подстраивается под число вкладок, как в iOS (≈90px на вкладку) */
