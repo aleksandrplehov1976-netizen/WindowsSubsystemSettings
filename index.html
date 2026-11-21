@@ -94,15 +94,23 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   --g-lens-blur:.4;    /* блюр слоя с преломлением, Chromium (число, px) */
   --g-lens-mag:16;     /* сила преломления у кромки, Chromium (число, px) */
   --g-lens-bezel:28;   /* ширина зоны преломления, Chromium (число, px) */
+  --g-mirror-w:22px; /* ширина зоны преломления на таббаре (зеркало контента, работает и в Safari) */
   --g-sat:1.8;         /* насыщенность фона под стеклом */
 }
-.glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
+.glass{position:relative;background:transparent;box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
 /* слои стекла: базовый блюр + кромка (блюр сильнее и преломление у краёв) + внутренний глоу */
 .gb,.gf{position:absolute;inset:0;border-radius:inherit;pointer-events:none}
-.gb1{-webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat))}
+.gb1{background:var(--gfill,rgba(255,255,255,.62));-webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat))}
 .gb2{--gm:var(--g-edge-w);-webkit-backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);
   -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
   mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
+.gm{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;--gm:var(--g-mirror-w);transition:opacity .25s;
+  -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
+  mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
+.gm::after{content:"";position:absolute;inset:0;background:var(--gfill,rgba(255,255,255,.62))}
+.gm.off{opacity:0}
+.gm-in{position:absolute;left:0;top:0;width:0;height:0}
+.mstage{position:absolute;left:0;top:0;perspective-origin:50% 38%;pointer-events:none}
 .gf{z-index:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 6px 8px -3px #fff,inset 0 -6px 8px -3px #fff,inset 0 0 16px rgba(255,255,255,.5)}
 .glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;
   background:linear-gradient(180deg,rgba(255,255,255,.9) 0%,rgba(60,60,67,.32) 36%,rgba(60,60,67,.32) 64%,rgba(255,255,255,.9) 100%);
@@ -189,7 +197,7 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   <div class="tb-bubble"><div class="tb-ring"><div class="tb-ct"></div></div><div class="tb-lens"></div></div>
 </div>
 
-<svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
+<svg id="defs" xmlns:xlink="http://www.w3.org/1999/xlink" width="1" height="1" style="position:absolute;left:0;top:0;pointer-events:none" aria-hidden="true"></svg>
 
 <div id="modal">
   <div class="modal-dim"></div>
@@ -211,7 +219,7 @@ document.addEventListener('wheel', e=>{ if(e.ctrlKey)e.preventDefault(); }, {pas
 
 /* ================= ДАННЫЕ ================= */
 const DATA=[
- {t:"A1",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
+ {t:"A11",b:"#7FB5B5",f:"#8CC2C2",c:"#fff"},
  {t:"A2",b:"#A18594",f:"#AD94A1",c:"#fff"},
  {t:"B1",b:"#FF9BAA",f:"#FFA9B6",c:"#fff"},
  {t:"B2",b:"#EAE0C8",f:"#F0E8D4",c:"#555"},
@@ -333,6 +341,7 @@ function render(){
     e.label.style.opacity=1-clamp(qc*3,0,1);
   });
   strip.style.display=(!editMode&&o>=0&&p>.6)?"block":"none";
+  if(window.mirrorSync)mirrorSync();
 }
 
 /* ================= СТИКЕРЫ ================= */
@@ -377,6 +386,7 @@ function renderStickers(animateIdx){
     });
   });
   if(!palette.childElementCount)buildPalette();
+  if(window.mirrorRebuild)mirrorRebuild();
   render();
 }
 
@@ -628,7 +638,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
     const b=navigator.userAgentData&&navigator.userAgentData.brands;return !!(b&&b.some(x=>/Chromium/.test(x.brand)))||/Chrome\//.test(ua)})();
   const NS='http://www.w3.org/2000/svg';
   function lens(el,o={}){
-    if(!LENS_OK||el._lens)return;el._lens=1;
+    if((!LENS_OK&&!o.filter)||el._lens)return;el._lens=1;
     const id='lg'+(lens.n=(lens.n||0)+1);
     const f=document.createElementNS(NS,'filter');f.id=id;
     f.setAttribute('color-interpolation-filters','sRGB');
@@ -656,9 +666,10 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
       }
       ctx.putImageData(im,0,0);
       const S=2*M,url=cv.toDataURL(),ch3=(s,k)=>`<feDisplacementMap in="SourceGraphic" in2="m" scale="${(S*s).toFixed(2)}" xChannelSelector="R" yChannelSelector="G" result="d${k}"/><feColorMatrix in="d${k}" type="matrix" values="${k==='r'?'1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0':k==='g'?'0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0':'0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0'}" result="c${k}"/>`;
-      f.innerHTML=`<feImage href="${url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="m"/>`+
+      f.innerHTML=`<feImage href="${url}" xlink:href="${url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="m"/>`+
         ch3(1,'r')+ch3(.975,'g')+ch3(.95,'b')+
         `<feBlend in="cr" in2="cg" mode="screen" result="rg"/><feBlend in="rg" in2="cb" mode="screen"/>`;
+      if(o.filter){el.style.webkitFilter=el.style.filter=`url(#${id})`;return}
       const v=`blur(${o.blur??.6}px) url(#${id}) saturate(${o.sat||1.7}) brightness(1.07)`;
       el.style.webkitBackdropFilter=v;el.style.backdropFilter=v;
     };
@@ -666,13 +677,13 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   }
   
   
-  function glassify(el){
+  function glassify(el,opt={}){
     if(el._gl)return;el._gl=1;
-    el.insertAdjacentHTML('afterbegin','<i class="gb gb1"></i><i class="gb gb2"></i>');
+    el.insertAdjacentHTML('afterbegin',opt.mirror?'<i class="gb gb1"></i><div class="gm"><div class="gm-in"></div></div>':'<i class="gb gb1"></i><i class="gb gb2"></i>');
     el.insertAdjacentHTML('beforeend','<i class="gf"></i>');
-    const g=el.querySelector('.gb2');
+    const g=el.querySelector(opt.mirror?'.gm':'.gb2');
     const cs=getComputedStyle(document.documentElement),v=(n,d)=>{const x=parseFloat(cs.getPropertyValue(n));return isNaN(x)?d:x};
-    lens(g,{bezel:v('--g-lens-bezel',28),mag:v('--g-lens-mag',16),zoom:.001,blur:v('--g-lens-blur',.4),sat:1.5});
+    lens(g,{filter:!!opt.mirror,bezel:v('--g-lens-bezel',28),mag:v('--g-lens-mag',16),zoom:.001,blur:v('--g-lens-blur',.4),sat:1.5});
   }
   window.glassify=glassify;
 
@@ -683,7 +694,21 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   };
 
   const wrap=$('#tabbarWrap'),bar=$('#tabbar'),bub=$('.tb-bubble',wrap),myScreen=$('#myScreen');
-  glassify(bar);
+  glassify(bar,{mirror:true});
+  const gm=$('.gm',bar),gmIn=$('.gm-in',bar);let pairs=[];
+  /* зеркало контента: копия #stage внутри таббара, искажается SVG-фильтром — так преломление работает и в Safari */
+  function mirrorRebuild(){
+    const c=stage.cloneNode(true);c.removeAttribute('id');c.className='mstage';c.setAttribute('aria-hidden','true');
+    c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
+    const r=stage.getBoundingClientRect();c.style.width=r.width+'px';c.style.height=r.height+'px';
+    gmIn.replaceChildren(c);
+    const A=[stage,...stage.querySelectorAll('*')],B=[c,...c.querySelectorAll('*')];
+    pairs=A.map((a,i)=>({a,b:B[i],t:null})).slice(1).filter(p=>p.b);
+    mirrorSync();mirrorAlign();
+  }
+  function mirrorSync(){for(const p of pairs){const t=p.a.style.cssText;if(p.t!==t){p.t=t;p.b.style.cssText=t}}}
+  function mirrorAlign(){gmIn.style.transform=`translate3d(${-wrap.offsetLeft}px,${-wrap.offsetTop}px,0)`}
+  window.mirrorRebuild=mirrorRebuild;window.mirrorSync=mirrorSync;
   const TABS=[['study','study'],['my','my']];
   /* ширина таббара подстраивается под число вкладок, как в iOS (≈90px на вкладку) */
   document.documentElement.style.setProperty('--tb-max-width',Math.min(TABS.length*TB_CFG.tabW+2*TB_CFG.pad,TB_CFG.width)+'px');
@@ -703,7 +728,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
 
   function measure(){
     tw=(bar.clientWidth-PAD*2)/TABS.length;
-    bub.style.width=tw+'px';
+    bub.style.width=tw+'px';mirrorAlign();
     $$('.tb',ct).concat($$('.tb',ct2)).forEach(t=>t.style.width=tw+'px');
     paint();
   }
@@ -732,6 +757,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   function setActive(i){
     if(i===active)return;
     active=i;syncOn();
+    gm.classList.toggle('off',i===1);
     if(i===1){stage.classList.add('dimmed');myScreen.classList.add('on');tabbarSetHidden(false)}
     else{stage.classList.remove('dimmed');myScreen.classList.remove('on');try{layout()}catch(_){}}
     if(navigator.vibrate)try{navigator.vibrate(8)}catch(_){}
