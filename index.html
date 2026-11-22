@@ -206,7 +206,7 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .cat-plus{flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#111;--gfill:rgba(255,255,255,.75)}
 .cat-plus.glass{background:var(--gfill)}
 /* ============================================================
-   КНИЖКА-СЛОВАРЬ (выдвигается справа, 3D-обложка)
+   КНИЖКА-СЛОВАРЬ (выдвигается справа)
    ============================================================ */
 .gbtn{border:0;padding:0;margin:0;font:inherit;outline:0;cursor:pointer;touch-action:none;-webkit-appearance:none;appearance:none}
 .ph{display:inline-block;width:20px;height:20px;border:1.5px dashed currentColor;border-radius:6px;opacity:.7;flex:none}
@@ -215,7 +215,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .bk-handle{position:absolute;right:2px;top:50%;width:5px;height:76px;margin-top:-38px;border-radius:3px;background:rgba(60,60,67,.3);transition:opacity .25s}
 #bkEdgeL{position:absolute;left:0;top:0;bottom:0;width:24px;z-index:12;touch-action:none;display:none}
 #book{position:fixed;inset:0;z-index:60;visibility:hidden;pointer-events:none;perspective:1700px;perspective-origin:50% 50%;overflow:hidden}
-.bk-page{position:absolute;inset:0;background:#f2f2f7;visibility:hidden;color:#111;font-family:-apple-system,"SF Pro Text",Helvetica,Arial,sans-serif}
+.bk-page{position:absolute;inset:0;background:#f2f2f7;visibility:hidden;color:#111;font-family:-apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;will-change:transform}
 .bk-shade{position:absolute;inset:0;pointer-events:none;z-index:9;background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,0) 55%)}
 .bk-top{position:absolute;left:0;right:0;top:0;z-index:8;display:flex;justify-content:space-between;pointer-events:none;
   padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
@@ -241,18 +241,6 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .lx-note{display:block;margin-top:4px;font-size:13px;color:#8e8e93}
 .lx-empty{margin:56px 24px;text-align:center;color:#8e8e93;font-size:17px}
 .lx-empty button{display:block;margin:14px auto 0;border:0;background:none;color:#0a84ff;font:600 17px -apple-system,Helvetica,Arial,sans-serif;padding:8px 14px}
-.bk-cover{position:absolute;inset:0;transform-origin:0 50%;transform-style:preserve-3d;will-change:transform;transform:translate3d(104%,0,0);z-index:3}
-.bk-face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden}
-.bk-front{border-radius:4px 24px 24px 4px;overflow:hidden;
-  background:radial-gradient(120% 70% at 75% 8%,rgba(255,255,255,.14),transparent 60%),repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 5px),linear-gradient(160deg,#2b4d63,#14283a);
-  box-shadow:2px 0 0 #f4ecd9,4px 0 0 #d5c9ae,6px 0 0 #f0e8d4,8px 0 18px rgba(0,0,0,.28)}
-.bk-front::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,.12) 55%,transparent);border-right:1px solid rgba(255,255,255,.1)}
-.bk-frame{position:absolute;left:12%;right:9%;top:14%;bottom:14%;border:1.5px solid rgba(225,190,120,.75);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#e8c987;text-align:center}
-.bk-frame i{width:84px;height:84px;border:1.5px dashed rgba(232,201,135,.6);border-radius:50%}
-.bk-frame b{font:600 30px/1.1 "Iowan Old Style","Palatino","Georgia",serif;letter-spacing:.5px}
-.bk-frame span{font:italic 15px "Iowan Old Style","Palatino","Georgia",serif;opacity:.75}
-.bk-cshade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,.05));opacity:0}
-.bk-back{transform:rotateY(180deg);border-radius:24px 4px 4px 24px;background:repeating-linear-gradient(60deg,rgba(120,90,50,.05) 0 2px,transparent 2px 6px),linear-gradient(200deg,#f6eedc,#e7dcc2);box-shadow:inset -14px 0 22px rgba(90,60,20,.18)}
 .lx-dim{position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.34);opacity:0;pointer-events:none;transition:opacity .35s}
 .lx-dim.on{opacity:1;pointer-events:auto}
 .lx-sheet{position:absolute;left:0;right:0;bottom:0;z-index:21;max-height:92%;overflow-y:auto;background:#f2f2f7;border-radius:28px 28px 0 0;transform:translateY(105%);transition:transform .5s cubic-bezier(.32,.72,0,1);box-shadow:0 -10px 40px rgba(0,0,0,.2);
@@ -260,7 +248,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .lx-sheet.on{transform:none;pointer-events:auto}
 .lx-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;position:sticky;top:0;background:#f2f2f7;z-index:2}
 .lx-bar b{font-size:17px;font-weight:600}
-.lx-bar button{border:0;background:none;font:400 17px -apple-system,Helvetica,Arial,sans-serif;color:#0a84ff;padding:6px 2px}
+.lx-bar button{border:0;font:500 16px -apple-system,Helvetica,Arial,sans-serif;color:#111;height:40px;padding:0 18px;border-radius:20px;--gfill:rgba(255,255,255,.7);cursor:pointer;touch-action:none;-webkit-appearance:none;appearance:none;outline:0}
 .lx-bar button#lxDone{font-weight:600}
 .lx-card{margin:8px 16px;background:#fff;border-radius:18px;overflow:hidden}
 .lx-card input,.lx-card textarea{display:block;width:100%;border:0;outline:0;background:none;padding:13px 16px;font:400 17px -apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;color:#111;box-sizing:border-box;resize:none}
@@ -323,13 +311,9 @@ input,textarea{-webkit-user-select:text;user-select:text}
       <div id="bkList"></div>
     </div>
   </div>
-  <div class="bk-cover" id="bkCover">
-    <div class="bk-face bk-front"><div class="bk-frame"><i></i><b>Мой словарь</b><span>Dictionnaire personnel</span></div><div class="bk-cshade" id="bkCShade"></div></div>
-    <div class="bk-face bk-back"></div>
-  </div>
   <div class="lx-dim" id="lxDim"></div>
   <div class="lx-sheet" id="lxSheet">
-    <div class="lx-bar"><button id="lxCancel">Отмена</button><b id="lxTitle">Новая запись</b><button id="lxDone">Готово</button></div>
+    <div class="lx-bar"><button class="glass jl" id="lxCancel">Отмена</button><b id="lxTitle">Новая запись</b><button class="glass jl" id="lxDone">Готово</button></div>
     <div class="lx-entry">
       <div class="lx-card" id="lxCard"><input id="lxFr" placeholder="Слово или фраза" autocomplete="off" autocapitalize="none"><input id="lxRu" placeholder="Перевод" autocomplete="off"><textarea id="lxNote" rows="3" placeholder="Заметка"></textarea></div>
       <div class="lx-lab">Категория</div><div class="lx-cats" id="lxCats"></div>
@@ -956,34 +940,38 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
 
 
 /* =====================================================================
-   КНИЖКА-СЛОВАРЬ: жест справа, 3D-обложка, личные записи по категориям
+   КНИЖКА-СЛОВАРЬ: жест справа, личные записи по категориям
    ===================================================================== */
 (function(){
   const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
   const cl=(v,a,b)=>v<a?a:v>b?b:v;
   const Sp=window.Sp,run=window.runAnim;
-  const book=$('#book'),cover=$('#bkCover'),page=$('#bkPage'),shade=$('#bkShade'),cshade=$('#bkCShade'),edge=$('#bkEdge'),edgeL=$('#bkEdgeL'),back=$('#bkBack'),addB=$('#bkAdd');
+  const book=$('#book'),page=$('#bkPage'),shade=$('#bkShade'),edge=$('#bkEdge'),edgeL=$('#bkEdgeL'),back=$('#bkBack'),addB=$('#bkAdd');
   let hid=false,down=false,isOpen=false,startX=0,lastX=0,lastT=0,vel=0,mode='open';
   const P=new Sp(0,140,21);
-  const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 
   function render(p){
     book.style.visibility=p>.001?'visible':'hidden';
     book.style.pointerEvents=p>.02?'auto':'none';
-    const s=cl(p/.3,0,1),r=cl((p-.3)/.7,0,1),es=1-Math.pow(1-s,3),er=ease(r);
-    cover.style.transform=`translate3d(${((1-es)*104).toFixed(2)}%,0,0) rotateY(${(-er*176).toFixed(2)}deg)`;
-    cshade.style.opacity=(er*.9).toFixed(3);
-    page.style.visibility=p>.27?'visible':'hidden';
-    shade.style.opacity=(1-er).toFixed(3);
+    const es=1-Math.pow(1-cl(p,0,1),3);
+    page.style.visibility=p>.001?'visible':'hidden';
+    page.style.transform=`translate3d(${((1-es)*100).toFixed(2)}%,0,0)`;
+    shade.style.opacity='0';
     if(p>.001){stage.style.transform=`translate3d(0,${(p*16).toFixed(2)}%,0) scale(${(1-p*.07).toFixed(4)})`;stage.style.opacity=(1-p*.6).toFixed(3)}
     else{stage.style.transform='';stage.style.opacity=''}
-    const bt=cl((p-.72)/.28,0,1);
-    [back,addB].forEach((b,i)=>{b.style.opacity=bt.toFixed(3);b.style.pointerEvents=bt>.6?'auto':'none'});
+    const bt=cl((p-.4)/.4,0,1);
+    [back,addB].forEach(b=>{b.style.opacity=bt.toFixed(3);b.style.pointerEvents=bt>.6?'auto':'none'});
     if(p>.03&&!hid){hid=true;tabbarSetHidden(true)}else if(p<=.03&&hid){hid=false;tabbarSetHidden(false)}
-    edge.style.display=(p<.001&&!editMode&&o<0)?'block':'none';
+    edge.style.display=(p<.01&&!editMode&&o<0)?'block':'none';
     edgeL.style.display=p>.9?'block':'none';
   }
-  const anim={tick(dt){for(let n=0;n<3;n++)P.step(dt/3);render(P.x);return down||!P.rest}};
+  const anim={tick(dt){
+    for(let n=0;n<3;n++)P.step(dt/3);
+    const going=down||!P.rest;
+    if(!going){P.x=P.t;P.v=0}
+    render(P.x);
+    return going;
+  }};
   function openBook(){isOpen=true;P.t=1;run(anim)}
   function closeBook(){isOpen=false;P.t=0;run(anim);try{document.activeElement&&document.activeElement.blur()}catch(_){}}
   /* жест: вытягивание справа / закрытие слева */
@@ -1010,6 +998,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   back.addEventListener('click',()=>{if(sheetOpen)closeSheet();else closeBook()});
   addEventListener('keydown',e=>{if(e.key==='Escape'&&isOpen){sheetOpen?closeSheet():closeBook()}});
   glassify(back);glassify(addB);jelly(back,{press:1.08,follow:.2,lim:.12});jelly(addB,{press:1.08,follow:.2,lim:.12});
+  ['#lxCancel','#lxDone'].forEach(s=>{const b=$(s);glassify(b);jelly(b,{press:1.08,follow:.2,lim:.12})});
 
   /* ---------- данные ---------- */
   const KEY='lexicon-v1';
