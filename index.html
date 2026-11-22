@@ -176,8 +176,10 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 @keyframes paneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .sec{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 8px;font:700 22px/1.15 -apple-system,"SF Pro Display",Helvetica,Arial,sans-serif;letter-spacing:-.4px;color:#111}
 .sec a{font:500 15px -apple-system,Helvetica,Arial,sans-serif;color:#0a84ff;letter-spacing:0}
-.lrow{display:flex;gap:14px;align-items:center;padding:8px 0}
-.thumb{flex:none;width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--a,#bfe3d9),var(--b,#8fc5e8));border:1.5px dashed rgba(0,0,0,.22);box-sizing:border-box}
+.lrow{padding:13px 0;border-bottom:1px solid rgba(60,60,67,.1)}
+.lrow:last-child{border-bottom:0}
+.pbar{margin-top:9px;height:4px;border-radius:2px;background:rgba(60,60,67,.1);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:2px;background:#0a84ff}
 .lt{font:600 17px/1.2 -apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;color:#111;letter-spacing:-.2px}
 .ls{margin-top:3px;font:400 14px -apple-system,Helvetica,Arial,sans-serif;color:#8e8e93}
 .banner{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:6px 0 4px;padding:20px 18px;min-height:112px;border-radius:26px;background:#6dbbea;color:#0b2a40}
@@ -280,19 +282,37 @@ var tabbarSetHidden = function(){};
 
 /* ================= ПОСТРОЕНИЕ ПАПОК ================= */
 
-const THUMBS=[["#bfe3d9","#7ccbc0"],["#e9cfa6","#caa56a"],["#f2c6cf","#e08fa0"],["#cdd7f2","#8fa4de"],["#f7e3a6","#e3bf55"],["#cfe9c8","#8dc784"]];
-const lessonRow=(t,s,i)=>`<div class="lrow"><div class="thumb" style="--a:${THUMBS[i%6][0]};--b:${THUMBS[i%6][1]}"></div><div><div class="lt">${t}</div><div class="ls">${s}</div></div></div>`;
-const LESSONS=[["Bonjour! Приветствия","22 слова"],["Французский сленг","12 слов"],["В кафе и ресторане","14 слов"],["Почему произношение сложное","17 слов"],["Числа от 1 до 100","20 слов"],["Идиомы и выражения","7 слов"]];
-const PANE0=`<div class="sec">Мои уроки<a>Все</a></div>`+LESSONS.map((l,i)=>lessonRow(l[0],l[1],i)).join("");
-const PANE1=`<div class="sec">Топовые слова<a>Все</a></div><div class="wide"><div class="sq"></div><div><div class="lt">Топ 100. Глаголы</div><div class="ls">100 слов</div></div></div>
-<div class="banner"><div><b>Если тянет в Париж</b><span>Подготовься к поездке заранее</span></div><i></i></div>
-<div class="sec">Любимые сериалы и фильмы<a>Все</a></div>
-<div class="cards"><div class="card"><div class="sq"></div><div class="lt">Эмили в Париже</div><div class="ls">38 слов</div></div><div class="card"><div class="sq" style="background:#e6a9b8"></div><div class="lt">Амели</div><div class="ls">95 слов</div></div><div class="card"><div class="sq" style="background:#a9d3b8"></div><div class="lt">Леон</div><div class="ls">100 слов</div></div></div>
-<div class="sec">Международные экзамены<a>Все</a></div>`+[["Подготовка к DELF A1","121 слово"],["Подготовка к DELF B1","210 слов"]].map((l,i)=>lessonRow(l[0],l[1],i+2)).join("");
+const pl=n=>{const m=n%100,d=n%10;return n+" "+((m>10&&m<20)?"слов":d===1?"слово":(d>1&&d<5)?"слова":"слов")};
+/* уровни: A1, A2, B1, B2, C (носитель). [название, число слов, прогресс %] */
+const LEVELS=[
+ {lessons:[["Приветствия и знакомство",24,80],["Числа от 0 до 100",30,55],["Семья и люди",18,30],["Цвета, предметы, одежда",26,10],["Дни недели и месяцы",19,0],["Еда и напитки",28,0]],
+  top:["Топ 100 слов для начала","100 слов"],banner:["Первое утро в Париже","Закажи кофе и круассан без английского"],
+  secB:"Песни и мультфильмы",cards:[["Детские песни","32 слова","#89aee6"],["Мультфильмы","54 слова","#e6a9b8"],["Меню и рынки","41 слово","#a9d3b8"]],exam:[["Подготовка к DELF A1",121]]},
+ {lessons:[["В магазине и на рынке",32,70],["Город и транспорт",36,45],["Мой день и распорядок",28,20],["Здоровье и аптека",30,0],["Погода и времена года",22,0],["Хобби и отдых",34,0]],
+  top:["Топ 300 глаголов","300 слов"],banner:["Путешествие по Франции","Бронь отеля, билеты и маршруты"],
+  secB:"Сериалы и фильмы",cards:[["Эмили в Париже","38 слов","#89aee6"],["Амели","95 слов","#e6a9b8"],["Мальчишки из хора","64 слова","#a9d3b8"]],exam:[["Подготовка к DELF A2",160]]},
+ {lessons:[["Работа и профессии",44,60],["Учёба и университет",38,35],["Путешествия и отели",41,10],["Глаголы с предлогами",52,0],["Эмоции и отношения",46,0],["Новости и общество",40,0]],
+  top:["Топ 500 слов B1","500 слов"],banner:["Подкасты на французском","Слушай и повторяй слова из выпусков"],
+  secB:"Сериалы и подкасты",cards:[["Люпен","88 слов","#89aee6"],["Всё тип-топ","71 слово","#e6a9b8"],["Эмили в Париже","38 слов","#a9d3b8"]],exam:[["Подготовка к DELF B1",210]]},
+ {lessons:[["Политика и экономика",58,50],["Наука и технологии",49,25],["Экология",44,0],["Культура и искусство",52,0],["Связки и логические слова",36,0],["Дебаты и аргументация",40,0]],
+  top:["Топ 800 слов B2","800 слов"],banner:["Французская пресса","Слова из Le Monde и Libération"],
+  secB:"Кино и книги",cards:[["1+1","102 слова","#89aee6"],["Маленький принц","85 слов","#e6a9b8"],["Незнакомец","93 слова","#a9d3b8"]],exam:[["Подготовка к DELF B2",260],["Подготовка к TCF",180]]},
+ {lessons:[["Идиомы и пословицы",64,40],["Сленг и верлан",72,20],["Литературная лексика",80,0],["Юридический язык",56,0],["Деловая переписка",48,0],["Региональные выражения",60,0]],
+  top:["Топ 1000 редких слов","1000 слов"],banner:["Как говорят на самом деле","Верлан, сокращения и уличный язык"],
+  secB:"Классика и музыка",cards:[["Камю","120 слов","#89aee6"],["Stromae","66 слов","#e6a9b8"],["IAM","90 слов","#a9d3b8"]],exam:[["Подготовка к DALF C1",300],["Подготовка к DALF C2",340]]}
+];
+const lessonRow=(t,n,p)=>`<div class="lrow"><div class="lt">${t}</div><div class="ls">${pl(n)}${p?" · пройдено "+p+" %":""}</div><div class="pbar"><i style="width:${p}%"></i></div></div>`;
+const examRow=(t,n)=>`<div class="lrow"><div class="lt">${t}</div><div class="ls">${pl(n)}</div></div>`;
+const pane0=i=>`<div class="sec">Мои уроки<a>Все</a></div>`+LEVELS[i].lessons.map(l=>lessonRow(...l)).join("");
+const pane1=i=>{const L=LEVELS[i];return `<div class="sec">Топовые слова<a>Все</a></div><div class="wide"><div class="sq"></div><div><div class="lt">${L.top[0]}</div><div class="ls">${L.top[1]}</div></div></div>
+<div class="banner"><div><b>${L.banner[0]}</b><span>${L.banner[1]}</span></div><i></i></div>
+<div class="sec">${L.secB}<a>Все</a></div>
+<div class="cards">${L.cards.map(c=>`<div class="card"><div class="sq" style="background:${c[2]}"></div><div class="lt">${c[0]}</div><div class="ls">${c[1]}</div></div>`).join("")}</div>
+<div class="sec">Международные экзамены<a>Все</a></div>`+L.exam.map(e=>examRow(...e)).join("")};
 const els=DATA.map((d,i)=>{
   const b=document.createElement("div");b.className="b";b.style.zIndex=2*i;
   b.innerHTML=`<div class="bb" style="background:${d.b}"></div><div class="tab" style="background:${d.b}"><span class="tl" style="color:${d.c}">${d.t}</span></div>`+
-    `<div class="sheet"><div class="sgw"></div><div class="pane on" data-p="0">${PANE0}</div><div class="pane" data-p="1">${PANE1}</div></div>`;
+    `<div class="sheet"><div class="sgw"></div><div class="pane on" data-p="0">${pane0(i)}</div><div class="pane" data-p="1">${pane1(i)}</div></div>`;
   const c=document.createElement("div");c.className="c";c.style.zIndex=2*i+1;c.style.background=d.f;
   c.innerHTML=`<span class="label" style="color:${d.c}">${d.t}</span><i class="sh"></i><div class="stick-layer"></div>`;
   stage.append(b,c);
