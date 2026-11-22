@@ -22,7 +22,7 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 .tab{left:calc(var(--u)*9);top:0;width:calc(var(--u)*362);height:calc(var(--u)*74);border-radius:calc(var(--u)*40) calc(var(--u)*37) 0 0}
 .bb{left:calc(var(--u)*9);right:calc(var(--u)*9);top:calc(var(--u)*37);border-radius:0 calc(var(--u)*32) calc(var(--u)*26) calc(var(--u)*26)}
 .tl{position:absolute;left:calc(var(--u)*34);top:5px;font-size:12px;font-weight:600;letter-spacing:.01em;opacity:0}
-.sheet{left:calc(var(--u)*22);right:calc(var(--u)*22);top:calc(var(--u)*74);border-radius:12px 12px 14px 14px;overflow:auto;box-sizing:border-box;padding:24px 22px 40px;color:#3a3a3c;background:#fffefd;box-shadow:inset 0 10px 14px -10px rgba(0,0,0,.16);-webkit-overflow-scrolling:touch}
+.sheet{left:calc(var(--u)*22);right:calc(var(--u)*22);top:calc(var(--u)*74);border-radius:12px 12px 14px 14px;overflow:auto;box-sizing:border-box;padding:10px 18px 44px;color:#111;background:#fffefd;box-shadow:inset 0 10px 14px -10px rgba(0,0,0,.16);-webkit-overflow-scrolling:touch}
 .sheet h2{margin:0 0 4px;font-size:32px;font-weight:600;letter-spacing:-.6px}
 .sheet small{display:block;margin-bottom:16px;opacity:.5;font-size:13px}
 .sheet p{margin:0 0 14px;font-size:16px;line-height:1.5}
@@ -91,30 +91,20 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   --g-blur:.6px;        /* базовый блюр по всей площади стекла */
   --g-edge-blur:2px;   /* блюр у кромки (Safari/iOS и Chromium) */
   --g-edge-w:16px;     /* ширина кромки, где блюр усиливается */
-  --g-lens-blur:.4;    /* блюр слоя с преломлением, Chromium (число, px) */
-  --g-lens-mag:16;     /* сила преломления у кромки, Chromium (число, px) */
-  --g-lens-bezel:28;   /* ширина зоны преломления, Chromium (число, px) */
-  /* преломление таббара (зеркало контента, работает в Safari): два кольца, внутреннее слабее, внешнее сильнее */
-  --g-ref-w1:28px; --g-ref-s1:.94;   /* ширина и масштаб (<1 = сжатие, сильнее изгиб) внутреннего кольца */
-  --g-ref-w2:11px; --g-ref-s2:.85;   /* то же для внешнего кольца у самой кромки */
   --g-sat:1.8;         /* насыщенность фона под стеклом */
 }
-.glass{position:relative;background:transparent;box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
+.glass{position:relative;background:var(--gfill,rgba(255,255,255,.62));box-shadow:0 6px 20px rgba(0,0,0,.09),0 1px 3px rgba(0,0,0,.05)}
 /* слои стекла: базовый блюр + кромка (блюр сильнее и преломление у краёв) + внутренний глоу */
 .gb,.gf{position:absolute;inset:0;border-radius:inherit;pointer-events:none}
-.gb1{background:var(--gfill,rgba(255,255,255,.62));-webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat))}
+.gb1{-webkit-backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat));backdrop-filter:blur(var(--g-blur)) saturate(var(--g-sat))}
 .gb2{--gm:var(--g-edge-w);-webkit-backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);backdrop-filter:blur(var(--g-edge-blur)) saturate(1.5);
   -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
   mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
-.gm{position:absolute;inset:0;border-radius:inherit;pointer-events:none;transition:opacity .25s}
-.gm-lay{position:absolute;inset:0;border-radius:inherit;overflow:hidden;
-  -webkit-mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000);
-  mask-image:linear-gradient(to right,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000),linear-gradient(to bottom,#000,transparent var(--gm),transparent calc(100% - var(--gm)),#000)}
-.gm-lay.a{--gm:var(--g-ref-w1)}.gm-lay.b{--gm:var(--g-ref-w2)}
-.gm-lay::after{content:"";position:absolute;inset:0;background:var(--gfill,rgba(255,255,255,.62))}
-.gm.off{opacity:0}
-.gm-in{position:absolute;left:0;top:0;width:0;height:0}
-.mstage{position:absolute;left:0;top:0;perspective-origin:50% 38%;pointer-events:none}
+.pal.glass{background:var(--gfill,rgba(255,255,255,.12))}
+.tb-bubble.idle .tb-lens,.tb-bubble.idle .tb-ring{display:none}
+.gf::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9) 20%,rgba(255,255,255,.9) 80%,transparent) 50% 5px/70% 2px no-repeat,
+    linear-gradient(90deg,transparent,rgba(255,255,255,.85) 20%,rgba(255,255,255,.85) 80%,transparent) 50% calc(100% - 5px)/70% 2px no-repeat;filter:blur(.8px)}
 .gf{z-index:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 6px 8px -3px #fff,inset 0 -6px 8px -3px #fff,inset 0 0 16px rgba(255,255,255,.5)}
 .glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;
   background:linear-gradient(180deg,rgba(255,255,255,.9) 0%,rgba(60,60,67,.32) 36%,rgba(60,60,67,.32) 64%,rgba(255,255,255,.9) 100%);
@@ -169,6 +159,40 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(60,60,67,.3) 35%,rgba(60,60,67,.3) 65%,rgba(255,255,255,.95));
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 @media (prefers-reduced-motion:reduce){.tb-icon,.tb-label{transition:none}}
+
+/* ============================================================
+   ПИКЕР «Основное / Интересное» (идентичен таббару) + UI уроков
+   ============================================================ */
+.sgw{position:sticky;top:-10px;z-index:6;display:flex;justify-content:center;padding:10px 0 12px;margin-bottom:4px}
+.seg{--sh:44px;--sp:3px;position:relative;display:flex;height:var(--sh);padding:var(--sp);border-radius:calc(var(--sh)/2);touch-action:none;cursor:pointer;will-change:transform;box-sizing:border-box;width:max-content}
+.sg{position:relative;z-index:1;flex:none;display:flex;align-items:center;justify-content:center;border:0;background:none;color:#000;font:500 15px/1 -apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;padding:0 2px;pointer-events:none;white-space:nowrap}
+.sg-act{position:absolute;inset:0;pointer-events:none;z-index:2;background:rgba(255,255,255,.97);border-radius:inherit;opacity:0}
+.sg-ct{position:absolute;left:var(--sp);top:var(--sp);display:flex;will-change:transform}
+.sg-ct .sg,.tb-ct .sg{height:100%;color:#000;text-shadow:-1.2px 0 rgba(255,196,0,.75),1.2px 0 rgba(110,70,255,.6),0 1px 0 rgba(0,200,255,.25)}
+.sg-bub{position:absolute;left:0;top:0;pointer-events:none;will-change:transform;z-index:31;--lit:0;--rest:1;background:rgba(120,120,128,calc(.2*var(--rest,1)))}
+.sg-bub.idle .tb-lens,.sg-bub.idle .tb-ring{display:none}
+
+.pane{display:none}.pane.on{display:block;animation:paneIn .35s cubic-bezier(.2,.9,.3,1) both}
+@keyframes paneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 8px;font:700 22px/1.15 -apple-system,"SF Pro Display",Helvetica,Arial,sans-serif;letter-spacing:-.4px;color:#111}
+.sec a{font:500 15px -apple-system,Helvetica,Arial,sans-serif;color:#0a84ff;letter-spacing:0}
+.lrow{display:flex;gap:14px;align-items:center;padding:8px 0}
+.thumb{flex:none;width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--a,#bfe3d9),var(--b,#8fc5e8));border:1.5px dashed rgba(0,0,0,.22);box-sizing:border-box}
+.lt{font:600 17px/1.2 -apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;color:#111;letter-spacing:-.2px}
+.ls{margin-top:3px;font:400 14px -apple-system,Helvetica,Arial,sans-serif;color:#8e8e93}
+.banner{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:6px 0 4px;padding:20px 18px;min-height:112px;border-radius:26px;background:#6dbbea;color:#0b2a40}
+.banner b{display:block;font:700 20px/1.15 -apple-system,"SF Pro Display",Helvetica,Arial,sans-serif;letter-spacing:-.3px}
+.banner span{display:block;margin-top:6px;font:400 14px/1.25 -apple-system,Helvetica,Arial,sans-serif;opacity:.7}
+.banner i{flex:none;width:64px;height:64px;border-radius:16px;border:1.5px dashed rgba(11,42,64,.35);box-sizing:border-box}
+.cards{display:flex;gap:12px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cards::-webkit-scrollbar{display:none}
+.card{flex:none;width:132px}
+.card .sq{width:132px;height:132px;border-radius:26px;background:#89aee6;border:1.5px dashed rgba(255,255,255,.7);box-sizing:border-box}
+.card .lt{margin-top:8px;font-size:15px}
+.card .ls{font-size:13px}
+.wide{display:flex;align-items:stretch;border-radius:22px;background:#f3f4f6;overflow:hidden;margin:4px 0}
+.wide .sq{flex:none;width:96px;background:linear-gradient(135deg,#c9b8a6,#8d7a68);border-right:1.5px dashed rgba(255,255,255,.6)}
+.wide>div:last-child{padding:18px 16px}
 </style>
 </head>
 <body>
@@ -200,8 +224,6 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
   <nav id="tabbar" class="glass" aria-label="Вкладки"></nav>
   <div class="tb-bubble"><div class="tb-ring"><div class="tb-ct"></div></div><div class="tb-lens"></div></div>
 </div>
-
-<svg id="defs" xmlns:xlink="http://www.w3.org/1999/xlink" width="1" height="1" style="position:absolute;left:0;top:0;pointer-events:none" aria-hidden="true"></svg>
 
 <div id="modal">
   <div class="modal-dim"></div>
@@ -257,10 +279,20 @@ let pickedSize=1;
 var tabbarSetHidden = function(){};
 
 /* ================= ПОСТРОЕНИЕ ПАПОК ================= */
+
+const THUMBS=[["#bfe3d9","#7ccbc0"],["#e9cfa6","#caa56a"],["#f2c6cf","#e08fa0"],["#cdd7f2","#8fa4de"],["#f7e3a6","#e3bf55"],["#cfe9c8","#8dc784"]];
+const lessonRow=(t,s,i)=>`<div class="lrow"><div class="thumb" style="--a:${THUMBS[i%6][0]};--b:${THUMBS[i%6][1]}"></div><div><div class="lt">${t}</div><div class="ls">${s}</div></div></div>`;
+const LESSONS=[["Bonjour! Приветствия","22 слова"],["Французский сленг","12 слов"],["В кафе и ресторане","14 слов"],["Почему произношение сложное","17 слов"],["Числа от 1 до 100","20 слов"],["Идиомы и выражения","7 слов"]];
+const PANE0=`<div class="sec">Мои уроки<a>Все</a></div>`+LESSONS.map((l,i)=>lessonRow(l[0],l[1],i)).join("");
+const PANE1=`<div class="sec">Топовые слова<a>Все</a></div><div class="wide"><div class="sq"></div><div><div class="lt">Топ 100. Глаголы</div><div class="ls">100 слов</div></div></div>
+<div class="banner"><div><b>Если тянет в Париж</b><span>Подготовься к поездке заранее</span></div><i></i></div>
+<div class="sec">Любимые сериалы и фильмы<a>Все</a></div>
+<div class="cards"><div class="card"><div class="sq"></div><div class="lt">Эмили в Париже</div><div class="ls">38 слов</div></div><div class="card"><div class="sq" style="background:#e6a9b8"></div><div class="lt">Амели</div><div class="ls">95 слов</div></div><div class="card"><div class="sq" style="background:#a9d3b8"></div><div class="lt">Леон</div><div class="ls">100 слов</div></div></div>
+<div class="sec">Международные экзамены<a>Все</a></div>`+[["Подготовка к DELF A1","121 слово"],["Подготовка к DELF B1","210 слов"]].map((l,i)=>lessonRow(l[0],l[1],i+2)).join("");
 const els=DATA.map((d,i)=>{
   const b=document.createElement("div");b.className="b";b.style.zIndex=2*i;
   b.innerHTML=`<div class="bb" style="background:${d.b}"></div><div class="tab" style="background:${d.b}"><span class="tl" style="color:${d.c}">${d.t}</span></div>`+
-    `<div class="sheet"><h2>${d.t}</h2><small>Заметки · обновлено сегодня</small><p>${LOREM}</p><p>${LOREM}</p><p>${LOREM}</p></div>`;
+    `<div class="sheet"><div class="sgw"></div><div class="pane on" data-p="0">${PANE0}</div><div class="pane" data-p="1">${PANE1}</div></div>`;
   const c=document.createElement("div");c.className="c";c.style.zIndex=2*i+1;c.style.background=d.f;
   c.innerHTML=`<span class="label" style="color:${d.c}">${d.t}</span><i class="sh"></i><div class="stick-layer"></div>`;
   stage.append(b,c);
@@ -345,7 +377,6 @@ function render(){
     e.label.style.opacity=1-clamp(qc*3,0,1);
   });
   strip.style.display=(!editMode&&o>=0&&p>.6)?"block":"none";
-  if(window.mirrorSync)mirrorSync();
 }
 
 /* ================= СТИКЕРЫ ================= */
@@ -390,14 +421,13 @@ function renderStickers(animateIdx){
     });
   });
   if(!palette.childElementCount)buildPalette();
-  if(window.mirrorRebuild)mirrorRebuild();
   render();
 }
 
 function buildPalette(){
   STICKERS.forEach((s0,id)=>{
     const p=document.createElement("div");p.className="pal glass jl";
-    p.dataset.id=id;if(window.glassify)glassify(p);
+    p.dataset.id=id;if(window.glassify)glassify(p,{light:true});
     p.innerHTML=`<img src="${s0}" draggable="false">`;
     p.addEventListener("click",()=>{ if(editMode)addStickerToFolder(id); });
     if(window.jelly)jelly(p,{press:1.08,follow:.2,lim:.12});
@@ -637,59 +667,68 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   }
   
   window.jelly=jelly;
-  /* --- преломление кромки (Chromium) + размытие; в Safari/iOS — усиленный блюр у краёв --- */
-  const LENS_OK=(()=>{const ua=navigator.userAgent;if(/iPhone|iPad|iPod|Firefox/.test(ua))return false;
-    const b=navigator.userAgentData&&navigator.userAgentData.brands;return !!(b&&b.some(x=>/Chromium/.test(x.brand)))||/Chrome\//.test(ua)})();
-  const NS='http://www.w3.org/2000/svg';
-  function lens(el,o={}){
-    if((!LENS_OK&&!o.filter)||el._lens)return;el._lens=1;
-    const id='lg'+(lens.n=(lens.n||0)+1);
-    const f=document.createElementNS(NS,'filter');f.id=id;
-    f.setAttribute('color-interpolation-filters','sRGB');
-    ['x','y'].forEach(a=>f.setAttribute(a,'0'));f.setAttribute('width','100%');f.setAttribute('height','100%');
-    $('#defs').appendChild(f);
-    let W=0,H=0;
-    const build=()=>{
-      const w=Math.round(el.offsetWidth),h=Math.round(el.offsetHeight);
-      if(w<6||h<6||(w===W&&h===H))return;W=w;H=h;
-      let r=parseFloat(getComputedStyle(el).borderTopLeftRadius)||0;r=Math.min(r,w/2,h/2);
-      const bez=Math.min(o.bezel||Math.max(r*1.1,6),Math.min(w,h)/2),Me=Math.min(o.mag||bez*.45,15),K=Math.min(o.zoom||Math.min(w,h)*.07,7),M=Me+K;
-      const sc=Math.min(1,300/Math.max(w,h)),cw=Math.max(4,Math.round(w*sc)),ch=Math.max(4,Math.round(h*sc));
-      const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
-      const ctx=cv.getContext('2d'),im=ctx.createImageData(cw,ch),d=im.data;
-      const hx=cw/2,hy=ch/2,rr=r*sc,bb=bez*sc;
-      for(let y=0;y<ch;y++)for(let x=0;x<cw;x++){
-        const px=x+.5-hx,py=y+.5-hy,qx=Math.abs(px)-(hx-rr),qy=Math.abs(py)-(hy-rr);
-        const ox=Math.max(qx,0),oy=Math.max(qy,0),depth=-(Math.hypot(ox,oy)+Math.min(Math.max(qx,qy),0)-rr);
-        let nx=0,ny=0;
-        if(ox>0||oy>0){const l=Math.hypot(ox,oy);nx=ox/l*Math.sign(px);ny=oy/l*Math.sign(py)}
-        else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
-        const t=clamp(depth/bb,0,1),m=depth<0?0:Math.pow(1-t,2.4),i=(y*cw+x)*4;
-        const ex=-nx*m*(Me/M)-(px/hx)*(K/M),ey=-ny*m*(Me/M)-(py/hy)*(K/M);
-        d[i]=Math.round(255*clamp(.5+.5*ex,0,1));d[i+1]=Math.round(255*clamp(.5+.5*ey,0,1));d[i+2]=128;d[i+3]=255;
-      }
-      ctx.putImageData(im,0,0);
-      const S=2*M,url=cv.toDataURL(),ch3=(s,k)=>`<feDisplacementMap in="SourceGraphic" in2="m" scale="${(S*s).toFixed(2)}" xChannelSelector="R" yChannelSelector="G" result="d${k}"/><feColorMatrix in="d${k}" type="matrix" values="${k==='r'?'1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0':k==='g'?'0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0':'0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0'}" result="c${k}"/>`;
-      f.innerHTML=`<feImage href="${url}" xlink:href="${url}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="m"/>`+
-        ch3(1,'r')+ch3(.975,'g')+ch3(.95,'b')+
-        `<feBlend in="cr" in2="cg" mode="screen" result="rg"/><feBlend in="rg" in2="cb" mode="screen"/>`;
-      if(o.filter){el.style.webkitFilter=el.style.filter=`url(#${id})`;return}
-      const v=`blur(${o.blur??.6}px) url(#${id}) saturate(${o.sat||1.7}) brightness(1.07)`;
-      el.style.webkitBackdropFilter=v;el.style.backdropFilter=v;
-    };
-    new ResizeObserver(build).observe(el);build();
-  }
-  
-  
   function glassify(el,opt={}){
     if(el._gl)return;el._gl=1;
-    el.insertAdjacentHTML('afterbegin',opt.mirror?'<i class="gb gb1"></i><div class="gm"><div class="gm-lay a"><div class="gm-in"></div></div><div class="gm-lay b"><div class="gm-in"></div></div></div>':'<i class="gb gb1"></i><i class="gb gb2"></i>');
+    if(opt.light){el.insertAdjacentHTML('beforeend','<i class="gf"></i>');return}   /* лёгкий вариант без backdrop-слоёв (для множества плашек) */
+    el.insertAdjacentHTML('afterbegin','<i class="gb gb1"></i><i class="gb gb2"></i>');
     el.insertAdjacentHTML('beforeend','<i class="gf"></i>');
-    const g=el.querySelector(opt.mirror?'.gm':'.gb2');
-    const cs=getComputedStyle(document.documentElement),v=(n,d)=>{const x=parseFloat(cs.getPropertyValue(n));return isNaN(x)?d:x};
-    if(!opt.mirror)lens(g,{filter:false,bezel:v('--g-lens-bezel',28),mag:v('--g-lens-mag',16),zoom:.001,blur:v('--g-lens-blur',.4),sat:1.5});
   }
   window.glassify=glassify;
+
+  /* --- пикер-сегмент: та же линза, что у таббара --- */
+  function makeSeg(host,labels,onSelect){
+    const PAD=3;
+    const bar=document.createElement('div');bar.className='seg glass';host.appendChild(bar);glassify(bar);
+    labels.forEach(l=>bar.insertAdjacentHTML('beforeend',`<button class="sg" type="button" tabindex="-1">${l}</button>`));
+    const btns=$$('.sg',bar);
+    const act=document.createElement('div');act.className='sg-act';act.innerHTML='<div class="sg-ct"></div>';bar.appendChild(act);
+    const ct=$('.sg-ct',act);ct.innerHTML=labels.map(l=>`<span class="sg">${l}</span>`).join('');
+    const bub=document.createElement('div');bub.className='sg-bub idle';bub.innerHTML='<div class="tb-ring"><div class="tb-ct"></div></div><div class="tb-lens"></div>';bar.appendChild(bub);
+    const ct2=$('.tb-ct',bub);ct2.innerHTML=ct.innerHTML;
+    let active=0,tw=1,BH=38,down=false,rel=0,until=0;
+    const pos=new Sp(0,TB_CFG.springPos.k,TB_CFG.springPos.c),lit=new Sp(0,TB_CFG.springLit.k,TB_CFG.springLit.c);
+    function measure(){
+      btns.forEach(b=>b.style.width='auto');
+      let m=0;btns.forEach(b=>{m=Math.max(m,b.scrollWidth)});
+      tw=Math.ceil(m+34);
+      [...btns,...$$('.sg',ct),...$$('.tb-ct .sg',bub)].forEach(b=>b.style.width=tw+'px');
+      bar.style.width=(tw*labels.length+PAD*2)+'px';
+      BH=bar.clientHeight-2*PAD;
+      bub.style.width=tw+'px';bub.style.height=BH+'px';bub.style.borderRadius=(BH/2)+'px';
+      ct.style.height=BH+'px';ct2.style.height=BH+'px';
+      paint();
+    }
+    function paint(){
+      const sv=Math.abs(pos.v),sx=1+cl(sv*.1,0,.5)+lit.x*.4,sy=1-cl(sv*.03,0,.1)+lit.x*.32;
+      const H=bar.clientHeight,W=bar.clientWidth,cw=tw*sx,chh=BH*sy,l=PAD+pos.x*tw+tw/2-cw/2,t=H/2-chh/2,b=H-t-chh;
+      act.style.clipPath=`inset(${t}px ${W-l-cw}px ${b}px ${l}px round ${chh/2}px)`;act.style.opacity=cl(lit.x,0,1);
+      const org=`${pos.x*tw+tw/2}px ${BH/2}px`;
+      ct.style.transformOrigin=org;ct.style.transform=`scale(${(1+lit.x*.12).toFixed(3)})`;
+      ct2.style.transformOrigin=org;ct2.style.transform=`translate3d(${(-pos.x*tw).toFixed(2)}px,0,0) scale(${(1+lit.x*.22).toFixed(3)})`;
+      bub.style.transform=`translate3d(${(PAD+pos.x*tw).toFixed(2)}px,${PAD}px,0) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+      bub.classList.toggle('idle',lit.x<.01);
+      bub.style.setProperty('--lit',cl(lit.x,0,1).toFixed(3));bub.style.setProperty('--rest',cl(1-lit.x*5,0,1).toFixed(3));
+    }
+    const anim={tick(dt){
+      if(rel&&Math.abs(pos.t-pos.x)<.1&&Math.abs(pos.v)<1.2){lit.t=0;rel=0}
+      for(let n=0;n<2;n++){pos.step(dt/2);lit.step(dt/2)}
+      paint();return down||performance.now()<until||!(pos.rest&&lit.rest);
+    }};
+    const idxAt=x=>{const r=bar.getBoundingClientRect(),k=r.width/bar.offsetWidth||1;return cl((x-r.left)/k/1-PAD,0,tw*labels.length)/tw-.5};
+    const pick=i=>{if(i===active)return;active=i;onSelect&&onSelect(i);if(navigator.vibrate)try{navigator.vibrate(8)}catch(_){}};
+    const clampI=v=>cl(v,0,labels.length-1);
+    bar.addEventListener('pointerdown',e=>{if(e.button>0)return;down=true;rel=0;until=performance.now()+1200;
+      try{bar.setPointerCapture(e.pointerId)}catch(_){}
+      lit.t=1;pos.t=clampI(idxAt(e.clientX));pick(Math.round(pos.t));run(anim)});
+    bar.addEventListener('pointermove',e=>{if(!down)return;pos.t=clampI(idxAt(e.clientX));pick(Math.round(pos.t));run(anim)});
+    const end=()=>{if(!down)return;down=false;rel=1;pos.t=active;until=performance.now()+1200;run(anim)};
+    bar.addEventListener('pointerup',end);bar.addEventListener('pointercancel',end);
+    jelly(bar,{press:TB_CFG.jellyPress,follow:TB_CFG.jellyFollow,lim:TB_CFG.jellyLim,stretch:TB_CFG.jellyStretch,damp:TB_CFG.jellyDamp});
+    addEventListener('resize',measure);
+    measure();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(measure);
+    return {measure};
+  }
+  window.makeSeg=makeSeg;
 
   /* --- иконки --- */
   const TB_ICONS={
@@ -698,29 +737,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   };
 
   const wrap=$('#tabbarWrap'),bar=$('#tabbar'),bub=$('.tb-bubble',wrap),myScreen=$('#myScreen');
-  glassify(bar,{mirror:true});
-  const gm=$('.gm',bar),gmIns=$$('.gm-in',bar);let pairs=[];
-  const cssv=(n,d)=>{const x=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n));return isNaN(x)?d:x};
-  /* зеркало контента: копии #stage внутри таббара, у кромки чуть сжаты — получается изгиб стекла, работает и в Safari */
-  function mirrorRebuild(){
-    pairs=[];
-    const r=stage.getBoundingClientRect();
-    gmIns.forEach(g=>{
-      const c=stage.cloneNode(true);c.removeAttribute('id');c.className='mstage';c.setAttribute('aria-hidden','true');
-      c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
-      c.style.width=r.width+'px';c.style.height=r.height+'px';
-      g.replaceChildren(c);
-      const A=[stage,...stage.querySelectorAll('*')],B=[c,...c.querySelectorAll('*')];
-      A.forEach((a,i)=>{if(i&&B[i])pairs.push({a,b:B[i],t:null})});
-    });
-    mirrorSync();mirrorAlign();
-  }
-  function mirrorSync(){for(const p of pairs){const t=p.a.style.cssText;if(p.t!==t){p.t=t;p.b.style.cssText=t}}}
-  function mirrorAlign(){
-    const L=wrap.offsetLeft,T=wrap.offsetTop,Cx=L+wrap.offsetWidth/2,Cy=T+wrap.offsetHeight/2,sc=[cssv('--g-ref-s1',.94),cssv('--g-ref-s2',.85)];
-    gmIns.forEach((g,i)=>{g.style.transform=`translate3d(${-L}px,${-T}px,0) translate(${Cx}px,${Cy}px) scale(${sc[i]}) translate(${-Cx}px,${-Cy}px)`});
-  }
-  window.mirrorRebuild=mirrorRebuild;window.mirrorSync=mirrorSync;
+  glassify(bar);
   const TABS=[['study','study'],['my','my']];
   /* ширина таббара подстраивается под число вкладок, как в iOS (≈90px на вкладку) */
   document.documentElement.style.setProperty('--tb-max-width',Math.min(TABS.length*TB_CFG.tabW+2*TB_CFG.pad,TB_CFG.width)+'px');
@@ -740,7 +757,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
 
   function measure(){
     tw=(bar.clientWidth-PAD*2)/TABS.length;
-    bub.style.width=tw+'px';mirrorAlign();
+    bub.style.width=tw+'px';
     $$('.tb',ct).concat($$('.tb',ct2)).forEach(t=>t.style.width=tw+'px');
     paint();
   }
@@ -755,6 +772,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
     ct.style.transformOrigin=org;ct.style.transform=`scale(${(1+lit.x*.12).toFixed(3)})`;
     ct2.style.transformOrigin=org;ct2.style.transform=`translate3d(${(-pos.x*tw).toFixed(2)}px,0,0) scale(${(1+lit.x*.22).toFixed(3)})`;
     bub.style.transform=`translate3d(${(bx+pos.x*tw*k).toFixed(2)}px,${by.toFixed(2)}px,0) scale(${(sx*k).toFixed(3)},${(sy*k).toFixed(3)})`;
+    bub.classList.toggle('idle',lit.x<.01);
     bub.style.setProperty('--lit',cl(lit.x,0,1).toFixed(3));
     bub.style.setProperty('--rest',cl(1-lit.x*5,0,1).toFixed(3));
   }
@@ -769,7 +787,6 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   function setActive(i){
     if(i===active)return;
     active=i;syncOn();
-    gm.classList.toggle('off',i===1);
     if(i===1){stage.classList.add('dimmed');myScreen.classList.add('on');tabbarSetHidden(false)}
     else{stage.classList.remove('dimmed');myScreen.classList.remove('on');try{layout()}catch(_){}}
     if(navigator.vibrate)try{navigator.vibrate(8)}catch(_){}
@@ -801,6 +818,10 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
 /* ================= INIT ================= */
 loadStickers();
 layout();
+els.forEach(e=>{
+  const panes=[...e.sheet.querySelectorAll('.pane')];
+  makeSeg(e.sheet.querySelector('.sgw'),['Основное','Интересное'],i=>panes.forEach((p,k)=>p.classList.toggle('on',k===i)));
+});
 </script>
 </body>
 </html>
