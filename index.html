@@ -72,18 +72,24 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2));font-f
 #controls .row input{flex:1;accent-color:#ff3b30;pointer-events:auto}
 #controls button.remove{border:0;border-radius:999px;padding:10px 14px;font:600 14px -apple-system,Helvetica,Arial,sans-serif;background:#ff3b30;color:#fff;box-shadow:0 4px 12px rgba(255,59,48,.4)}
 
-/* ===== модалка ===== */
-#modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
-#modal.on{display:flex}
-#modal .modal-dim{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:fade-in .2s ease both}
-#modal .modal-card{position:relative;background:#fffefd;color:#111;border-radius:34px;padding:22px 20px 18px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:card-in .3s cubic-bezier(.34,1.4,.64,1) both}
-@keyframes fade-in{from{opacity:0}to{opacity:1}}
-@keyframes card-in{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:none}}
-#modal h3{margin:0 0 10px;font-size:19px;font-weight:600;letter-spacing:-.3px}
-#modal p{margin:0 0 12px;font-size:14px;line-height:1.45;color:#3a3a3c}
-#modal p:last-of-type{margin-bottom:16px}
-#modal .modal-icon{width:44px;height:44px;border-radius:50%;background:#ff3b30;color:#fff;display:flex;align-items:center;justify-content:center;font:600 22px -apple-system,Helvetica,Arial,sans-serif;margin-bottom:14px;box-shadow:0 6px 18px rgba(255,59,48,.35)}
-#modal .modal-ok{border:0;border-radius:999px;padding:12px 20px;font:600 15px -apple-system,Helvetica,Arial,sans-serif;background:#111;color:#fff;width:100%}
+/* ===== алерты (Apple-style) ===== */
+#alert{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+#alert.on{display:flex}
+.al-dim{position:absolute;inset:0;background:rgba(0,0,0,.34);animation:al-fade .3s ease both}
+#alert.out .al-dim{animation:al-fade-out .2s ease both}
+.al-card{--gfill:rgba(246,246,246,.84);width:min(100%,300px);border-radius:38px;padding:22px 14px 14px;box-sizing:border-box;box-shadow:0 24px 60px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.06);font-family:-apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;color:#000;animation:al-in .45s cubic-bezier(.2,.9,.25,1) both;transform-origin:50% 50%}
+#alert.out .al-card{animation:al-out .2s ease-in both}
+.al-card>*:not(.gb):not(.gf){position:relative;z-index:1}
+.al-t{margin:0 8px 8px;font-size:17px;font-weight:600;line-height:1.3;letter-spacing:-.2px}
+.al-m{margin:0 8px 20px;font-size:17px;font-weight:400;line-height:1.3;letter-spacing:-.2px}
+.al-b{display:flex;flex-direction:column;gap:8px}
+.al-btn{display:block;width:100%;height:48px;border:0;border-radius:999px;background:rgba(0,0,0,.075);color:#000;font:600 17px -apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;appearance:none;outline:0;padding:0}
+.al-btn.default{background:#0a84ff;color:#fff}
+.al-btn.destructive{color:#ff3b40}
+@keyframes al-fade{from{opacity:0}to{opacity:1}}
+@keyframes al-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes al-in{from{opacity:0;transform:scale(1.14)}to{opacity:1;transform:none}}
+@keyframes al-out{from{opacity:1;transform:none}to{opacity:0;transform:scale(.94)}}
 
 /* ============================================================
    ОБЩИЙ МАТЕРИАЛ: glass + jelly
@@ -245,7 +251,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .chip{flex:none;height:36px;padding:0 15px;border:0;border-radius:18px;background:rgba(255,255,255,.85);color:#111;font:500 15px -apple-system,"SF Pro Text",Helvetica,Arial,sans-serif;cursor:pointer}
 .chip.on{background:rgba(10,132,255,.14);color:#0a84ff;font-weight:600}
 .chip.add{color:#0a84ff;background:transparent;box-shadow:none;border:1.5px dashed rgba(10,132,255,.45)}
-.lx-h{margin:20px 16px 6px;font:400 13px -apple-system,Helvetica,Arial,sans-serif;color:#8e8e93;text-transform:uppercase;letter-spacing:.3px}
+.lx-h{margin:20px 16px 6px;font:400 13px -apple-system,Helvetica,Arial,sans-serif;color:#8e8e93;text-transform:none;letter-spacing:.3px}
 .lx-grp{--gfill:rgba(255,255,255,.78);border-radius:34px;overflow:hidden}
 .glass.flat{background:var(--gfill)}
 .lx-row{display:block;width:100%;text-align:left;border:0;background:none;padding:12px 16px;position:relative;font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
@@ -270,7 +276,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .lx-card input+input,.lx-card input+textarea{border-top:1px solid rgba(60,60,67,.12)}
 .lx-card.err{animation:shake .35s}
 @keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
-.lx-lab{margin:16px 32px 6px;font-size:13px;color:#8e8e93;text-transform:uppercase;letter-spacing:.3px}
+.lx-lab{margin:16px 32px 6px;font-size:13px;color:#8e8e93;text-transform:none;letter-spacing:.3px}
 .lx-cats{display:flex;flex-wrap:wrap;gap:8px;margin:0 16px}
 .lx-cats .chip{background:#fff}.lx-cats .chip.on{background:rgba(10,132,255,.14)}
 .lx-newcat{display:flex;align-items:center;border-radius:999px}
@@ -279,7 +285,21 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .lx-newcat button{flex:none;border:0;background:none;color:#0a84ff;font:600 17px -apple-system,Helvetica,Arial,sans-serif;padding:0 16px;height:46px}
 .lx-del{display:block;width:calc(100% - 32px);margin:18px 16px 4px;border:0;border-radius:999px;background:#fff;color:#ff3b30;font:400 17px -apple-system,Helvetica,Arial,sans-serif;padding:14px}
 .lx-sheet.catmode .lx-entry{display:none}
+.lx-sheet:not(.catmode) .lx-cedlab,.lx-sheet:not(.catmode) .lx-catlist{display:none}
+.lx-crow{display:flex;align-items:center;position:relative}
+.lx-crow+.lx-crow::before{content:"";position:absolute;left:18px;right:0;top:0;height:1px;background:rgba(60,60,67,.12)}
+.lx-card .lx-cname{flex:1;width:auto;min-width:0;padding:13px 8px 13px 18px}
+.lx-cnt{flex:none;margin-right:8px;font-size:15px;color:#8e8e93}
+.lx-cb{flex:none;width:34px;height:34px;margin-right:6px;border:0;border-radius:50%;background:rgba(120,120,128,.12);color:#111;font:600 16px -apple-system,Helvetica,Arial,sans-serif;cursor:pointer;touch-action:manipulation;padding:0}
+.lx-cb:disabled{opacity:.3}
+.lx-cb.del{color:#ff3b30}
+.lx-cb.del.arm{background:#ff3b30;color:#fff}
+.lx-cempty{padding:16px 18px;color:#8e8e93;font-size:15px}
 .lx-sheet:not(.edit) .lx-del{display:none}
+/* ===== малый регистр везде, кроме заголовков папок ===== */
+body{text-transform:lowercase}
+.label,.tl{text-transform:none}
+input::placeholder,textarea::placeholder{text-transform:lowercase}
 </style>
 </head>
 <body>
@@ -332,7 +352,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
     <div class="bk-scroll" id="bkScroll">
       <h1 class="bk-title">Словарь</h1>
       <div class="bk-sub">Слова и фразы, которые нужно запомнить</div>
-      <div class="cat-row"><div class="cat-seg" id="bkSeg"></div><button class="gbtn glass jl cat-plus" id="bkCatAdd" aria-label="Новая категория"><i class="ph"></i></button></div>
+      <div class="cat-row"><div class="cat-seg" id="bkSeg"></div><button class="gbtn glass jl cat-plus" id="bkCatAdd" aria-label="Категории"><i class="ph"></i></button></div>
       <div id="bkList"></div>
     </div>
   </div>
@@ -343,22 +363,14 @@ input,textarea{-webkit-user-select:text;user-select:text}
       <div class="lx-card" id="lxCard"><input id="lxFr" placeholder="Слово или фраза" autocomplete="off" autocapitalize="none"><input id="lxRu" placeholder="Перевод" autocomplete="off"><textarea id="lxNote" rows="3" placeholder="Заметка"></textarea></div>
       <div class="lx-lab">Категория</div><div class="lx-cats" id="lxCats"></div>
     </div>
+    <div class="lx-lab lx-cedlab">Мои категории</div><div class="lx-card lx-catlist" id="lxCatList"></div>
     <div class="lx-lab lx-catlab">Новая категория</div>
     <div class="lx-card lx-newcat"><input id="lxCatIn" placeholder="Название" autocomplete="off"><button id="lxCatAdd">Добавить</button></div>
     <button class="lx-del" id="lxDel">Удалить запись</button>
   </div>
 </div>
 
-<div id="modal">
-  <div class="modal-dim"></div>
-  <div class="modal-card">
-    <div class="modal-icon">!</div>
-    <h3>Папки накладываются друг на друга</h3>
-    <p>Видна только <b>верхняя полоса</b> каждой папки — её нижнюю часть перекрывает следующая папка.</p>
-    <p>Поэтому стикеры стоит размещать в верхней зоне. Если наклейка уйдёт ниже, её скроет соседняя папка.</p>
-    <button class="modal-ok" id="modalOk">Понятно</button>
-  </div>
-</div>
+<div id="alert" aria-hidden="true"></div>
 
 <script>
 /* ================= ЗАПРЕТ ЗУМА ================= */
@@ -385,7 +397,6 @@ const controls=document.getElementById("controls"),rotRange=document.getElementB
 const mainBtn=document.getElementById("mainBtn");
 const pickerWrap=document.getElementById("pickerWrap");
 const hintBtn=document.getElementById("hintBtn");
-const modal=document.getElementById("modal");
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, n=DATA.length;
 let H,W,u,ys=[],top0,sab,base,Hb,step,o=-1;
 const s={p:0,v:0,t:0};
@@ -708,13 +719,13 @@ removeBtn.addEventListener("click",()=>{
   renderStickers();
 });
 
-/* ================= МОДАЛКА ================= */
+/* ================= АЛЕРТ-ПОДСКАЗКА ================= */
 hintBtn.addEventListener("click",e=>{
   e.stopPropagation();
-  modal.classList.add("on");
+  showAlert({title:"Папки накладываются друг на друга",
+    message:"Видна только верхняя полоса каждой папки — её нижнюю часть перекрывает следующая папка. Поэтому стикеры стоит размещать в верхней зоне: если наклейка уйдёт ниже, её скроет соседняя папка.",
+    buttons:[{label:"Понятно",style:"default"}]});
 });
-modal.querySelector(".modal-dim").addEventListener("click",()=>modal.classList.remove("on"));
-document.getElementById("modalOk").addEventListener("click",()=>modal.classList.remove("on"));
 
 /* ================= МАНИПУЛЯЦИЯ ================= */
 function startStickManip(ev, el, st){
@@ -982,7 +993,7 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
 })();
 
 /* желейные кнопки редактора */
-[mainBtn,hintBtn,removeBtn,document.getElementById('modalOk')].forEach(b=>{b.classList.add('jl');jelly(b,{press:1.05,follow:.2,lim:.12})});
+[mainBtn,hintBtn,removeBtn].forEach(b=>{b.classList.add('jl');jelly(b,{press:1.05,follow:.2,lim:.12})});
 
 
 /* =====================================================================
@@ -1084,7 +1095,31 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
 
   /* ---------- шит добавления / правки ---------- */
   const sheet=$('#lxSheet'),dim=$('#lxDim'),fr=$('#lxFr'),ru=$('#lxRu'),note=$('#lxNote'),catsEl=$('#lxCats'),catIn=$('#lxCatIn'),del=$('#lxDel'),title=$('#lxTitle');
-  let sheetOpen=false,form=null,delArm=false;
+  let sheetOpen=false,form=null,delArm=false,armIdx=-1;
+  const listC=$('#lxCatList');
+  function drawCatList(){
+    if(!db.cats.length){listC.innerHTML='<div class="lx-cempty">Категорий пока нет</div>';return}
+    listC.innerHTML=db.cats.map((c,i)=>{const n=db.items.filter(x=>x.cat===c).length,ar=armIdx===i;
+      return `<div class="lx-crow" data-i="${i}"><input class="lx-cname" value="${esc(c)}" autocomplete="off"><span class="lx-cnt">${n}</span><button class="lx-cb" data-a="up"${i?'':' disabled'}>↑</button><button class="lx-cb" data-a="dn"${i<db.cats.length-1?'':' disabled'}>↓</button><button class="lx-cb del${ar?' arm':''}" data-a="del">${ar?'?':'×'}</button></div>`}).join('');
+  }
+  listC.addEventListener('click',e=>{
+    const b=e.target.closest('.lx-cb');if(!b||b.disabled)return;
+    const i=+b.closest('.lx-crow').dataset.i,a=b.dataset.a;
+    if(a==='up'||a==='dn'){const j=a==='up'?i-1:i+1;[db.cats[i],db.cats[j]]=[db.cats[j],db.cats[i]];armIdx=-1;save();renderAll();drawCatList();return}
+    const name=db.cats[i],n=db.items.filter(x=>x.cat===name).length;
+    showAlert({title:'Удалить категорию «'+name+'»?',message:n?'Записи ('+n+') останутся и перейдут в «Без категории».':'В этой категории нет записей.',buttons:[
+      {label:'Удалить',style:'destructive',onClick:()=>{const k=db.cats.indexOf(name);if(k<0)return;db.items.forEach(x=>{if(x.cat===name)x.cat=''});if(db.sel===name)db.sel='Все';db.cats.splice(k,1);save();renderAll();drawCatList()}},
+      {label:'Отмена',style:'cancel'}]});
+  });
+  listC.addEventListener('change',e=>{
+    const inp=e.target.closest('.lx-cname');if(!inp)return;
+    const i=+inp.closest('.lx-crow').dataset.i,old=db.cats[i],nv=inp.value.trim();
+    if(!nv||(nv!==old&&db.cats.includes(nv))){inp.value=old;return}
+    if(nv===old)return;
+    db.cats[i]=nv;db.items.forEach(x=>{if(x.cat===old)x.cat=nv});if(db.sel===old)db.sel=nv;
+    save();renderAll();drawCatList();
+  });
+  listC.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('lx-cname')){e.preventDefault();e.target.blur()}});
   function drawCats(){
     catsEl.innerHTML=db.cats.map(c=>chip(c,form.cat===c,c)).join('');
     $$('.chip',catsEl).forEach(c=>{c.classList.add('nog');glassify(c,{light:true})});
@@ -1093,29 +1128,31 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   function openSheet(m,item){
     form={m,id:item?item.id:null,cat:item?item.cat:(db.sel!=='Все'?db.sel:'')};
     sheet.classList.toggle('catmode',m==='cat');sheet.classList.toggle('edit',m==='edit');
-    title.textContent=m==='cat'?'Новая категория':m==='edit'?'Запись':'Новая запись';
+    title.textContent=m==='cat'?'Категории':m==='edit'?'Запись':'Новая запись';
     fr.value=item?item.fr:'';ru.value=item?item.ru:'';note.value=item?item.note:'';catIn.value='';
-    del.textContent='Удалить запись';delArm=false;drawCats();
+    del.textContent='Удалить запись';delArm=false;armIdx=-1;drawCats();if(m==='cat')drawCatList();
     sheet.classList.add('on');dim.classList.add('on');sheetOpen=true;window.bkState.sheet=true;syncStatus();sheet.scrollTop=0;
-    setTimeout(()=>{try{(m==='cat'?catIn:fr).focus({preventScroll:true})}catch(_){}},380);
+    if(m!=='cat')setTimeout(()=>{try{fr.focus({preventScroll:true})}catch(_){}},380);
   }
   function closeSheet(){sheetOpen=false;window.bkState.sheet=false;syncStatus();sheet.classList.remove('on');dim.classList.remove('on');try{document.activeElement&&document.activeElement.blur()}catch(_){};sheet.style.bottom=''}
   const addCat=name=>{name=name.trim();if(!name)return false;if(!db.cats.includes(name))db.cats.push(name);return name};
   $('#lxCatAdd').addEventListener('click',()=>{
     const n=addCat(catIn.value);if(!n)return;catIn.value='';
-    if(form.m==='cat'){db.sel=n;save();renderAll();closeSheet()}else{form.cat=n;save();drawCats();renderChips()}});
+    if(form.m==='cat'){save();renderAll();drawCatList()}else{form.cat=n;save();drawCats();renderChips()}});
   catIn.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#lxCatAdd').click()}});
   $('#lxCancel').addEventListener('click',closeSheet);dim.addEventListener('click',closeSheet);
   $('#lxDone').addEventListener('click',()=>{
-    if(form.m==='cat'){if(catIn.value.trim())$('#lxCatAdd').click();else closeSheet();return}
+    if(form.m==='cat'){const n=addCat(catIn.value);if(n){catIn.value='';save();renderAll()}closeSheet();return}
     if(!fr.value.trim()){const c=$('#lxCard');c.classList.remove('err');void c.offsetWidth;c.classList.add('err');fr.focus();return}
     const data={fr:fr.value.trim(),ru:ru.value.trim(),note:note.value.trim(),cat:form.cat||''};
     if(form.id){Object.assign(db.items.find(i=>i.id===form.id),data)}else{db.items.unshift(Object.assign({id:db.next++},data))}
     save();renderAll();closeSheet();
   });
   del.addEventListener('click',()=>{
-    if(!delArm){delArm=true;del.textContent='Точно удалить?';return}
-    db.items=db.items.filter(i=>i.id!==form.id);save();renderAll();closeSheet();
+    const it=db.items.find(i=>i.id===form.id);if(!it)return;
+    showAlert({title:'Удалить запись?',message:'«'+it.fr+'» будет удалена из словаря.',buttons:[
+      {label:'Удалить',style:'destructive',onClick:()=>{db.items=db.items.filter(i=>i.id!==form.id);save();renderAll();closeSheet()}},
+      {label:'Отмена',style:'cancel'}]});
   });
   /* клавиатура iOS: поднимаем шит над ней */
   if(window.visualViewport){const vv=visualViewport,fix=()=>{sheet.style.bottom=sheetOpen?Math.max(0,innerHeight-vv.height-vv.offsetTop)+'px':''};vv.addEventListener('resize',fix);vv.addEventListener('scroll',fix)}
@@ -1180,6 +1217,29 @@ document.documentElement.style.setProperty('--tb-max-width',TB_CFG.width+'px');
   back.addEventListener('click',closeLesson);
   addEventListener('keydown',ev=>{if(ev.key==='Escape')closeLesson()});
   start.addEventListener('click',()=>dispatchEvent(new CustomEvent('lesson:start',{detail:{title:tt.textContent}})));
+})();
+
+/* =====================================================================
+   АЛЕРТЫ: showAlert({title,message,buttons:[{label,style:'default'|'destructive'|'cancel',onClick}]})
+   ===================================================================== */
+(function(){
+  const host=document.getElementById('alert');let busy=false;
+  window.showAlert=function(o){
+    if(busy)return;busy=true;
+    host.innerHTML='';host.classList.remove('out');
+    const dim=document.createElement('div');dim.className='al-dim';
+    const card=document.createElement('div');card.className='al-card glass flat';
+    if(o.title){const h=document.createElement('h3');h.className='al-t';h.textContent=o.title;card.appendChild(h)}
+    if(o.message){const m=document.createElement('p');m.className='al-m';m.textContent=o.message;card.appendChild(m)}
+    const bs=document.createElement('div');bs.className='al-b';card.appendChild(bs);
+    const hide=cb=>{host.classList.add('out');setTimeout(()=>{host.classList.remove('on','out');host.innerHTML='';host.setAttribute('aria-hidden','true');busy=false;cb&&cb()},200)};
+    (o.buttons||[{label:'OK',style:'default'}]).forEach(b=>{
+      const el=document.createElement('button');el.className='al-btn jl '+(b.style||'cancel');el.textContent=b.label;
+      el.addEventListener('click',()=>hide(b.onClick));bs.appendChild(el);jelly(el,{press:1.04,follow:.15,lim:.08});
+    });
+    host.append(dim,card);glassify(card);
+    host.classList.add('on');host.setAttribute('aria-hidden','false');
+  };
 })();
 
 /* ================= INIT ================= */
